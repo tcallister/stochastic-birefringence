@@ -14,3 +14,4 @@ OmgL = 0.6935
 Msun = 1.99e30
 MsunToSec = Msun*G/np.power(c,3.)
 rhoC = 3.*np.power(H0*c,2.)/(8.*np.pi*G)*np.power(Mpc,3.) # Converted to J/Mpc^3
+R_earth = 6.371e6

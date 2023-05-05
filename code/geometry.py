@@ -155,7 +155,7 @@ class Detector():
         """
         return cls(V1x,V1u,V1v)
 
-class Baseline()
+class Baseline():
 
     """
     Class representing a two-detector baseline
@@ -237,9 +237,9 @@ class Baseline()
         Returns
         -------
         GammaI : array
-            Overlap reduction function for Stokes I and desired frequencies
+            Overlap reduction function for Stokes I at desired frequencies
         GammaV : array
-            Overlap reduction function for Stokes V and desired frequencies
+            Overlap reduction function for Stokes V at desired frequencies
         """
 
         # Get angles
@@ -257,7 +257,7 @@ class Baseline()
 
         # Compute Eqs. 23, 24, and 27 of https://arxiv.org/pdf/0801.4185.pdf
         Theta1 = np.cos(beta/2)**4*(j0 + 5.*j2/7. + 3.*j4/112.)
-        Theta2 = ((-3./8.)*j0 + (45./56.)*j2 - (169./896.)*j4)
+        Theta2 = ((-3./8.)*j0 + (45./56.)*j2 - (169./896.)*j4) \
                     + (j0/2. - (5./7.)*j2 - (27./224.)*j4)*np.cos(beta) \
                     + (-j0/8. - (5./56.)*j2 - (3./896.)*j4)*np.cos(2.*beta)
         Theta3 = -np.sin(beta/2.)*((-j1 + (7./8.)*j3) \
@@ -267,7 +267,30 @@ class Baseline()
         GammaI = Theta1*np.cos(4*delta) + Theta2*np.cos(4*Delta)
         GammaV = Theta3*np.sin(4.*Delta)
 
-        return
+        return GammaI,GammaV
+
+    def circular_overlap_reduction_functions(self,frequencies):
+
+        """
+        Function to compute overlap reduction functions for R and L circular polarizations
+  
+        Parameters
+        ----------
+        frequencies : array
+            Set of frequencies at which we want to evaluate ORFs
+
+        Returns
+        -------
+        GammaR : array
+            Overlap reduction function for right-circular polarization at desired frequencies
+        GammaL : array
+            Overlap reduction function for left-circular polarization at desired frequencies
+        """
+
+        GammaI,GammaV = self.stokes_overlap_reduction_functions(frequencies)
+        GammaR = GammaI + GammaV
+        GammaL = GammaI - GammaV
+        return GammaR,GammaL
 
 def Omega(theta,phi):
     """
