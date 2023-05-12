@@ -1,5 +1,5 @@
 import numpyro
-nChains = 1
+nChains = 3
 numpyro.set_host_device_count(nChains)
 from numpyro.infer import NUTS,MCMC
 from jax.config import config
