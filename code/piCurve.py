@@ -24,8 +24,10 @@ def pi_curve(frequencies,sigmas,alpha_min,alpha_max):
     pi = np.max(power_law_locus,axis=0)
     return pi
 
+"""
 spectra = get_all_data()
 freqs = spectra['H1L1_O3'][0]
 sigmas = spectra['H1L1_O3'][2]
 
 pi_curve(freqs,sigmas,-8,8)
+"""

@@ -5,10 +5,28 @@ import os
 import matplotlib.pyplot as plt
 from constants import *
 from scipy.special import erf
-
+from astropy.cosmology import Planck18
+import astropy.units as u
 codeDir = os.path.dirname(os.path.realpath(__file__))
 
 def v(Mtot,f):
+
+    """
+    Helper function computing the PN expansion parameter (pi*M*f)**(1/3) and returning a tuple of its first three powers.
+
+    Inputs
+    ------
+    Mtot : `float`
+        Total binary mass in units of solar masses
+    f : `float` or `np.array`
+        Frequency or frequencies at which to evaluate
+
+    Returns
+    -------
+    pn_params : `np.array`
+        Array containing the first, second, and third powers of the PN expansion parameter
+    """
+
     return np.array([(np.pi*Mtot*MsunToSec*f)**(1./3.), (np.pi*Mtot*MsunToSec*f)**(2./3.), (np.pi*Mtot*MsunToSec*f)])
 
 def dEdf(Mtot,freqs,eta=0.25,PN=True):
@@ -16,12 +34,21 @@ def dEdf(Mtot,freqs,eta=0.25,PN=True):
     """
     Function to compute the energy spectrum radiated by a CBC
     
-    INPUTS
-    Mtot: Total mass in units of Msun
-    freqs: Array of frequencies at which we want to evaluate dEdf
-    eta: Reduced mass ratio. Defaults to 0.25 (equal mass)
-    inspiralOnly: If True, will return only energy radiated through inspiral
+    Inputs
+    ------
+    Mtot : `float`
+        Total mass in units of Msun
+    freqs : `np.array`
+        Array of frequencies at which we want to evaluate dEdf
+    eta : `float`
+        Reduced mass ratio. Defaults to 0.25 (equal mass)
+    PN: `bool`
+        If True, will include PN corrections to radiated energy spectrum (Default True) 
 
+    Returns
+    -------
+    dEdf : `np.array`
+        Energy spectrum in units of J/Hz
     """
 
     chi = 0.
@@ -106,7 +133,7 @@ class OmegaGW(object):
     via array multiplication. Different mass distributions are imposed by specifying probability weights in mass space.
     """
 
-    def __init__(self,ref_mMin,ref_mMax,ref_zs,fmax,inspiralOnly,Mtots=[],qs=[],gridSize=(70,65)):
+    def __init__(self,ref_mMin,ref_mMax,ref_zs,fmax,Mtots=[],qs=[],gridSize=(70,65)):
 
         """
         Initializes class by setting up a grid of masses and mass ratios, and evaluating the radiated energy spectrum dE/df
@@ -114,16 +141,21 @@ class OmegaGW(object):
         energy spectrum, we will take a weighted sum across this grid. Weights are imposed by redefining `self.probs`, implemented
         in child classes via the `setProbs()` function.
 
-        INPUTS
-        ref_mMin: Minimum component mass to consider in mass grid
-        ref_mMax: Maximum component mass to consider in mass grid
-        ref_zs: Redshift array across which we will integrate to compute Omega(f)
-        fMax: Maximum detector-frame frequency to consider
-        inspiralOnly: If true, restrict dE/df to the energy radiated before the ISCO
+        Inputs
+        ------
+        ref_mMin: `float`
+            Minimum component mass to consider in mass grid
+        ref_mMax: `float`
+            Maximum component mass to consider in mass grid
+        ref_zs: `np.array`
+            Redshift array across which we will integrate to compute Omega(f)
+        fMax: `float`
+            Maximum detector-frame frequency to consider
         """
 
         # Save reference grid of redshifts
         self.ref_zs = ref_zs
+        self.comoving_distances = Planck18.comoving_distance(self.ref_zs).to(u.Gpc).value
 
         # Initialize grid of masses over which we'll compute dE/df
         # In particular, we'll grid log-uniformly in total mass and uniformly in mass ratio q
@@ -140,9 +172,6 @@ class OmegaGW(object):
         else:
             qMin = max(0.05,ref_mMin/ref_mMax)
             self.ref_qs = np.linspace(qMin,1,gridSize[1])
-
-        print(self.ref_Mtots)
-        print(self.ref_qs)
 
         # Grid
         self.Mtots_2d,self.qs_2d = np.meshgrid(self.ref_Mtots,self.ref_qs)
@@ -166,21 +195,47 @@ class OmegaGW(object):
         # Now evaluate the energy spectrum at each of these source-frame frequencies, for every point in our mass grid
         # self.ref_energySpectra[i,j,k,:] is the energy contribution from a CBC with reduced mass ratio self.ref_etas[i],
         # total mass self.ref_Mtots[j], and at redshift self.ref_zs[k].
-        self.ref_energySpectra = np.array([[dEdf(M,self.ref_redshiftedFreqs,eta=eta,inspiralOnly=inspiralOnly) for M in self.ref_Mtots] for eta in self.ref_etas])
+        self.ref_energySpectra = np.array([[dEdf(M,self.ref_redshiftedFreqs,eta=eta) for M in self.ref_Mtots] for eta in self.ref_etas])
 
         # Initialize weights for mass grid
         self.probs = np.ones(self.Mtots_2d.shape)
         self.probs /= np.sum(self.probs)
 
-    def eval(self,R0,dRdV,targetFreqs):
+    def amplification(self,kappa_d,kappa_z):
+
+        """
+        Helper function to compute exponential factor by which GW energies are birefringently amplified
+
+        Inputs
+        ------
+        kappa : `float`
+            Birefringent parameter, units Gpc**(-1) if `amplification_type=='dist'`, otherwise dimensionless
+        amplification_type : `str`
+            Specifies whether birefringence should scale with comoving distance (`dist`) or redshift (`redshift`). Default `dist`
+
+        Returns
+        -------
+        amplification_factor : `np.array`
+            2D array of amplification factors modifying the energy radiated at detector-frame frequencies `self.ref_freqs` from sources at `self.ref_zs`
+
+        """
+
+        amplification_factor = np.cosh(2.*(kappa_d*self.comoving_distances+kappa_z*self.ref_zs)[np.newaxis,:]*(self.ref_freqs[:,np.newaxis]/100.))
+        return amplification_factor
+
+    def eval(self,R0,dRdV,targetFreqs,kappa_d,kappa_z):
 
         """
         Given a prescription for the local merger rate and its evolution over redshift, compute Omega(f)
 
-        INPUTS
-        R0: Local merger rate density in units Gpc^{-3} yr^{-1}
-        dRdV = Arbitrarily normalized merger rate density as a function of redshift. Should correspond to self.ref_zs
-        targetFreqs: Array of frequencies at which we want Omega(f). Must be above 10 and below fMax
+        Inputs
+        ------
+        R0 : `float`
+            Local merger rate density in units Gpc^{-3} yr^{-1}
+        dRdV : `np.array`
+            Arbitrarily normalized merger rate density as a function of redshift. Should be defined at the same redshifts specified in `self.ref_zs`
+        targetFreqs : `np.array`
+            Array of frequencies at which we want Omega(f). Must be above 10 and below the `fmax` used to initialize the object
         """
 
         # Convert to number per Mpc^3 per sec and normalize merger rate density
@@ -191,6 +246,9 @@ class OmegaGW(object):
         # The result is a 2D array, with dedf[i,j] the population-averaged energy contributed at detector-frame
         # frequency i by binaries at redshift j
         dedf = np.tensordot(self.probs,self.ref_energySpectra,axes=2).T
+
+        # Birefringently amplify
+        dedf *= self.amplification(kappa_d,kappa_z)
 
         # Redshift integrand
         R_invE = dRdV_norm/np.sqrt(OmgM*(1.+self.ref_zs)**3.+OmgL)/(1.+self.ref_zs)
@@ -213,7 +271,7 @@ class OmegaGW_BBH(OmegaGW):
     """
 
     def __init__(self,ref_mMin,ref_mMax,ref_zs,Mtots=[],qs=[],gridSize=(70,65)):
-        super(OmegaGW_BBH,self).__init__(ref_mMin,ref_mMax,ref_zs,3000,False,Mtots=Mtots,qs=qs,gridSize=gridSize)
+        super(OmegaGW_BBH,self).__init__(ref_mMin,ref_mMax,ref_zs,3000,Mtots=Mtots,qs=qs,gridSize=gridSize)
 
     def setProbs_plPeak(self,mMin,mMax,lmbda,mu_peak,sig_peak,frac_peak,bq):
         
@@ -230,28 +288,6 @@ class OmegaGW_BBH(OmegaGW):
         # Combined m1
         probs_m1 = frac_peak*p_m1_peak + (1.-frac_peak)*p_m1_pl
         probs_m1[self.m1s_2d>=mMax] = 0.
-
-        # Probability on secondary mass
-        probs_m2 = (1.+bq)*np.power(self.m2s_2d,bq)/(np.power(self.m1s_2d,1.+bq)-mMin**(1.+bq))  
-        probs_m2[self.m2s_2d<=mMin] = 0.
-
-        # Combine and set
-        probs = probs_jacobian*probs_m1*probs_m2
-        probs /= np.sum(probs)
-        self.probs = probs
-
-    def setProbs(self,mMin,lmbda1,lmbda2,m0,bq):
-
-        # Jacobian with which to convert integration over d(lnM)dq to d(m1)d(m2)
-        probs_jacobian = self.Mtots_2d**2./(1.+self.qs_2d)**2.
-
-        # Probability density for primary mass
-        p_m1_norm = (1.+lmbda1)*(1.+lmbda2)/(m0*(lmbda2-lmbda1)-mMin*np.power(mMin/m0,lmbda1)*(1.+lmbda2))
-        probs_m1 = np.ones(self.m1s_2d.shape)
-        low_m_dets = self.m1s_2d<m0
-        high_m_dets = self.m1s_2d>=m0
-        probs_m1[low_m_dets] = p_m1_norm*np.power(self.m1s_2d[low_m_dets]/m0,lmbda1)
-        probs_m1[high_m_dets] = p_m1_norm*np.power(self.m1s_2d[high_m_dets]/m0,lmbda2)
 
         # Probability on secondary mass
         probs_m2 = (1.+bq)*np.power(self.m2s_2d,bq)/(np.power(self.m1s_2d,1.+bq)-mMin**(1.+bq))  
