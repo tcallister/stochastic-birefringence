@@ -215,13 +215,20 @@ class OmegaGW(object):
 
         Returns
         -------
-        amplification_factor : `np.array`
-            2D array of amplification factors modifying the energy radiated at detector-frame frequencies `self.ref_freqs` from sources at `self.ref_zs`
-
+        cosh_amplification_factor : `np.array`
+            2D array of cosh amplification factors modifying the energy radiated at detector-frame frequencies `self.ref_freqs` from sources at `self.ref_zs`; used to compute Stokes I background
+        sinh_amplification_factor : `np.array`
+            2D array of sinh amplification factors modifying the energy radiated at detector-frame frequencies `self.ref_freqs` from sources at `self.ref_zs`; used to compute Stokes V background
         """
 
-        amplification_factor = np.cosh(2.*(kappa_d*self.comoving_distances+kappa_z*self.ref_zs)[np.newaxis,:]*(self.ref_freqs[:,np.newaxis]/100.))
-        return amplification_factor
+        # Compute argument of amplification exponentials
+        amplification_factor = 2.*(kappa_d*self.comoving_distances+kappa_z*self.ref_zs)[np.newaxis,:]*(self.ref_freqs[:,np.newaxis]/100.)
+
+        # Get cosh and sinh of this factor, for Stokes I and V respectively
+        cosh_amplification_factor = np.cosh(amplification_factor)
+        sinh_amplification_factor = np.sinh(amplification_factor)
+
+        return cosh_amplification_factor,sinh_amplification_factor
 
     def eval(self,R0,dRdV,targetFreqs,kappa_d,kappa_z):
 
@@ -236,6 +243,13 @@ class OmegaGW(object):
             Arbitrarily normalized merger rate density as a function of redshift. Should be defined at the same redshifts specified in `self.ref_zs`
         targetFreqs : `np.array`
             Array of frequencies at which we want Omega(f). Must be above 10 and below the `fmax` used to initialize the object
+
+        Returns
+        -------
+        final_Omg_I_spectrum : `np.array`
+            Array containing Stokes I energy density spectrum
+        final_Omg_V_spectrum : `np.array`
+            Array containing Stokes V energy density spectrum
         """
 
         # Convert to number per Mpc^3 per sec and normalize merger rate density
@@ -248,18 +262,22 @@ class OmegaGW(object):
         dedf = np.tensordot(self.probs,self.ref_energySpectra,axes=2).T
 
         # Birefringently amplify
-        dedf *= self.amplification(kappa_d,kappa_z)
+        cosh_amp,sinh_amp = self.amplification(kappa_d,kappa_z)
+        dedf_I = dedf*cosh_amp
+        dedf_V = dedf*sinh_amp
 
         # Redshift integrand
         R_invE = dRdV_norm/np.sqrt(OmgM*(1.+self.ref_zs)**3.+OmgL)/(1.+self.ref_zs)
 
         # Integrate over redshifts via a dot product between dedf and the redshift-dependent R_invE
         dz = self.ref_zs[1]-self.ref_zs[0]
-        Omg_spectrum = (self.ref_freqs/rhoC/H0)*dedf.dot(R_invE)*dz
+        Omg_I_spectrum = (self.ref_freqs/rhoC/H0)*dedf_I.dot(R_invE)*dz
+        Omg_V_spectrum = (self.ref_freqs/rhoC/H0)*dedf_V.dot(R_invE)*dz
 
         # Interpolate onto desired frequencies and return
-        final_Omg_spectrum = np.interp(targetFreqs,self.ref_freqs,Omg_spectrum,left=0.,right=0.)
-        return final_Omg_spectrum
+        final_Omg_I_spectrum = np.interp(targetFreqs,self.ref_freqs,Omg_I_spectrum,left=0.,right=0.)
+        final_Omg_V_spectrum = np.interp(targetFreqs,self.ref_freqs,Omg_V_spectrum,left=0.,right=0.)
+        return final_Omg_I_spectrum,final_Omg_V_spectrum
 
 class OmegaGW_BBH(OmegaGW):
 
