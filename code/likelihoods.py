@@ -1,7 +1,10 @@
 import jax.numpy as jnp
 from jax import vmap
+import numpy as np
 import numpyro
 import numpyro.distributions as dist
+from constants import *
+from gwBackground import dEdf
 
 logit_std = 2.5
 
@@ -111,4 +114,62 @@ def stokes(spectra):
 
     log_ps = jnp.array([model_and_observe(*spectra[k]) for k in spectra])
     numpyro.factor("logp",jnp.sum(log_ps))
+
+def generateMonteCarloEnergies(nsamples,freqs):
+
+    # Parameters specifying BBH mass distribution
+    m_min = 8.
+    m_max = 100.
+    alpha = -3.
+    mu_peak = 35.
+    sig_peak = 5.
+    frac_peak = 0.05
+    bq = 2 
+
+    # Construct normalized probability distribution over m1 grid
+    m1_grid = np.linspace(m_min,m_max,1000)
+    p_m1_pl = (1.+alpha)*m1_grid**alpha/(m_max**(1.+alpha) - m_min**(1.+alpha))
+    p_m1_peak = np.exp(-(m1_grid-mu_peak)**2/(2.*sig_peak**2))/np.sqrt(2.*np.pi*sig_peak**2)
+    p_m1_grid = frac_peak*p_m1_peak + (1.-frac_peak)*p_m1_pl
+    cdf_m1_grid = np.cumsum(p_m1_grid)/np.sum(p_m1_grid)
+
+    # Draw random primary masses
+    m1_samples = np.interp(np.random.random(nsamples),cdf_m1_grid,m1_grid)
+
+    # Draw random secondary masses
+    m2_samples = np.power(m_min**(1.+bq) + np.random.random(nsamples)*(m1_samples**(1.+bq) - m_min**(1.+bq)),1./(1.+bq))
+
+    # Now construct integrand of redshift integral
+    # First we need the comoving merger rate density
+    # Sample from a fiducial Madau+Dickinson model
+    R0 = 20./1e9/year   # Convert to number per Mpc^3 per sec to match units
+    alpha = 2.7
+    beta = 5.6
+    zpeak = 1.9
+    z_grid = np.linspace(0,10,3000)
+    dRdV = np.power(1.+z_grid,alpha)/(1.+np.power((1.+z_grid)/(1.+zpeak),beta))
+    dRdV *= R0/dRdV[0]
+
+    # Construct full integrand and normalize to obtain a probability distribution
+    # Note that this is **not** any kind of physical probability distribution over source redshifts,
+    # but just a normalized version of the integrand we can use to draw monte carlo samples
+    integrand = dRdV/((1.+z_grid)*np.sqrt(OmgM*(1.+z_grid)**3+OmgL))
+    integrandNorm = np.trapz(integrand,z_grid)
+    p_z = integrand/integrandNorm
+    cdf_z = np.cumsum(p_z)/np.sum(p_z)
+
+    # Draw redshifts
+    z_samples = np.interp(np.random.random(nsamples),cdf_z,z_grid)
+    
+    # Compute energy spectra at each sample
+    Mtot_samples = m1_samples+m2_samples
+    q_samples = m2_samples/m1_samples
+    eta_samples = q_samples/(1.+q_samples)**2
+    dEdf_samples = np.array([dEdf(Mtot_samples[i],freqs*(1.+z_samples[i]),eta_samples[i]) for i in range(nsamples)])
+
+    # Finally, compute relevant monte carlo weights
+    dRdV_samples = np.power(1.+z_samples,alpha)/(1.+np.power((1.+z_samples)/(1.+zpeak),beta))
+    mc_weights = integrandNorm*dEdf_samples*freqs/rhoC/H0
+
+    return mc_weights,dRdV_samples
 
