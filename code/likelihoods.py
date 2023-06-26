@@ -39,30 +39,58 @@ def get_value_from_logit(logit_x,x_min,x_max):
 
 def unpolarized(spectra):
 
+    """
+    Likelihood to perform a standard power-law inference on the stochastic background, for use within `numpyro`.
+    Stochastic background is assumed to be unpolarized and governed by two parameters:
+       * `alpha` : Power-law index on energy density
+       * `log_Omega` : log10 of the energy-density amplitude at f=25 Hz
+
+    Parameters
+    ----------
+    spectra : `dict`
+        Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`
+    """
+
     # Sample power-law parameters
     alpha = numpyro.sample("alpha",dist.Normal(0,3.5))
 
+    # Amplitude
     logit_log_Omega = numpyro.sample("logit_log_Omega",dist.Normal(0,logit_std))
     log_Omega,jac_log_Omega = get_value_from_logit(logit_log_Omega,-13.,-5.)
     numpyro.factor("p_log_Omega",logit_log_Omega**2/(2.*logit_std**2)-jnp.log(jac_log_Omega))
     numpyro.deterministic("log_Omega",log_Omega)
 
-    # Construct proposed model background
+    # Define function to evalute likelihood of cross-correlation measurements
     def model_and_observe(freqs,Ys,sigmas):
         Omega_model = 10.**log_Omega * jnp.power(freqs/25.,alpha)
         logp = jnp.sum(-(Ys-Omega_model)**2/(2.*sigmas**2))
         return logp
 
-    #logps = vmap(model_and_observe)(jnp.array([spectra[k] for k in spectra]).T)
+    # Map log-likelihood function across all baselines and observing runs
     log_ps = jnp.array([model_and_observe(*spectra[k]) for k in spectra])
     numpyro.factor("logp",jnp.sum(log_ps))
 
 def right_left(spectra):
 
+    """
+    Likelihood to perform inference on a possibly-circularly-polarized stochastic background, for use within `numpyro`.
+    Stochastic background is parametrized by right vs. left energy-densities, with the following four parameters:
+       * `alpha_R` : Power-law index on energy density in right-circular polarizations
+       * `alpha_L` : Power-law index on energy density in left-circular polarizations
+       * `log_Omega_R` : log10 of the energy-density amplitude at f=25 Hz in right-circular polarizations
+       * `log_Omega_L` : log10 of the energy-density amplitude at f=25 Hz in left-circular polarizations
+
+    Parameters
+    ----------
+    spectra : `dict`
+        Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`
+    """
+
     # Sample power-law parameters
     alpha_R = numpyro.sample("alpha_R",dist.Normal(0,3.5))
     alpha_L = numpyro.sample("alpha_L",dist.Normal(0,3.5))
 
+    # Amplitude
     logit_log_Omega_R = numpyro.sample("logit_log_Omega_R",dist.Normal(0,logit_std))
     logit_log_Omega_L = numpyro.sample("logit_log_Omega_L",dist.Normal(0,logit_std))
     log_Omega_R,jac_log_Omega_R = get_value_from_logit(logit_log_Omega_R,-13.,-5.)
@@ -72,50 +100,94 @@ def right_left(spectra):
     numpyro.deterministic("log_Omega_R",log_Omega_R)
     numpyro.deterministic("log_Omega_L",log_Omega_L)
 
-    # Construct proposed model background
+    # Define function to evalute likelihood of cross-correlation measurements
     def model_and_observe(freqs,Ys,sigmas,orfR,orfL):
 
-        orfI = orfR + orfL
+        # Construct right- and left-handed spectra
         Omega_model_R = 10.**log_Omega_R * jnp.power(freqs/25.,alpha_R)
         Omega_model_L = 10.**log_Omega_L * jnp.power(freqs/25.,alpha_L)
 
+        # Construct total model and compute log-likelihood
+        # Note that `Ys` are normalized such that we need to divide model by the Stokes-I ORF
+        orfI = orfR + orfL
         total_model = Omega_model_R*orfR/orfI + Omega_model_L*orfL/orfI
         logp = jnp.sum(-(Ys-total_model)**2/(2.*sigmas**2))
 
         return logp
 
+    # Map log-likelihood function across all baselines and observing runs
     log_ps = jnp.array([model_and_observe(*spectra[k]) for k in spectra])
     numpyro.factor("logp",jnp.sum(log_ps))
 
 def stokes(spectra):
 
+    """
+    Likelihood to perform inference on a possibly-circularly-polarized stochastic background, for use within `numpyro`.
+    Stochastic background is parametrized by Stokes I and V amplitudes, with the following four parameters:
+       * `alpha_I` : Power-law index on total energy density
+       * `log_Omega_I` : log10 of the total energy-density amplitude at f=25 Hz 
+       * `log_Omega_L` : log10 of the energy-density amplitude at f=25 Hz in left-circular polarizations
+
+    Parameters
+    ----------
+    spectra : `dict`
+        Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`
+    """
+
     # Sample power-law parameters
     alpha_I = numpyro.sample("alpha_I",dist.Normal(0,3.5))
 
+    # Total energy-density amplitude
     logit_log_Omega_I = numpyro.sample("logit_log_Omega_I",dist.Normal(0,logit_std))
     log_Omega_I,jac_log_Omega_I = get_value_from_logit(logit_log_Omega_I,-13.,-5.)
     numpyro.factor("p_log_Omega_I",logit_log_Omega_I**2/(2.*logit_std**2)-jnp.log(jac_log_Omega_I))
     numpyro.deterministic("log_Omega_I",log_Omega_I)
 
+    # Polarization fraction; when multiplyed by `Omega_I`, this is the energy density in Stokes V
     logit_pol_fraction = numpyro.sample("logit_pol_fraction",dist.Normal(0,logit_std))
     pol_fraction,jac_pol_fraction = get_value_from_logit(logit_pol_fraction,-1.,1.)
     numpyro.factor("p_pol_fraction",logit_pol_fraction**2/(2.*logit_std**2)-jnp.log(jac_pol_fraction))
     numpyro.deterministic("pol_fraction",pol_fraction)
 
-    # Construct proposed model background
+    # Define function to evalute likelihood of cross-correlation measurements
     def model_and_observe(freqs,Ys,sigmas,orfI,orfV):
 
+        # Construct model
+        # Note that Stokes V term needs to be divided by the Stokes I ORF to match normalization of `Ys`
         Omega_model_I = 10.**log_Omega_I * jnp.power(freqs/25.,alpha_I)
         total_model = Omega_model_I*(1.+orfV/orfI*pol_fraction)
 
+        # Compute likelihood
         logp = jnp.sum(-(Ys-total_model)**2/(2.*sigmas**2))
-
         return logp
 
+    # Map log-likelihood function across all baselines and observing runs
     log_ps = jnp.array([model_and_observe(*spectra[k]) for k in spectra])
     numpyro.factor("logp",jnp.sum(log_ps))
 
 def generateMonteCarloEnergies(nsamples,freqs):
+
+    """
+    Helper function to enable Monte Carlo calculation of stochastic energy-density spectra.
+    Draws an ensemble of BBHs and their associated energy densities; these energy densities can then be
+    reweighted to compute Omega(f) under a variety of BBH populations and/or birefringent scenarios
+
+    Parameters
+    ----------
+    nsamples : `int`
+        Size of BBH ensemble to draw
+    freqs : `array`
+        Array of frequencies at which to evaluate energy spectra
+
+    Returns
+    -------
+    mc_weights : `array`
+        The mean of these weights gives the stochastic energy density Omega(f) arising from our default BBH population
+    z_samples : `array`
+        Redshifts of each BBH in our ensemble
+    dRdV_samples : `array`
+        The comoving merger rate density at each redshift in `z_samples`; divide by this if you wish to reweight `mc_weights` to another redshift distribution
+    """
 
     # Parameters specifying BBH mass distribution
     m_min = 8.
@@ -142,13 +214,13 @@ def generateMonteCarloEnergies(nsamples,freqs):
     # Now construct integrand of redshift integral
     # First we need the comoving merger rate density
     # Sample from a fiducial Madau+Dickinson model
-    R0 = 20./1e9/year   # Convert to number per Mpc^3 per sec to match units
+    R0 = 20.
     alpha = 2.7
     beta = 5.6
     zpeak = 1.9
     z_grid = np.linspace(0,10,3000)
     dRdV = np.power(1.+z_grid,alpha)/(1.+np.power((1.+z_grid)/(1.+zpeak),beta))
-    dRdV *= R0/dRdV[0]
+    dRdV *= (R0/1e9/year)/dRdV[0]   # Convert to number per Mpc^3 per sec to match units
 
     # Construct full integrand and normalize to obtain a probability distribution
     # Note that this is **not** any kind of physical probability distribution over source redshifts,
@@ -168,8 +240,13 @@ def generateMonteCarloEnergies(nsamples,freqs):
     dEdf_samples = np.array([dEdf(Mtot_samples[i],freqs*(1.+z_samples[i]),eta_samples[i]) for i in range(nsamples)])
 
     # Finally, compute relevant monte carlo weights
-    dRdV_samples = np.power(1.+z_samples,alpha)/(1.+np.power((1.+z_samples)/(1.+zpeak),beta))
     mc_weights = integrandNorm*dEdf_samples*freqs/rhoC/H0
 
-    return mc_weights,dRdV_samples
+    # To enable reweighting, compute the merger rate density that went into our sample
+    # We can divide by this if we want to reweight to some other population
+    dRdV_samples = np.power(1.+z_samples,alpha)/(1.+np.power((1.+z_samples)/(1.+zpeak),beta))
+    dRdV_0 = 1./(1.+np.power(1./(1.+zpeak),beta))
+    dRdV_samples *= R0/dRdV_0
+
+    return mc_weights,z_samples,dRdV_samples
 
