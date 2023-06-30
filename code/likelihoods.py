@@ -250,3 +250,160 @@ def generateMonteCarloEnergies(nsamples,freqs):
 
     return mc_weights,z_samples,dRdV_samples
 
+def amplification_argument(kappa_Dc,kappa_z,Dcs_fs,zs_fs):
+
+    """
+    Helper function to compute birefringent amplification factor appearing in hyperbolic factors modifying Stokes I and Stokes V
+
+    Parameters
+    ----------
+    kappa_Dc : float
+        Birefringent coefficient corresponding to comoving-distance-based amplification
+    kappa_z : float
+        Birefringent coefficient corresponding to redshift-based amplification
+    Dcs_fs : array
+        Expected to be a 2D outer product of comoving distances (units of Gpc) and frequencies, with `Dcs_fs[i,j]` corresponding
+        to distance i and frequency j
+    zs_fs : array
+        Expected to be a 2D outer product of redshifts and frequencies, as above.
+
+    Returns
+    -------
+    amp_factor : array
+        Total amplification factor at the corresponding comoving distance/redshift and frequency
+    """
+
+    # Combine
+    # Note that kappas are defined with reference to a 100 Hz reference frequency
+    amp_factor = 2.*(kappa_Dc*Dcs_fs + kappa_z*zs_fs)/100.
+    return amp_factor
+
+def birefringence(spectra,weight_dictionary):
+
+    """
+    Likelihood to perform inference on a birefringently-amplified stochastic background, for use within `numpyro`.
+
+    Parameters
+    ----------
+    spectra : `dict`
+        Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`
+    weight_dictionary : `dict`
+        Dictionary containing ensemble of BBHs and associated contributions to Omega(f); reweighted to perform Monte Carlo calculation of amplified energy-densities
+    """
+    
+    # Draw comoving-distance birefringence parameter
+    logit_kappa_Dc = numpyro.sample("logit_kappa_Dc",dist.Normal(0,logit_std))
+    kappa_Dc,jac_kappa_Dc = get_value_from_logit(logit_kappa_Dc,0,0.4)
+    numpyro.factor("p_kappa_Dc",logit_kappa_Dc**2/(2.*logit_std**2)-jnp.log(jac_kappa_Dc))
+    numpyro.deterministic("kappa_Dc",kappa_Dc)
+
+    # Draw redshift birefringence parameter
+    logit_kappa_z = numpyro.sample("logit_kappa_z",dist.Normal(0,logit_std))
+    kappa_z,jac_kappa_z = get_value_from_logit(logit_kappa_z,0,1)
+    numpyro.factor("p_kappa_z",logit_kappa_z**2/(2.*logit_std**2)-jnp.log(jac_kappa_z))
+    numpyro.deterministic("kappa_z",kappa_z)
+
+    # Extract data from reference ensemble for reweighting
+    sample_frequencies = weight_dictionary['freqs']
+    sample_Dcs_fs = weight_dictionary['Dcs_outer_freqs']
+    sample_zs_fs = weight_dictionary['zs_outer_freqs']
+    sample_omg_weights = weight_dictionary['omg_weights']
+
+    # Compute birefringent amplification and boost each sample event's contributions accordingly
+    amp_argument = amplification_argument(kappa_Dc,kappa_z,sample_Dcs_fs,sample_zs_fs)
+    Omg_I_weights = sample_omg_weights*jnp.cosh(amp_argument)
+    Omg_V_weights = sample_omg_weights*jnp.sinh(amp_argument)
+
+    # Save model as well as frequency-dependent effective sample counts
+    Omg_I_model = numpyro.deterministic("Omg_I_model",jnp.mean(Omg_I_weights,axis=0))
+    Omg_V_model = numpyro.deterministic("Omg_V_model",jnp.mean(Omg_V_weights,axis=0))
+    Omg_I_neff = numpyro.deterministic("Omg_I_neff",jnp.sum(Omg_I_weights,axis=0)**2/jnp.sum(Omg_I_weights**2,axis=0))
+    Omg_V_neff = numpyro.deterministic("Omg_V_neff",jnp.sum(Omg_V_weights,axis=0)**2/jnp.sum(Omg_V_weights**2,axis=0))
+
+    # Define function to evalute likelihood of cross-correlation measurements
+    def model_and_observe(freqs,Ys,sigmas,orfI,orfV):
+
+        # Construct model
+        Omega_I_interpolated = jnp.interp(freqs,sample_frequencies,Omg_I_model) 
+        Omega_V_interpolated = jnp.interp(freqs,sample_frequencies,Omg_V_model) 
+        total_model = Omega_I_interpolated + (orfV/orfI)*Omega_V_interpolated
+
+        # Compute likelihood
+        logp = jnp.sum(-(Ys-total_model)**2/(2.*sigmas**2))
+        return logp
+
+    # Map log-likelihood function across all baselines and observing runs
+    log_ps = jnp.array([model_and_observe(*spectra[k]) for k in spectra])
+    numpyro.factor("logp",jnp.sum(log_ps))
+
+def birefringence_variable_evolution(spectra,weight_dictionary):
+
+    """
+    Likelihood to perform inference on a birefringently-amplified stochastic background, for use within `numpyro`.
+
+    Parameters
+    ----------
+    spectra : `dict`
+        Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`
+    weight_dictionary : `dict`
+        Dictionary containing ensemble of BBHs and associated contributions to Omega(f); reweighted to perform Monte Carlo calculation of amplified energy-densities
+    """
+    
+    # Draw comoving-distance birefringence parameter
+    logit_kappa_Dc = numpyro.sample("logit_kappa_Dc",dist.Normal(0,logit_std))
+    kappa_Dc,jac_kappa_Dc = get_value_from_logit(logit_kappa_Dc,0,0.4)
+    numpyro.factor("p_kappa_Dc",logit_kappa_Dc**2/(2.*logit_std**2)-jnp.log(jac_kappa_Dc))
+    numpyro.deterministic("kappa_Dc",kappa_Dc)
+
+    # Draw redshift birefringence parameter
+    logit_kappa_z = numpyro.sample("logit_kappa_z",dist.Normal(0,logit_std))
+    kappa_z,jac_kappa_z = get_value_from_logit(logit_kappa_z,0,1)
+    numpyro.factor("p_kappa_z",logit_kappa_z**2/(2.*logit_std**2)-jnp.log(jac_kappa_z))
+    numpyro.deterministic("kappa_z",kappa_z)
+
+    # Draw parameters governing rate of BBHs
+    R0 = numpyro.deterministic("R0",20.)
+    alpha = numpyro.deterministic("alpha",2.9)
+    zp = numpyro.sample("zp",dist.Uniform(0.5,4))
+    beta = numpyro.sample("beta",dist.Uniform(0,10))
+
+    # Extract data from reference ensemble for reweighting
+    sample_frequencies = weight_dictionary['freqs']
+    sample_Dcs_fs = weight_dictionary['Dcs_outer_freqs']
+    sample_zs_fs = weight_dictionary['zs_outer_freqs']
+    sample_zs = weight_dictionary['zs']
+    sample_omg_weights = weight_dictionary['omg_weights']
+    sample_old_dRdVs = weight_dictionary['dRdVs']
+
+    # Compute new merger rate factors
+    dRdV_norm = 1./(1.+jnp.power(1./(1.+zp),beta))
+    sample_new_dRdVs = jnp.power(1.+sample_zs,alpha)/(1.+jnp.power((1.+sample_zs)/(1.+zp),beta))
+    sample_new_dRdVs *= R0/dRdV_norm
+
+    # Compute birefringent amplification and boost each sample event's contributions accordingly
+    amp_argument = amplification_argument(kappa_Dc,kappa_z,sample_Dcs_fs,sample_zs_fs)
+    Omg_weights_unamplified = sample_omg_weights*(sample_new_dRdVs/sample_old_dRdVs)[:,jnp.newaxis]
+    Omg_I_weights = Omg_weights_unamplified*jnp.cosh(amp_argument)
+    Omg_V_weights = Omg_weights_unamplified*jnp.sinh(amp_argument)
+
+    # Save model as well as frequency-dependent effective sample counts
+    Omg_I_model = numpyro.deterministic("Omg_I_model",jnp.mean(Omg_I_weights,axis=0))
+    Omg_V_model = numpyro.deterministic("Omg_V_model",jnp.mean(Omg_V_weights,axis=0))
+    Omg_I_neff = numpyro.deterministic("Omg_I_neff",jnp.sum(Omg_I_weights,axis=0)**2/jnp.sum(Omg_I_weights**2,axis=0))
+    Omg_V_neff = numpyro.deterministic("Omg_V_neff",jnp.sum(Omg_V_weights,axis=0)**2/jnp.sum(Omg_V_weights**2,axis=0))
+
+    # Define function to evalute likelihood of cross-correlation measurements
+    def model_and_observe(freqs,Ys,sigmas,orfI,orfV):
+
+        # Construct model
+        Omega_I_interpolated = jnp.interp(freqs,sample_frequencies,Omg_I_model) 
+        Omega_V_interpolated = jnp.interp(freqs,sample_frequencies,Omg_V_model) 
+        total_model = Omega_I_interpolated + (orfV/orfI)*Omega_V_interpolated
+
+        # Compute likelihood
+        logp = jnp.sum(-(Ys-total_model)**2/(2.*sigmas**2))
+        return logp
+
+    # Map log-likelihood function across all baselines and observing runs
+    log_ps = jnp.array([model_and_observe(*spectra[k]) for k in spectra])
+    numpyro.factor("logp",jnp.sum(log_ps))
