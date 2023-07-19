@@ -57,7 +57,7 @@ weight_dictionary['zs_outer_freqs'] = weight_dictionary['zs'][:,np.newaxis]*weig
 
 # Set up NUTS sampler over our likelihood
 kernel = NUTS(birefringence_variable_evolution,dense_mass=True,target_accept_prob=0.9)
-mcmc = MCMC(kernel,num_warmup=1000,num_samples=1000,num_chains=nChains)
+mcmc = MCMC(kernel,num_warmup=500,num_samples=1000,num_chains=nChains)
 
 # Choose a random key and run over our model
 rng_key = random.PRNGKey(114)
@@ -68,5 +68,5 @@ mcmc.print_summary()
 
 # Save out data
 data = az.from_numpyro(mcmc)
-az.to_netcdf(data,"./../data/birefringence_variable_evolution.cdf")
+az.to_netcdf(data,"./../data/birefringence_variable_evolution_varyingAlphaR0.cdf")
 

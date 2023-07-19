@@ -222,7 +222,7 @@ class OmegaGW(object):
         """
 
         # Compute argument of amplification exponentials
-        amplification_factor = 2.*(kappa_d*self.comoving_distances+kappa_z*self.ref_zs)[np.newaxis,:]*(self.ref_freqs[:,np.newaxis]/100.)
+        amplification_factor = 2.*np.pi*(kappa_d*self.comoving_distances+kappa_z*self.ref_zs)[np.newaxis,:]*(self.ref_freqs[:,np.newaxis]/100.)
 
         # Get cosh and sinh of this factor, for Stokes I and V respectively
         cosh_amplification_factor = np.cosh(amplification_factor)

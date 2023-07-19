@@ -362,8 +362,10 @@ def birefringence_variable_evolution(spectra,weight_dictionary):
     numpyro.deterministic("kappa_z",kappa_z)
 
     # Draw parameters governing rate of BBHs
-    R0 = numpyro.deterministic("R0",20.)
-    alpha = numpyro.deterministic("alpha",2.9)
+    #R0 = numpyro.deterministic("R0",20.)
+    #alpha = numpyro.deterministic("alpha",2.9)
+    R0 = numpyro.sample("R0",dist.Normal(15.,5.))
+    alpha = numpyro.sample("alpha",dist.Normal(3.,1.5))
     zp = numpyro.sample("zp",dist.Uniform(0.5,4))
     beta = numpyro.sample("beta",dist.Uniform(0,10))
 
