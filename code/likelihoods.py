@@ -275,7 +275,7 @@ def amplification_argument(kappa_Dc,kappa_z,Dcs_fs,zs_fs):
 
     # Combine
     # Note that kappas are defined with reference to a 100 Hz reference frequency
-    amp_factor = 2.*(kappa_Dc*Dcs_fs + kappa_z*zs_fs)/100.
+    amp_factor = 2.*np.pi*(kappa_Dc*Dcs_fs + kappa_z*zs_fs)/100.
     return amp_factor
 
 def birefringence(spectra,weight_dictionary):
@@ -350,24 +350,29 @@ def birefringence_variable_evolution(spectra,weight_dictionary):
     """
     
     # Draw comoving-distance birefringence parameter
+    kappa_Dc = numpyro.sample("kappa_Dc",dist.Uniform(-0.5,0.5))
+    """
     logit_kappa_Dc = numpyro.sample("logit_kappa_Dc",dist.Normal(0,logit_std))
     kappa_Dc,jac_kappa_Dc = get_value_from_logit(logit_kappa_Dc,0,0.4)
     numpyro.factor("p_kappa_Dc",logit_kappa_Dc**2/(2.*logit_std**2)-jnp.log(jac_kappa_Dc))
     numpyro.deterministic("kappa_Dc",kappa_Dc)
+    """
 
     # Draw redshift birefringence parameter
+    kappa_z = numpyro.sample("kappa_z",dist.Uniform(-1.,1.))
+    """
     logit_kappa_z = numpyro.sample("logit_kappa_z",dist.Normal(0,logit_std))
-    kappa_z,jac_kappa_z = get_value_from_logit(logit_kappa_z,0,1)
+    kappa_z,jac_kappa_z = get_value_from_logit(logit_kappa_z,0,0.8)
     numpyro.factor("p_kappa_z",logit_kappa_z**2/(2.*logit_std**2)-jnp.log(jac_kappa_z))
     numpyro.deterministic("kappa_z",kappa_z)
+    """
 
     # Draw parameters governing rate of BBHs
-    #R0 = numpyro.deterministic("R0",20.)
-    #alpha = numpyro.deterministic("alpha",2.9)
-    R0 = numpyro.sample("R0",dist.Normal(15.,5.))
+    log_R0 = numpyro.sample("log_R0",dist.Normal(jnp.log(15.),jnp.log(20./15.)))
     alpha = numpyro.sample("alpha",dist.Normal(3.,1.5))
     zp = numpyro.sample("zp",dist.Uniform(0.5,4))
     beta = numpyro.sample("beta",dist.Uniform(0,10))
+    R0 = jnp.exp(log_R0)
 
     # Extract data from reference ensemble for reweighting
     sample_frequencies = weight_dictionary['freqs']

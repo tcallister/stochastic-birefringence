@@ -4,7 +4,7 @@ from load_data import *
 def pi_curve(frequencies,sigmas,alpha_min,alpha_max):
 
     # Range of power-law indices
-    alphas = np.linspace(alpha_min,alpha_max,30)
+    alphas = np.linspace(alpha_min,alpha_max,50)
     amplitudes = np.zeros(alphas.size)
 
     # Loop across indices
