@@ -350,7 +350,7 @@ def birefringence_variable_evolution(spectra,weight_dictionary):
     """
     
     # Draw comoving-distance birefringence parameter
-    kappa_Dc = numpyro.sample("kappa_Dc",dist.Uniform(-0.5,0.5))
+    kappa_Dc = numpyro.sample("kappa_Dc",dist.Uniform(-0.4,0.4))
     """
     logit_kappa_Dc = numpyro.sample("logit_kappa_Dc",dist.Normal(0,logit_std))
     kappa_Dc,jac_kappa_Dc = get_value_from_logit(logit_kappa_Dc,0,0.4)

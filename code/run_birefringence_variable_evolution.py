@@ -43,7 +43,7 @@ spectra['L1V1_O3'].append(LV_O3_gammaV)
 
 # Get Monte Carlo weights to compute stochastic spectra
 frequencies_to_sample = np.logspace(np.log10(spectra['H1L1_O1'][0][0]),np.log10(spectra['H1L1_O1'][0][-1]),300)
-omg_weights,z_samples,dRdV_samples = generateMonteCarloEnergies(30000,frequencies_to_sample)
+omg_weights,z_samples,dRdV_samples = generateMonteCarloEnergies(100000,frequencies_to_sample)
 weight_dictionary = {\
     'zs':z_samples,
     'Dcs':Planck18.comoving_distance(z_samples).to(u.Gpc).value,
@@ -56,7 +56,7 @@ weight_dictionary['Dcs_outer_freqs'] = weight_dictionary['Dcs'][:,np.newaxis]*we
 weight_dictionary['zs_outer_freqs'] = weight_dictionary['zs'][:,np.newaxis]*weight_dictionary['freqs'][np.newaxis,:]
 
 # Set up NUTS sampler over our likelihood
-kernel = NUTS(birefringence_variable_evolution,dense_mass=True,target_accept_prob=0.9)
+kernel = NUTS(birefringence_variable_evolution)#,dense_mass=True,target_accept_prob=0.9)
 mcmc = MCMC(kernel,num_warmup=200,num_samples=200,num_chains=nChains)
 
 # Choose a random key and run over our model
