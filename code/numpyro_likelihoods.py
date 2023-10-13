@@ -165,7 +165,7 @@ def stokes(spectra):
     log_ps = jnp.array([model_and_observe(*spectra[k]) for k in spectra])
     numpyro.factor("logp",jnp.sum(log_ps))
 
-def generateMonteCarloEnergies(nsamples,freqs):
+def generateMonteCarloEnergies(nsamples,freqs,alpha=3,beta=5,zpeak=3):
 
     """
     Helper function to enable Monte Carlo calculation of stochastic energy-density spectra.
@@ -190,36 +190,44 @@ def generateMonteCarloEnergies(nsamples,freqs):
     """
 
     # Parameters specifying BBH mass distribution
-    m_min = 8.
-    m_max = 100.
-    alpha = -3.
-    mu_peak = 35.
-    sig_peak = 5.
-    frac_peak = 0.05
-    bq = 2 
+    R0 = 16.
+    m_min = 9.
+    m_max = 70.
+    dm_min = 0.5
+    dm_max = 10.
+    alpha_m = -3.8
+    mu_peak = 34.
+    sig_peak = 3.
+    frac_peak = 10.**(-2.7)
+    bq = 2
 
-    # Construct normalized probability distribution over m1 grid
-    m1_grid = np.linspace(m_min,m_max,1000)
-    p_m1_pl = (1.+alpha)*m1_grid**alpha/(m_max**(1.+alpha) - m_min**(1.+alpha))
+    # Construct normalized power law and Gaussian over m1 grid
+    m1_grid = np.linspace(2.,100.,1000)
+    p_m1_pl = (1.+alpha_m)*m1_grid**alpha_m/(100.**(1.+alpha_m) - 2.**(1.+alpha_m))
     p_m1_peak = np.exp(-(m1_grid-mu_peak)**2/(2.*sig_peak**2))/np.sqrt(2.*np.pi*sig_peak**2)
-    p_m1_grid = frac_peak*p_m1_peak + (1.-frac_peak)*p_m1_pl
-    cdf_m1_grid = np.cumsum(p_m1_grid)/np.sum(p_m1_grid)
 
-    # Draw random primary masses
+    # Compute low- and high-mass filters
+    low_filter = np.exp(-(m1_grid-m_min)**2/(2.*dm_min**2))
+    low_filter = np.where(m1_grid<m_min,low_filter,1.)
+    high_filter = np.exp(-(m1_grid-m_max)**2/(2.*dm_max**2))
+    high_filter = np.where(m1_grid>m_max,high_filter,1.)
+
+    # Apply filters to combined power-law and peak
+    p_m1_grid = (frac_peak*p_m1_peak + (1.-frac_peak)*p_m1_pl)*low_filter*high_filter
+    p_m1_grid[m1_grid>=100.] = 0.
+
+    # Construct CDF and draw random primary masses
+    cdf_m1_grid = np.cumsum(p_m1_grid)/np.sum(p_m1_grid)
     m1_samples = np.interp(np.random.random(nsamples),cdf_m1_grid,m1_grid)
 
     # Draw random secondary masses
-    m2_samples = np.power(m_min**(1.+bq) + np.random.random(nsamples)*(m1_samples**(1.+bq) - m_min**(1.+bq)),1./(1.+bq))
+    m2_samples = np.power(2.**(1.+bq) + np.random.random(nsamples)*(m1_samples**(1.+bq) - 2.**(1.+bq)),1./(1.+bq))
 
     # Now construct integrand of redshift integral
     # First we need the comoving merger rate density
     # Sample from a fiducial Madau+Dickinson model
-    R0 = 20.
-    alpha = 2.7
-    beta = 5.6
-    zpeak = 1.9
-    z_grid = np.linspace(0,10,3000)
-    dRdV = np.power(1.+z_grid,alpha)/(1.+np.power((1.+z_grid)/(1.+zpeak),beta))
+    z_grid = np.linspace(0,10,10000)
+    dRdV = np.power(1.+z_grid,alpha)/(1.+np.power((1.+z_grid)/(1.+zpeak),alpha+beta))
     dRdV *= (R0/1e9/year)/dRdV[0]   # Convert to number per Mpc^3 per sec to match units
 
     # Construct full integrand and normalize to obtain a probability distribution
@@ -244,8 +252,8 @@ def generateMonteCarloEnergies(nsamples,freqs):
 
     # To enable reweighting, compute the merger rate density that went into our sample
     # We can divide by this if we want to reweight to some other population
-    dRdV_samples = np.power(1.+z_samples,alpha)/(1.+np.power((1.+z_samples)/(1.+zpeak),beta))
-    dRdV_0 = 1./(1.+np.power(1./(1.+zpeak),beta))
+    dRdV_samples = np.power(1.+z_samples,alpha)/(1.+np.power((1.+z_samples)/(1.+zpeak),alpha+beta))
+    dRdV_0 = 1./(1.+np.power(1./(1.+zpeak),alpha+beta))
     dRdV_samples *= R0/dRdV_0
 
     return mc_weights,z_samples,dRdV_samples
@@ -383,8 +391,8 @@ def birefringence_variable_evolution(spectra,weight_dictionary):
     sample_old_dRdVs = weight_dictionary['dRdVs']
 
     # Compute new merger rate factors
-    dRdV_norm = 1./(1.+jnp.power(1./(1.+zp),beta))
-    sample_new_dRdVs = jnp.power(1.+sample_zs,alpha)/(1.+jnp.power((1.+sample_zs)/(1.+zp),beta))
+    dRdV_norm = 1./(1.+jnp.power(1./(1.+zp),alpha+beta))
+    sample_new_dRdVs = jnp.power(1.+sample_zs,alpha)/(1.+jnp.power((1.+sample_zs)/(1.+zp),alpha+beta))
     sample_new_dRdVs *= R0/dRdV_norm
 
     # Compute birefringent amplification and boost each sample event's contributions accordingly

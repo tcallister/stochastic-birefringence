@@ -4,6 +4,8 @@ from scipy.special import spherical_jn
 
 # Hanford
 # http://www.ligo.org/scientists/GW100916/detectors.txt
+# See also LIGO DCC T980044
+# Also https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lal/lib/tools/LALDetectors.h
 H1x = np.array([-2.16141492636e6,-3.83469517889e6,4.60035022664e6])
 H1u = np.array([-0.22389266154,0.79983062746,0.55690487831])
 H1v = np.array([-0.91397818574,0.02609403989,-0.40492342125])

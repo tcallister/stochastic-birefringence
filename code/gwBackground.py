@@ -51,6 +51,7 @@ def dEdf(Mtot,freqs,eta=0.25,PN=True):
         Energy spectrum in units of J/Hz
     """
 
+    # Fix spin magnitudes to zero for convenience
     chi = 0.
 
     # Initialize energy density
@@ -170,7 +171,7 @@ class OmegaGW(object):
         if len(qs)!=0:
             self.ref_qs = qs
         else:
-            qMin = max(0.05,ref_mMin/ref_mMax)
+            qMin = ref_mMin/ref_mMax #max(0.05,ref_mMin/ref_mMax)
             self.ref_qs = np.linspace(qMin,1,gridSize[1])
 
         # Grid
@@ -282,7 +283,7 @@ class OmegaGW(object):
 class OmegaGW_BBH(OmegaGW):
 
     """
-    Subclass of `OmegaGW`, used to compute energy density due to BBHs under a "Broken Power Law" mass model
+    Subclass of `OmegaGW`, used to compute energy density due to BBHs under a "Power-Law + Peak" mass model
 
     Implements a function `setProbs` to fix the weights used in integrating over the mass grid to compute
     a population averaged energy spectrum
@@ -291,25 +292,57 @@ class OmegaGW_BBH(OmegaGW):
     def __init__(self,ref_mMin,ref_mMax,ref_zs,Mtots=[],qs=[],gridSize=(70,65)):
         super(OmegaGW_BBH,self).__init__(ref_mMin,ref_mMax,ref_zs,3000,Mtots=Mtots,qs=qs,gridSize=gridSize)
 
-    def setProbs_plPeak(self,mMin,mMax,lmbda,mu_peak,sig_peak,frac_peak,bq):
+    def setProbs_plPeak(self,mMin,mMax,dmMin,dmMax,lmbda,mu_peak,sig_peak,frac_peak,bq):
+
+        """
+        Function to set mass-dependent weights over precomputed energy-density spectra in order
+        to implement and integrate over a realistic black hole mass distribution.
+
+        Inputs
+        ------
+        mMin : `float`
+            Mass below which the black hole primary mass distribution is truncated to zero
+        mMax : `float`
+            Mass above which the black hole primary mass distribution is truncated to zero
+        dmMin : `float`
+            Scale of the exponential truncation applied below `mMin`
+        dmMax : `float`
+            Scale of the exponential truncation applied above `mMax`
+        lmbda : `float`
+            Power-law exponent describing the bulk of the primary mass distribution
+        mu_peak : `float`
+            The location of a Gaussian excess in the primary mass distribution
+        sig_peak : `float`
+            Standard deviation of the gaussian excess
+        frac_peak : `float`
+            The mixture fraction between power law and Gaussian components of the primary mass distribution.
+            (Note that the exponential truncations make this mixture fraction only approximate)
+        bq : `float`
+            Power-law exponent governing mass ratio distribution
+        """
         
         # Jacobian with which to convert integration over d(lnM)dq to d(m1)d(m2)
         probs_jacobian = self.Mtots_2d**2./(1.+self.qs_2d)**2.
 
         # Power law component in m1
-        p_m1_pl = (1.+lmbda)*self.m1s_2d**lmbda/(mMax**(1.+lmbda) - mMin**(1.+lmbda))
+        p_m1_pl = (1.+lmbda)*self.m1s_2d**lmbda/(100.**(1.+lmbda) - 2.**(1.+lmbda))
 
         # Gaussian component in m1
-        gaussian_norm = np.sqrt(sig_peak**2*np.pi/2)*(-erf((mMin-mu_peak)/np.sqrt(2*sig_peak**2)) + erf((mMax-mu_peak)/np.sqrt(2*sig_peak**2)))
-        p_m1_peak = np.exp(-(self.m1s_2d-mu_peak)**2/(2.*sig_peak**2))/gaussian_norm
+        p_m1_peak = np.exp(-(self.m1s_2d-mu_peak)**2/(2.*sig_peak**2))/np.sqrt(2.*np.pi*sig_peak**2)
 
-        # Combined m1
-        probs_m1 = frac_peak*p_m1_peak + (1.-frac_peak)*p_m1_pl
-        probs_m1[self.m1s_2d>=mMax] = 0.
+        # Compute low- and high-mass filters
+        low_filter = np.exp(-(self.m1s_2d-mMin)**2/(2.*dmMin**2))
+        low_filter = np.where(self.m1s_2d<mMin,low_filter,1.)
+        high_filter = np.exp(-(self.m1s_2d-mMax)**2/(2.*dmMax**2))
+        high_filter = np.where(self.m1s_2d>mMax,high_filter,1.)
+
+        # Apply filters to combined power-law and peak
+        probs_m1 = (frac_peak*p_m1_peak + (1.-frac_peak)*p_m1_pl)*low_filter*high_filter
+        probs_m1[self.m1s_2d>=100.] = 0.
 
         # Probability on secondary mass
-        probs_m2 = (1.+bq)*np.power(self.m2s_2d,bq)/(np.power(self.m1s_2d,1.+bq)-mMin**(1.+bq))  
-        probs_m2[self.m2s_2d<=mMin] = 0.
+        probs_m2 = (1.+bq)*np.power(self.m2s_2d,bq)/(np.power(self.m1s_2d,1.+bq)-2.**(1.+bq))  
+        probs_m2[self.m2s_2d<=2.] = 0.
 
         # Combine and set
         probs = probs_jacobian*probs_m1*probs_m2
