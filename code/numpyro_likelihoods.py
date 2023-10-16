@@ -301,13 +301,13 @@ def birefringence(spectra,weight_dictionary):
     
     # Draw comoving-distance birefringence parameter
     logit_kappa_Dc = numpyro.sample("logit_kappa_Dc",dist.Normal(0,logit_std))
-    kappa_Dc,jac_kappa_Dc = get_value_from_logit(logit_kappa_Dc,0,0.4)
+    kappa_Dc,jac_kappa_Dc = get_value_from_logit(logit_kappa_Dc,-0.5,0.5)
     numpyro.factor("p_kappa_Dc",logit_kappa_Dc**2/(2.*logit_std**2)-jnp.log(jac_kappa_Dc))
     numpyro.deterministic("kappa_Dc",kappa_Dc)
 
     # Draw redshift birefringence parameter
     logit_kappa_z = numpyro.sample("logit_kappa_z",dist.Normal(0,logit_std))
-    kappa_z,jac_kappa_z = get_value_from_logit(logit_kappa_z,0,1)
+    kappa_z,jac_kappa_z = get_value_from_logit(logit_kappa_z,-1,1)
     numpyro.factor("p_kappa_z",logit_kappa_z**2/(2.*logit_std**2)-jnp.log(jac_kappa_z))
     numpyro.deterministic("kappa_z",kappa_z)
 

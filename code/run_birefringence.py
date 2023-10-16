@@ -6,15 +6,28 @@ from jax.config import config
 config.update("jax_enable_x64", True)
 from jax import random
 import arviz as az
-from likelihoods import birefringence,generateMonteCarloEnergies
+from numpyro_likelihoods import birefringence,generateMonteCarloEnergies
 from load_data import get_all_data
 from geometry import *
 from astropy.cosmology import Planck18
 import astropy.units as u
 import sys
 
+# Matlab data
+matlab_orf_freqs,matlab_orf_H1L1,matlab_orf_H1V1,matlab_orf_L1V1 = np.loadtxt('../input/matlab_orfs.dat',unpack=True)
+f_H1L1_O3 = matlab_orf_freqs[matlab_orf_freqs<=1726]
+matlab_orf_H1L1 = matlab_orf_H1L1[matlab_orf_freqs<=1726]
+matlab_orf_H1V1 = matlab_orf_H1V1[matlab_orf_freqs<=1726]
+matlab_orf_L1V1 = matlab_orf_L1V1[matlab_orf_freqs<=1726]
+
 # Get dictionaries holding injections and posterior samples
-spectra = get_all_data()
+# Also overwrite frequencies
+spectra = get_all_data(trim_nans=False)
+spectra['H1L1_O1'][0] = f_H1L1_O3
+spectra['H1L1_O2'][0] = f_H1L1_O3
+spectra['H1L1_O3'][0] = f_H1L1_O3
+spectra['H1V1_O3'][0] = f_H1L1_O3
+spectra['L1V1_O3'][0] = f_H1L1_O3
 
 # Create ORFs
 # First instantiate baseline objects
@@ -30,20 +43,20 @@ HV_O3_gammaI,HV_O3_gammaV = HV.stokes_overlap_reduction_functions(spectra['H1V1_
 LV_O3_gammaI,LV_O3_gammaV = LV.stokes_overlap_reduction_functions(spectra['L1V1_O3'][0])
 
 # Store
-spectra['H1L1_O1'].append(HL_O1_gammaI)
+spectra['H1L1_O1'].append(matlab_orf_H1L1)
 spectra['H1L1_O1'].append(HL_O1_gammaV)
-spectra['H1L1_O2'].append(HL_O2_gammaI)
+spectra['H1L1_O2'].append(matlab_orf_H1L1)
 spectra['H1L1_O2'].append(HL_O2_gammaV)
-spectra['H1L1_O3'].append(HL_O3_gammaI)
+spectra['H1L1_O3'].append(matlab_orf_H1L1)
 spectra['H1L1_O3'].append(HL_O3_gammaV)
-spectra['H1V1_O3'].append(HV_O3_gammaI)
+spectra['H1V1_O3'].append(matlab_orf_H1V1)
 spectra['H1V1_O3'].append(HV_O3_gammaV)
-spectra['L1V1_O3'].append(LV_O3_gammaI)
+spectra['L1V1_O3'].append(matlab_orf_L1V1)
 spectra['L1V1_O3'].append(LV_O3_gammaV)
 
 # Get Monte Carlo weights to compute stochastic spectra
 frequencies_to_sample = np.logspace(np.log10(spectra['H1L1_O1'][0][0]),np.log10(spectra['H1L1_O1'][0][-1]),300)
-omg_weights,z_samples,dRdV_samples = generateMonteCarloEnergies(10000,frequencies_to_sample)
+omg_weights,z_samples,dRdV_samples = generateMonteCarloEnergies(20000,frequencies_to_sample)
 weight_dictionary = {\
     'zs':z_samples,
     'Dcs':Planck18.comoving_distance(z_samples).to(u.Gpc).value,
@@ -51,13 +64,22 @@ weight_dictionary = {\
     'omg_weights':omg_weights,
     'freqs':frequencies_to_sample}
 
+# Precompute weights to take Monte Carlo draws to desired R(z)
+R0 = 16.
+alpha = 2.7
+beta = 5.6
+zpeak = 1.9
+dRdV_SFR = np.power(1.+z_samples,alpha)/(1.+np.power((1.+z_samples)/(1.+zpeak),beta))
+dRdV_SFR *= R0/dRdV_SFR[0]
+weight_dictionary['omg_weights'] = weight_dictionary['omg_weights']*(dRdV_SFR/dRdV_samples)[:,np.newaxis]
+
 # Premptively take outer products of frequencies with redshifts and distances
 weight_dictionary['Dcs_outer_freqs'] = weight_dictionary['Dcs'][:,np.newaxis]*weight_dictionary['freqs'][np.newaxis,:]
 weight_dictionary['zs_outer_freqs'] = weight_dictionary['zs'][:,np.newaxis]*weight_dictionary['freqs'][np.newaxis,:]
 
 # Set up NUTS sampler over our likelihood
-kernel = NUTS(birefringence,dense_mass=True,target_accept_prob=0.9)
-mcmc = MCMC(kernel,num_warmup=1000,num_samples=1000,num_chains=nChains)
+kernel = NUTS(birefringence,dense_mass=True,target_accept_prob=0.95)
+mcmc = MCMC(kernel,num_warmup=500,num_samples=1000,num_chains=nChains)
 
 # Choose a random key and run over our model
 rng_key = random.PRNGKey(114)
@@ -68,5 +90,5 @@ mcmc.print_summary()
 
 # Save out data
 data = az.from_numpyro(mcmc)
-az.to_netcdf(data,"./../data/birefringence_Dc.cdf")
+az.to_netcdf(data,"./../data/birefringence_numpyro.cdf")
 

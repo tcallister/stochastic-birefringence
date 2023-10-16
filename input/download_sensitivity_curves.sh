@@ -10,3 +10,6 @@ rm ce_strain.zip
 mv ce_strain/cosmic_explorer_strain.txt ./ 
 rm ce_strain/*.txt
 rmdir ce_strain/
+
+# Toy design LIGO strain
+curl -O https://dcc.ligo.org/public/0149/T1800044/005/aLIGODesign.txt
