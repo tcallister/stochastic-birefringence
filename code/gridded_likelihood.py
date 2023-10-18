@@ -2,7 +2,7 @@ from gwBackground import *
 from geometry import *
 from tqdm import tqdm
 
-def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGridSize=(30,29),kappaGridSize=100):
+def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGridSize=(30,29),kappaGridSize=100,baselines=['HLO1','HLO2','HLO3','HVO3','LVO3']):
 
     """
     Function to directly compute likelihoods over grids of birefringence coefficients.
@@ -17,6 +17,11 @@ def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGri
     * `run_birefringence_uniformRate.py`
     * `run_birefringence_SFR.py`
     * `run_birefringence_delayedSFR.py`
+    * `run_birefringence_delayedSFR_HLO1.py`
+    * `run_birefringence_delayedSFR_HLO2.py`
+    * `run_birefringence_delayedSFR_HLO3.py`
+    * `run_birefringence_delayedSFR_HVO3.py`
+    * `run_birefringence_delayedSFR_LVO3.py`
 
     Parameters
     ----------
@@ -35,6 +40,15 @@ def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGri
     kappaGridSize : `int`
         Determines the number of gridpoints at which we compute likelihoods in the 2D calculation.
         Defaults to `100`
+    baselines : `list`
+        Allows for variations in which set of baselines/observing runs to include as observational input.
+        Options are
+            * `HLO1` : Hanford-Livingston O1
+            * `HLO2` : Hanford-Livingston O2
+            * `HLO3` : Hanford-Livingston O3
+            * `HVO3` : Hanford-Virgo O3
+            * `LVO3` : Livingston-Virgo O3
+        Default is ['HLO1','HLO2','HLO3','HVO3','LVO3']
 
     Returns
     -------
@@ -132,11 +146,16 @@ def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGri
         
         # Given this prediction, add the log-likelihoods of our observations from each baseline
         log_likelihoods_dc = 0
-        log_likelihoods_dc += np.sum(-(C_H1L1_O1-model_background_HL)**2/(2.*sigma_H1L1_O1**2))
-        log_likelihoods_dc += np.sum(-(C_H1L1_O2-model_background_HL)**2/(2.*sigma_H1L1_O2**2))
-        log_likelihoods_dc += np.sum(-(C_H1L1_O3-model_background_HL)**2/(2.*sigma_H1L1_O3**2))
-        log_likelihoods_dc += np.sum(-(C_H1V1_O3-model_background_HV)**2/(2.*sigma_H1V1_O3**2))
-        log_likelihoods_dc += np.sum(-(C_L1V1_O3-model_background_LV)**2/(2.*sigma_L1V1_O3**2))
+        if 'HLO1' in baselines:
+            log_likelihoods_dc += np.sum(-(C_H1L1_O1-model_background_HL)**2/(2.*sigma_H1L1_O1**2))
+        if 'HLO2' in baselines:
+            log_likelihoods_dc += np.sum(-(C_H1L1_O2-model_background_HL)**2/(2.*sigma_H1L1_O2**2))
+        if 'HLO3' in baselines:
+            log_likelihoods_dc += np.sum(-(C_H1L1_O3-model_background_HL)**2/(2.*sigma_H1L1_O3**2))
+        if 'HVO3' in baselines:
+            log_likelihoods_dc += np.sum(-(C_H1V1_O3-model_background_HV)**2/(2.*sigma_H1V1_O3**2))
+        if 'LVO3' in baselines:
+            log_likelihoods_dc += np.sum(-(C_L1V1_O3-model_background_LV)**2/(2.*sigma_L1V1_O3**2))
 
         return log_likelihoods_dc
 
