@@ -357,30 +357,22 @@ def birefringence_variable_evolution(spectra,weight_dictionary):
         Dictionary containing ensemble of BBHs and associated contributions to Omega(f); reweighted to perform Monte Carlo calculation of amplified energy-densities
     """
     
-    # Draw comoving-distance birefringence parameter
+    # Draw comoving-distance and redshift birefringence parameters
     kappa_Dc = numpyro.sample("kappa_Dc",dist.Uniform(-0.4,0.4))
-    """
-    logit_kappa_Dc = numpyro.sample("logit_kappa_Dc",dist.Normal(0,logit_std))
-    kappa_Dc,jac_kappa_Dc = get_value_from_logit(logit_kappa_Dc,0,0.4)
-    numpyro.factor("p_kappa_Dc",logit_kappa_Dc**2/(2.*logit_std**2)-jnp.log(jac_kappa_Dc))
-    numpyro.deterministic("kappa_Dc",kappa_Dc)
-    """
-
-    # Draw redshift birefringence parameter
     kappa_z = numpyro.sample("kappa_z",dist.Uniform(-1.,1.))
-    """
-    logit_kappa_z = numpyro.sample("logit_kappa_z",dist.Normal(0,logit_std))
-    kappa_z,jac_kappa_z = get_value_from_logit(logit_kappa_z,0,0.8)
-    numpyro.factor("p_kappa_z",logit_kappa_z**2/(2.*logit_std**2)-jnp.log(jac_kappa_z))
-    numpyro.deterministic("kappa_z",kappa_z)
-    """
 
     # Draw parameters governing rate of BBHs
     log_R0 = numpyro.sample("log_R0",dist.Normal(jnp.log(15.),jnp.log(20./15.)))
     alpha = numpyro.sample("alpha",dist.Normal(3.,1.5))
-    zp = numpyro.sample("zp",dist.Uniform(0.5,4))
+    #zp = numpyro.sample("zp",dist.Uniform(0.5,4))
     beta = numpyro.sample("beta",dist.Uniform(0,10))
     R0 = jnp.exp(log_R0)
+
+    # Draw peak redshift
+    logit_zp = numpyro.sample("logit_zp",dist.Normal(0,logit_std))
+    zp,jac_zp = get_value_from_logit(logit_zp,0.5,4.)
+    numpyro.factor("p_zp",logit_zp**2/(2.*logit_std**2)-jnp.log(jac_zp))
+    numpyro.deterministic("zp",zp)
 
     # Extract data from reference ensemble for reweighting
     sample_frequencies = weight_dictionary['freqs']
