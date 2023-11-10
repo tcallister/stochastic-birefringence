@@ -165,7 +165,7 @@ def stokes(spectra):
     log_ps = jnp.array([model_and_observe(*spectra[k]) for k in spectra])
     numpyro.factor("logp",jnp.sum(log_ps))
 
-def generateMonteCarloEnergies(nsamples,freqs,alpha=3,beta=5,zpeak=3):
+def generateMonteCarloEnergies(nsamples,freqs,dRdV_function): #alpha=3,beta=5,zpeak=3):
 
     """
     Helper function to enable Monte Carlo calculation of stochastic energy-density spectra.
@@ -227,8 +227,10 @@ def generateMonteCarloEnergies(nsamples,freqs,alpha=3,beta=5,zpeak=3):
     # First we need the comoving merger rate density
     # Sample from a fiducial Madau+Dickinson model
     z_grid = np.linspace(0,10,10000)
-    dRdV = np.power(1.+z_grid,alpha)/(1.+np.power((1.+z_grid)/(1.+zpeak),alpha+beta))
-    dRdV *= (R0/1e9/year)/dRdV[0]   # Convert to number per Mpc^3 per sec to match units
+    dRdV = dRdV_function(z_grid)
+    dRdV *= (R0/1e9/year)/dRdV_function(0)   # Convert to number per Mpc^3 per sec to match units
+    #dRdV = np.power(1.+z_grid,alpha)/(1.+np.power((1.+z_grid)/(1.+zpeak),alpha+beta))
+    #dRdV *= (R0/1e9/year)/dRdV[0]   # Convert to number per Mpc^3 per sec to match units
 
     # Construct full integrand and normalize to obtain a probability distribution
     # Note that this is **not** any kind of physical probability distribution over source redshifts,
@@ -252,9 +254,11 @@ def generateMonteCarloEnergies(nsamples,freqs,alpha=3,beta=5,zpeak=3):
 
     # To enable reweighting, compute the merger rate density that went into our sample
     # We can divide by this if we want to reweight to some other population
-    dRdV_samples = np.power(1.+z_samples,alpha)/(1.+np.power((1.+z_samples)/(1.+zpeak),alpha+beta))
-    dRdV_0 = 1./(1.+np.power(1./(1.+zpeak),alpha+beta))
-    dRdV_samples *= R0/dRdV_0
+    #dRdV_samples = np.power(1.+z_samples,alpha)/(1.+np.power((1.+z_samples)/(1.+zpeak),alpha+beta))
+    #dRdV_0 = 1./(1.+np.power(1./(1.+zpeak),alpha+beta))
+    #dRdV_samples *= R0/dRdV_0
+    dRdV_samples = dRdV_function(z_samples)
+    dRdV_samples *= R0/dRdV_function(0)
 
     return mc_weights,z_samples,dRdV_samples
 
