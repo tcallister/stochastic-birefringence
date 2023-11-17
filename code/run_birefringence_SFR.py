@@ -7,9 +7,9 @@ import h5py
 # here is just the *shape*; the local merger rate is applied later in `compute_likelihood_grids`
 rateData = generateTimeDelayData()
 zs_merger = rateData['zs']
-alpha = 2.7
-beta = 5.6
-zpeak = 1.9
+alpha = 2.6 #2.7
+beta = 6.2 #5.6
+zpeak = 2.2 #1.9
 dRdV_SFR = np.power(1.+zs_merger,alpha)/(1.+np.power((1.+zs_merger)/(1.+zpeak),beta))
 dRdV_SFR /= dRdV_SFR[0]
 

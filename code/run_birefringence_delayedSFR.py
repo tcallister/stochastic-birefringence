@@ -6,7 +6,7 @@ from scipy.special import gammainc
 # Compute merger rate vs. redshift
 # First load precomputed grids of merger redshifts, evolutionary time delays, and corresponding
 # values of formation redshifts and star formation rates (following Madau+Dickinson)
-rateData = generateTimeDelayData()
+rateData = generateTimeDelayData(zMax=15)
 zs_merger = rateData['zs']
 time_delays = rateData['tds']
 zs_formation = rateData['formationRedshifts']
@@ -36,10 +36,10 @@ def toClip(kd,kz):
         return False
 
 # Compute likelihood over grid of kappa_dc and kappa_z values
-results = compute_likelihood_grids(zs_merger,dRdV_delayed,clippingFunction=toClip,kappaGridSize=400)
+results = compute_likelihood_grids(zs_merger,dRdV_delayed,clippingFunction=toClip,kappaGridSize=10)
 
 # Create hdf5 file and write posterior samples
-hfile = h5py.File('./../data/fixed_rate_delayedSFR.hdf','w')
+hfile = h5py.File('./../data/fixed_rate_delayedSFR_zMax_15.hdf','w')
 posterior = hfile.create_group('result')
 for key,val in results.items():
     posterior.create_dataset(key,data=val)
