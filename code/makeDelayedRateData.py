@@ -25,7 +25,7 @@ def timeDelay(zMerge,zForm):
         timeDelayIntegrands = (1./Gyr)*np.power((1.+zs)*H0*np.sqrt(OmgM*np.power(1.+zs,3.)+OmgL),-1.)
         return np.sum(timeDelayIntegrands)*(zs[1]-zs[0])
 
-def generateTimeDelayData():
+def generateTimeDelayData(zMax=10):
 
     """
     When computing stochastic backgrounds, we will need to integrate energies radiated by compact binaries
@@ -50,12 +50,12 @@ def generateTimeDelayData():
     """
 
     # MD rate density parameters
-    alpha = 2.7
-    beta = 5.6
-    zpeak = 1.9
+    alpha = 2.6 #2.7
+    beta = 6.2 #5.6
+    zpeak = 2.2 #1.9
 
     # Set up grids of possible merger redshifts and evolutionary time delays (Gyr)
-    zs = np.arange(0,10,0.01)
+    zs = np.arange(0,zMax,0.01)
     tds = np.arange(0.005,13.5,0.005)
 
     # Also set up a 2D grid that will hold the **formation redshifts** zf(zm,td)
@@ -85,7 +85,7 @@ def generateTimeDelayData():
         # Get the star formation rate at this *formation* redshift
         formationRates[i,:] = np.power(1.+zfs,alpha)/(1.+np.power((1.+zfs)/(1.+zpeak),beta))
         formationRates[i,zfs!=zfs] = 0
-        formationRates[i,zfs>10.] = 0
+        formationRates[i,zfs>zMax] = 0
 
     formationRates[formationRates!=formationRates] = 0.
     formationRedshifts[formationRedshifts!=formationRedshifts] = 0.
