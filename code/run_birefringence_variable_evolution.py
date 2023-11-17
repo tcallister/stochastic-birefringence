@@ -1,5 +1,5 @@
 import numpyro
-nChains = 1
+nChains = 3
 numpyro.set_host_device_count(nChains)
 from numpyro.infer import NUTS,MCMC
 from jax.config import config
@@ -55,11 +55,15 @@ spectra['L1V1_O3'].append(matlab_orf_L1V1)
 spectra['L1V1_O3'].append(LV_O3_gammaV)
 
 # Get Monte Carlo weights to compute stochastic spectra
-alpha_ref = 5
-beta_ref = -5
-zpeak_ref = 10
+#alpha_ref = 5
+#beta_ref = -5
+#zpeak_ref = 10
+
+def dRdV(z):
+    return (1.+30./(1.+np.exp(-(z-9.)/0.1)))*(1.+z)*np.sqrt(0.3*(1.+z)**3+0.7)
+
 frequencies_to_sample = np.logspace(np.log10(spectra['H1L1_O3'][0][0]),np.log10(spectra['H1L1_O3'][0][-1]),300)
-omg_weights,z_samples,dRdV_samples = generateMonteCarloEnergies(30000,frequencies_to_sample,alpha_ref,beta_ref,zpeak_ref)
+omg_weights,z_samples,dRdV_samples = generateMonteCarloEnergies(50000,frequencies_to_sample,dRdV)
 weight_dictionary = {\
     'zs':z_samples,
     'Dcs':Planck18.comoving_distance(z_samples).to(u.Gpc).value,
@@ -73,7 +77,7 @@ weight_dictionary['zs_outer_freqs'] = weight_dictionary['zs'][:,np.newaxis]*weig
 
 # Set up NUTS sampler over our likelihood
 kernel = NUTS(birefringence_variable_evolution,target_accept_prob=0.95,dense_mass=[("kappa_Dc","kappa_z")])
-mcmc = MCMC(kernel,num_warmup=500,num_samples=1000,num_chains=nChains)
+mcmc = MCMC(kernel,num_warmup=1000,num_samples=1500,num_chains=nChains)
 
 # Choose a random key and run over our model
 rng_key = random.PRNGKey(114)
@@ -84,5 +88,5 @@ mcmc.print_summary()
 
 # Save out data
 data = az.from_numpyro(mcmc)
-az.to_netcdf(data,"./../data/birefringence_variable_evolution.cdf")
+az.to_netcdf(data,"./../data/birefringence_variable_evolution_zmax_14.cdf")
 

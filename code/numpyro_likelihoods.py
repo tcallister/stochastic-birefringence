@@ -165,7 +165,7 @@ def stokes(spectra):
     log_ps = jnp.array([model_and_observe(*spectra[k]) for k in spectra])
     numpyro.factor("logp",jnp.sum(log_ps))
 
-def generateMonteCarloEnergies(nsamples,freqs,dRdV_function): #alpha=3,beta=5,zpeak=3):
+def generateMonteCarloEnergies(nsamples,freqs,dRdV_function,zMax=10): #alpha=3,beta=5,zpeak=3):
 
     """
     Helper function to enable Monte Carlo calculation of stochastic energy-density spectra.
@@ -226,7 +226,7 @@ def generateMonteCarloEnergies(nsamples,freqs,dRdV_function): #alpha=3,beta=5,zp
     # Now construct integrand of redshift integral
     # First we need the comoving merger rate density
     # Sample from a fiducial Madau+Dickinson model
-    z_grid = np.linspace(0,10,10000)
+    z_grid = np.linspace(0,zMax,10000)
     dRdV = dRdV_function(z_grid)
     dRdV *= (R0/1e9/year)/dRdV_function(0)   # Convert to number per Mpc^3 per sec to match units
     #dRdV = np.power(1.+z_grid,alpha)/(1.+np.power((1.+z_grid)/(1.+zpeak),alpha+beta))
