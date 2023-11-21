@@ -55,11 +55,15 @@ spectra['L1V1_O3'].append(matlab_orf_L1V1)
 spectra['L1V1_O3'].append(LV_O3_gammaV)
 
 # Get Monte Carlo weights to compute stochastic spectra
-alpha_ref = 3
-beta_ref = 2
-zpeak_ref = 9
+#alpha_ref = 5
+#beta_ref = -5
+#zpeak_ref = 10
+
+def dRdV(z):
+    return (1.+10./(1.+np.exp(-(z-9.)/0.5)))*(1.+z)*np.sqrt(0.3*(1.+z)**3+0.7)
+
 frequencies_to_sample = np.logspace(np.log10(spectra['H1L1_O3'][0][0]),np.log10(spectra['H1L1_O3'][0][-1]),300)
-omg_weights,z_samples,dRdV_samples = generateMonteCarloEnergies(20000,frequencies_to_sample,alpha_ref,beta_ref,zpeak_ref)
+omg_weights,z_samples,dRdV_samples = generateMonteCarloEnergies(50000,frequencies_to_sample,dRdV,zMax=15)
 weight_dictionary = {\
     'zs':z_samples,
     'Dcs':Planck18.comoving_distance(z_samples).to(u.Gpc).value,
@@ -72,8 +76,8 @@ weight_dictionary['Dcs_outer_freqs'] = weight_dictionary['Dcs'][:,np.newaxis]*we
 weight_dictionary['zs_outer_freqs'] = weight_dictionary['zs'][:,np.newaxis]*weight_dictionary['freqs'][np.newaxis,:]
 
 # Set up NUTS sampler over our likelihood
-kernel = NUTS(birefringence_variable_evolution,target_accept_prob=0.95,dense_mass=[("kappa_Dc","kappa_z")])
-mcmc = MCMC(kernel,num_warmup=200,num_samples=300,num_chains=nChains)
+kernel = NUTS(birefringence_variable_evolution,target_accept_prob=0.95,dense_mass=True)
+mcmc = MCMC(kernel,num_warmup=500,num_samples=1500,num_chains=nChains)
 
 # Choose a random key and run over our model
 rng_key = random.PRNGKey(114)

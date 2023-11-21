@@ -361,30 +361,32 @@ def birefringence_variable_evolution(spectra,weight_dictionary):
         Dictionary containing ensemble of BBHs and associated contributions to Omega(f); reweighted to perform Monte Carlo calculation of amplified energy-densities
     """
     
-    # Draw comoving-distance birefringence parameter
+    # Draw comoving-distance and redshift birefringence parameters
     kappa_Dc = numpyro.sample("kappa_Dc",dist.Uniform(-0.4,0.4))
-    """
-    logit_kappa_Dc = numpyro.sample("logit_kappa_Dc",dist.Normal(0,logit_std))
-    kappa_Dc,jac_kappa_Dc = get_value_from_logit(logit_kappa_Dc,0,0.4)
-    numpyro.factor("p_kappa_Dc",logit_kappa_Dc**2/(2.*logit_std**2)-jnp.log(jac_kappa_Dc))
-    numpyro.deterministic("kappa_Dc",kappa_Dc)
-    """
-
-    # Draw redshift birefringence parameter
     kappa_z = numpyro.sample("kappa_z",dist.Uniform(-1.,1.))
-    """
-    logit_kappa_z = numpyro.sample("logit_kappa_z",dist.Normal(0,logit_std))
-    kappa_z,jac_kappa_z = get_value_from_logit(logit_kappa_z,0,0.8)
-    numpyro.factor("p_kappa_z",logit_kappa_z**2/(2.*logit_std**2)-jnp.log(jac_kappa_z))
-    numpyro.deterministic("kappa_z",kappa_z)
-    """
 
     # Draw parameters governing rate of BBHs
     log_R0 = numpyro.sample("log_R0",dist.Normal(jnp.log(15.),jnp.log(20./15.)))
     alpha = numpyro.sample("alpha",dist.Normal(3.,1.5))
-    zp = numpyro.sample("zp",dist.Uniform(0.5,4))
-    beta = numpyro.sample("beta",dist.Uniform(0,10))
     R0 = jnp.exp(log_R0)
+
+    # Draw peak redshift
+    logit_zp = numpyro.sample("logit_zp",dist.Normal(0,logit_std))
+    zp,jac_zp = get_value_from_logit(logit_zp,0.5,4.)
+    numpyro.factor("p_zp",logit_zp**2/(2.*logit_std**2)-jnp.log(jac_zp))
+    numpyro.deterministic("zp",zp)
+
+    # Draw max redshift
+    logit_zMax = numpyro.sample("logit_zMax",dist.Normal(0,logit_std))
+    zMax,jac_zMax = get_value_from_logit(logit_zMax,10.,15.)
+    numpyro.factor("p_zMax",logit_zMax**2/(2.*logit_std**2)-jnp.log(jac_zMax))
+    numpyro.deterministic("zMax",zMax)
+
+    # Draw trailing slope
+    logit_beta = numpyro.sample("logit_beta",dist.Normal(0,logit_std))
+    beta,jac_beta = get_value_from_logit(logit_beta,1,10)
+    numpyro.factor("p_beta",logit_beta**2/(2.*logit_std**2)-jnp.log(jac_beta))
+    numpyro.deterministic("beta",beta)
 
     # Extract data from reference ensemble for reweighting
     sample_frequencies = weight_dictionary['freqs']
@@ -398,6 +400,7 @@ def birefringence_variable_evolution(spectra,weight_dictionary):
     dRdV_norm = 1./(1.+jnp.power(1./(1.+zp),alpha+beta))
     sample_new_dRdVs = jnp.power(1.+sample_zs,alpha)/(1.+jnp.power((1.+sample_zs)/(1.+zp),alpha+beta))
     sample_new_dRdVs *= R0/dRdV_norm
+    sample_new_dRdVs = jnp.where(sample_zs<=zMax,sample_new_dRdVs,0.)
 
     # Compute birefringent amplification and boost each sample event's contributions accordingly
     amp_argument = amplification_argument(kappa_Dc,kappa_z,sample_Dcs_fs,sample_zs_fs)
@@ -410,6 +413,104 @@ def birefringence_variable_evolution(spectra,weight_dictionary):
     Omg_V_model = numpyro.deterministic("Omg_V_model",jnp.mean(Omg_V_weights,axis=0))
     Omg_I_neff = numpyro.deterministic("Omg_I_neff",jnp.sum(Omg_I_weights,axis=0)**2/jnp.sum(Omg_I_weights**2,axis=0))
     Omg_V_neff = numpyro.deterministic("Omg_V_neff",jnp.sum(Omg_V_weights,axis=0)**2/jnp.sum(Omg_V_weights**2,axis=0))
+
+    # Define function to evalute likelihood of cross-correlation measurements
+    def model_and_observe(freqs,Ys,sigmas,orfI,orfV):
+
+        # Construct model
+        Omega_I_interpolated = jnp.interp(freqs,sample_frequencies,Omg_I_model) 
+        Omega_V_interpolated = jnp.interp(freqs,sample_frequencies,Omg_V_model) 
+        total_model = Omega_I_interpolated + (orfV/orfI)*Omega_V_interpolated
+
+        # Compute likelihood
+        logp = jnp.sum(-(Ys-total_model)**2/(2.*sigmas**2))
+        return logp
+
+    # Map log-likelihood function across all baselines and observing runs
+    log_ps = jnp.array([model_and_observe(*spectra[k]) for k in spectra])
+    numpyro.factor("logp",jnp.sum(log_ps))
+
+def birefringence_variable_evolution_massGrid(spectra,omg_calculator):
+
+    """
+    Likelihood to perform inference on a birefringently-amplified stochastic background, for use within `numpyro`.
+
+    Parameters
+    ----------
+    spectra : `dict`
+        Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`
+    weight_dictionary : `dict`
+        Dictionary containing ensemble of BBHs and associated contributions to Omega(f); reweighted to perform Monte Carlo calculation of amplified energy-densities
+    """
+    
+    # Draw comoving-distance and redshift birefringence parameters
+    #kappa_Dc = numpyro.sample("kappa_Dc",dist.Uniform(-0.4,0.4))
+    #kappa_z = numpyro.sample("kappa_z",dist.Uniform(-1.,1.))
+
+    # Draw Dc birefringence parameter
+    #logit_kappa_Dc = numpyro.sample("logit_kappa_Dc",dist.Normal(0,logit_std))
+    #kappa_Dc,jac_kappa_Dc = get_value_from_logit(logit_kappa_Dc,-0.3,0.3)
+    #numpyro.factor("p_kappa_Dc",logit_kappa_Dc**2/(2.*logit_std**2)-jnp.log(jac_kappa_Dc))
+    #numpyro.deterministic("kappa_Dc",kappa_Dc)
+
+    # Draw z birefringence parameter
+    #logit_kappa_z = numpyro.sample("logit_kappa_z",dist.Normal(0,logit_std))
+    #kappa_z,jac_kappa_z = get_value_from_logit(logit_kappa_z,-0.75,0.75)
+    #numpyro.factor("p_kappa_z",logit_kappa_z**2/(2.*logit_std**2)-jnp.log(jac_kappa_z))
+    #numpyro.deterministic("kappa_z",kappa_z)
+
+    # Draw first birefringence parameter
+    logit_kappa_x = numpyro.sample("logit_kappa_x",dist.Normal(0,logit_std))
+    kappa_x,jac_kappa_x = get_value_from_logit(logit_kappa_x,-0.5,0.5)
+    numpyro.factor("p_kappa_x",logit_kappa_x**2/(2.*logit_std**2)-jnp.log(jac_kappa_x))
+
+    # Draw second birefringence parameter
+    logit_kappa_y = numpyro.sample("logit_kappa_y",dist.Normal(0,logit_std))
+    kappa_y,jac_kappa_y = get_value_from_logit(logit_kappa_y,-0.15,0.15)
+    numpyro.factor("p_kappa_y",logit_kappa_y**2/(2.*logit_std**2)-jnp.log(jac_kappa_y))
+
+    # Rotate
+    phi = np.arctan(-1.9)
+    rotation = jnp.array([[jnp.cos(phi),-jnp.sin(phi)],[jnp.sin(phi),jnp.cos(phi)]])
+    kappa_Dc,kappa_z = rotation@jnp.array([kappa_x,kappa_y])
+    numpyro.deterministic("kappa_Dc",kappa_Dc)
+    numpyro.deterministic("kappa_z",kappa_z)
+    
+
+    # Draw parameters governing rate of BBHs
+    log_R0 = numpyro.sample("log_R0",dist.Normal(jnp.log(16.),jnp.log(20./16.)))
+    alpha = numpyro.sample("alpha",dist.Normal(3.,1.5))
+    R0 = jnp.exp(log_R0)
+
+    # Draw peak redshift
+    logit_zp = numpyro.sample("logit_zp",dist.Normal(0,logit_std))
+    zp,jac_zp = get_value_from_logit(logit_zp,0.5,4.)
+    numpyro.factor("p_zp",logit_zp**2/(2.*logit_std**2)-jnp.log(jac_zp))
+    numpyro.deterministic("zp",zp)
+
+    # Draw max redshift
+    logit_zMax = numpyro.sample("logit_zMax",dist.Normal(0,logit_std))
+    zMax,jac_zMax = get_value_from_logit(logit_zMax,10.,15.)
+    numpyro.factor("p_zMax",logit_zMax**2/(2.*logit_std**2)-jnp.log(jac_zMax))
+    numpyro.deterministic("zMax",zMax)
+
+    # Draw trailing slope
+    logit_beta = numpyro.sample("logit_beta",dist.Normal(0,logit_std))
+    beta,jac_beta = get_value_from_logit(logit_beta,1,10)
+    numpyro.factor("p_beta",logit_beta**2/(2.*logit_std**2)-jnp.log(jac_beta))
+    numpyro.deterministic("beta",beta)
+
+    zs = omg_calculator.ref_zs
+    dRdV_norm = 1./(1.+jnp.power(1./(1.+zp),alpha+beta))
+    dRdV = jnp.power(1.+zs,alpha)/(1.+jnp.power((1.+zs)/(1.+zp),alpha+beta))
+    dRdV *= R0/dRdV_norm
+    dRdV = jnp.where(zs<=zMax,dRdV,0.)
+
+    # Save model as well as frequency-dependent effective sample counts
+    sample_frequencies = jnp.logspace(np.log10(20.),np.log10(1726.),300)
+    OmgI,OmgV = omg_calculator.eval(R0,dRdV,sample_frequencies,kappa_Dc,kappa_z)
+    Omg_I_model = numpyro.deterministic("Omg_I_model",OmgI)
+    Omg_V_model = numpyro.deterministic("Omg_V_model",OmgV)
 
     # Define function to evalute likelihood of cross-correlation measurements
     def model_and_observe(freqs,Ys,sigmas,orfI,orfV):

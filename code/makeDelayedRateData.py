@@ -50,9 +50,9 @@ def generateTimeDelayData(zMax=10):
     """
 
     # MD rate density parameters
-    alpha = 2.6 #2.7
-    beta = 6.2 #5.6
-    zpeak = 2.2 #1.9
+    alpha = 2.7 #2.6 #2.7
+    beta = 5.6 #6.2 #5.6
+    zpeak = 1.9 #2.2 #1.9
 
     # Set up grids of possible merger redshifts and evolutionary time delays (Gyr)
     zs = np.arange(0,zMax,0.01)
