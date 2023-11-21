@@ -1,4 +1,4 @@
-import numpy as np
+import jax.numpy as jnp
 import time
 import sys
 import os
@@ -223,11 +223,11 @@ class OmegaGW(object):
         """
 
         # Compute argument of amplification exponentials
-        amplification_factor = 2.*np.pi*(kappa_d*self.comoving_distances+kappa_z*self.ref_zs)[np.newaxis,:]*(self.ref_freqs[:,np.newaxis]/100.)
+        amplification_factor = 2.*jnp.pi*(kappa_d*self.comoving_distances+kappa_z*self.ref_zs)[jnp.newaxis,:]*(self.ref_freqs[:,jnp.newaxis]/100.)
 
         # Get cosh and sinh of this factor, for Stokes I and V respectively
-        cosh_amplification_factor = np.cosh(amplification_factor)
-        sinh_amplification_factor = np.sinh(amplification_factor)
+        cosh_amplification_factor = jnp.cosh(amplification_factor)
+        sinh_amplification_factor = jnp.sinh(amplification_factor)
 
         return cosh_amplification_factor,sinh_amplification_factor
 
@@ -260,7 +260,7 @@ class OmegaGW(object):
         # Compute weighted average of energy-density spectrum, integrated over total mass and mass ratio space
         # The result is a 2D array, with dedf[i,j] the population-averaged energy contributed at detector-frame
         # frequency i by binaries at redshift j
-        dedf = np.tensordot(self.probs,self.ref_energySpectra,axes=2).T
+        dedf = jnp.tensordot(self.probs,self.ref_energySpectra,axes=2).T
 
         # Birefringently amplify
         cosh_amp,sinh_amp = self.amplification(kappa_d,kappa_z)
@@ -268,7 +268,7 @@ class OmegaGW(object):
         dedf_V = dedf*sinh_amp
 
         # Redshift integrand
-        R_invE = dRdV_norm/np.sqrt(OmgM*(1.+self.ref_zs)**3.+OmgL)/(1.+self.ref_zs)
+        R_invE = dRdV_norm/jnp.sqrt(OmgM*(1.+self.ref_zs)**3.+OmgL)/(1.+self.ref_zs)
 
         # Integrate over redshifts via a dot product between dedf and the redshift-dependent R_invE
         dz = self.ref_zs[1]-self.ref_zs[0]
@@ -276,8 +276,8 @@ class OmegaGW(object):
         Omg_V_spectrum = (self.ref_freqs/rhoC/H0)*dedf_V.dot(R_invE)*dz
 
         # Interpolate onto desired frequencies and return
-        final_Omg_I_spectrum = np.interp(targetFreqs,self.ref_freqs,Omg_I_spectrum,left=0.,right=0.)
-        final_Omg_V_spectrum = np.interp(targetFreqs,self.ref_freqs,Omg_V_spectrum,left=0.,right=0.)
+        final_Omg_I_spectrum = jnp.interp(targetFreqs,self.ref_freqs,Omg_I_spectrum,left=0.,right=0.)
+        final_Omg_V_spectrum = jnp.interp(targetFreqs,self.ref_freqs,Omg_V_spectrum,left=0.,right=0.)
         return final_Omg_I_spectrum,final_Omg_V_spectrum
 
 class OmegaGW_BBH(OmegaGW):
