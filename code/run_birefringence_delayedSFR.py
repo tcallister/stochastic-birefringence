@@ -30,16 +30,16 @@ dRdV_delayed /= dRdV_delayed[0]
 # Define clipping function to skip likelihood calculations over gridpoints which we know
 # in advance will return loglikelihood = -inf.
 def toClip(kd,kz):
-    if kz<-0.4-2.*kd or kz>0.4-2.*kd or kz<-0.1+3.*(kd-0.5) or kz>0.1+3.*(kd+0.5):
+    if kz<-0.3-2.*kd or kz>0.3-2.*kd or kz<0.3+3.*(kd-0.5) or kz>-0.3+3.*(kd+0.5):
         return True
     else:
         return False
 
 # Compute likelihood over grid of kappa_dc and kappa_z values
-results = compute_likelihood_grids(zs_merger,dRdV_delayed,clippingFunction=toClip,kappaGridSize=10)
+results = compute_likelihood_grids(zs_merger,dRdV_delayed,clippingFunction=toClip,kappaGridSize=400)
 
 # Create hdf5 file and write posterior samples
-hfile = h5py.File('./../data/fixed_rate_delayedSFR_zMax_15.hdf','w')
+hfile = h5py.File('./../data/fixed_rate_delayedSFR.hdf','w')
 posterior = hfile.create_group('result')
 for key,val in results.items():
     posterior.create_dataset(key,data=val)
