@@ -1,6 +1,7 @@
 import numpy as np
 from gwBackground import *
 from geometry import *
+import population_parameters
 from tqdm import tqdm
 import jax
 from jax.config import config
@@ -76,16 +77,16 @@ def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGri
     omg = OmegaGW_BBH(m_absolute_min,m_absolute_max,zs,gridSize=massGridSize)
 
     # Define hyperparameters describing mass distribution
-    R0 = 16.
-    m_min = 9.
-    m_max = 70.
-    dm_min = 0.5
-    dm_max = 10.
-    alpha = -3.8
-    mu_peak = 34.
-    sig_peak = 3.
-    frac_peak = 10.**(-2.7)
-    bq = 2
+    R0 = population_parameters.R0
+    m_min = population_parameters.m_min
+    m_max = population_parameters.m_max
+    dm_min = population_parameters.dm_min
+    dm_max = population_parameters.dm_max
+    alpha_m = population_parameters.alpha_m
+    mu_peak = population_parameters.mu_peak
+    sig_peak = population_parameters.sig_peak
+    frac_peak = population_parameters.frac_peak
+    bq = population_parameters.bq
 
     # Pass these to our SGWB calculator
     omg.setProbs_plPeak(m_min,m_max,dm_min,dm_max,alpha,mu_peak,sig_peak,frac_peak,bq)

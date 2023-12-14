@@ -11,7 +11,18 @@ def timeDelay(zMerge,zForm):
 
     """
     Function to compute the proper time occuring between redshifts zForm and zMerge
-    Returns delay time in Gyr
+
+    Parameters
+    ----------
+    zMerge : `int`
+        Redshift at binary merger
+    zForm: `int`
+        Redshift at binary formation
+
+    Returns
+    -------
+    time_delay : `int`
+        Source-frame time delay between `zMerge` and `zForm` in Gyr        
     """
 
     # We better be merging after we've formed...
@@ -41,7 +52,8 @@ def generateTimeDelayData(zMax=10):
 
     Parameters
     ----------
-    None
+    zMax : `int`
+        Maximum formation redshift to consider (default 10)
 
     Returns
     -------
@@ -50,9 +62,9 @@ def generateTimeDelayData(zMax=10):
     """
 
     # MD rate density parameters
-    alpha = 2.7 #2.6 #2.7
-    beta = 5.6 #6.2 #5.6
-    zpeak = 1.9 #2.2 #1.9
+    alpha = 2.7
+    beta = 5.6
+    zpeak = 1.9
 
     # Set up grids of possible merger redshifts and evolutionary time delays (Gyr)
     zs = np.arange(0,zMax,0.01)
@@ -87,9 +99,7 @@ def generateTimeDelayData(zMax=10):
         formationRates[i,zfs!=zfs] = 0
         formationRates[i,zfs>zMax] = 0
 
-    formationRates[formationRates!=formationRates] = 0.
-    formationRedshifts[formationRedshifts!=formationRedshifts] = 0.
-
+    # Store
     delayedRateDict = {}
     delayedRateDict['formationRates'] = formationRates
     delayedRateDict['formationRedshifts'] = formationRedshifts
