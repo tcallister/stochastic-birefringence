@@ -34,7 +34,7 @@ def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGri
     dRdV : `array`
         An array, defined at `zs`, giving the BBH merger rate as a function of redshift
     clippingFunction : `func`
-        Function to speed up calculation by skipping points in our 2D grid where the likelihood is zero.
+        Function to speed up calculation by skipping points in our 2D grid where the likelihood is known to be zero.
         Takes in two arguments, `kappa_D` and `kappa_z` and returns a Boolean value.
         If True, the point in question will be skipped and the log-likelihood manually fixed to -inf.
         Defaults to `lambda x,y : False`

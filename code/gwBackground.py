@@ -211,10 +211,10 @@ class OmegaGW(object):
 
         Inputs
         ------
-        kappa : `float`
-            Birefringent parameter, units Gpc**(-1) if `amplification_type=='dist'`, otherwise dimensionless
-        amplification_type : `str`
-            Specifies whether birefringence should scale with comoving distance (`dist`) or redshift (`redshift`). Default `dist`
+        kappa_d : `float`
+            Coefficient determining degree of amplitude birefringence with comoving distance
+        kappa_z : `float`
+            Coefficient determining degree of amplitude birefringence with redshift
 
         Returns
         -------
@@ -246,6 +246,10 @@ class OmegaGW(object):
             Arbitrarily normalized merger rate density as a function of redshift. Should be defined at the same redshifts specified in `self.ref_zs`
         targetFreqs : `np.array`
             Array of frequencies at which we want Omega(f). Must be above 10 and below the `fmax` used to initialize the object
+        kappa_d : `float`
+            Coefficient governing birefringence with respect to comoving distance
+        kappa_z : `float`
+            Coefficient governing birefringence with respect to redshift
 
         Returns
         -------
@@ -351,9 +355,4 @@ class OmegaGW_BBH(OmegaGW):
         probs = probs_jacobian*probs_m1*probs_m2
         probs /= np.sum(probs)
         self.probs = probs
-
-if __name__=="__main__":
-
-    freqs = np.arange(10.,400.,1)
-    testObject = OmegaGW_BBH(2.,20.,np.linspace(0,8,100))
 
