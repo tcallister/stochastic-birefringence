@@ -6,15 +6,17 @@
 Welcome to stochastic-birefringence's documentation!
 ====================================================
 
+This page details the code used to produce the results presented in *A New Probe of Gravitational Parity Violation Through (Non-)Observation of the Stochastic Gravitational-Wave Background*, which can be accessed at
+
+https://github.com/tcallister/stochastic-birefringence/
+
+The datasets comprising our results, as well as the input data necessary to reproduce our work, are hosted on Zenodo:
+
+https://doi.org/10.5281/zenodo.10384998
+
+Contents:
+
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
