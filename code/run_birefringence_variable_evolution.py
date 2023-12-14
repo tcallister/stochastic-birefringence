@@ -1,7 +1,7 @@
 import numpyro
-nChains = 1
+nChains = 3
 numpyro.set_host_device_count(nChains)
-from numpyro.infer import NUTS,MCMC,SA
+from numpyro.infer import NUTS,MCMC
 from numpyro.infer.initialization import init_to_value
 from jax.config import config
 config.update("jax_enable_x64", True)
@@ -13,7 +13,7 @@ from geometry import *
 from gwBackground import OmegaGW_BBH
 from astropy.cosmology import Planck18
 import astropy.units as u
-import sys
+import population_parameters
 
 # Matlab data
 matlab_orf_freqs,matlab_orf_H1L1,matlab_orf_H1V1,matlab_orf_L1V1 = np.loadtxt('../input/matlab_orfs.dat',unpack=True)
@@ -63,16 +63,16 @@ zs = np.linspace(0,17,200)
 omg = OmegaGW_BBH(m_absolute_min,m_absolute_max,zs,gridSize=(30,29))
 
 # Define hyperparameters describing mass distribution
-R0 = 16.
-m_min = 9.
-m_max = 70.
-dm_min = 0.5
-dm_max = 10.
-alpha = -3.8
-mu_peak = 34.
-sig_peak = 3.
-frac_peak = 10.**(-2.7)
-bq = 2
+R0 = population_parameters.R0
+m_min = population_parameters.m_min
+m_max = population_parameters.m_max
+dm_min = population_parameters.dm_min
+dm_max = population_parameters.dm_max
+alpha = population_parameters.alpha
+mu_peak = population_parameters.mu_peak
+sig_peak = population_parameters.sig_peak
+frac_peak = population_parameters.frac_peak
+bq = population_parameters.bq
 
 # Pass these to our SGWB calculator
 omg.setProbs_plPeak(m_min,m_max,dm_min,dm_max,alpha,mu_peak,sig_peak,frac_peak,bq)
@@ -81,8 +81,6 @@ omg.setProbs_plPeak(m_min,m_max,dm_min,dm_max,alpha,mu_peak,sig_peak,frac_peak,b
 init_params = {'logit_kappa_x':0.,'logit_kappa_y':0.}
 kernel = NUTS(birefringence_variable_evolution_massGrid,target_accept_prob=0.98,dense_mass=True,init_strategy=init_to_value(values=init_params))
 mcmc = MCMC(kernel,num_warmup=2500,num_samples=1500,num_chains=nChains)
-#kernel = SA(birefringence_variable_evolution_massGrid,init_strategy=init_to_value(values=init_params),adapt_state_size=2000)
-#mcmc = MCMC(kernel,num_warmup=100000,num_samples=20000,num_chains=nChains)
 
 # Choose a random key and run over our model
 rng_key = random.PRNGKey(116)
@@ -93,5 +91,5 @@ mcmc.print_summary()
 
 # Save out data
 data = az.from_numpyro(mcmc)
-az.to_netcdf(data,"./../data/birefringence_variable_evolution_onGrid.cdf")
+az.to_netcdf(data,"./../data/birefringence_variable_evolution.cdf")
 
