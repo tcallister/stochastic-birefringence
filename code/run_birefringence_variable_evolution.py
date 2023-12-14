@@ -68,14 +68,14 @@ m_min = population_parameters.m_min
 m_max = population_parameters.m_max
 dm_min = population_parameters.dm_min
 dm_max = population_parameters.dm_max
-alpha = population_parameters.alpha
+alpha_m = population_parameters.alpha_m
 mu_peak = population_parameters.mu_peak
 sig_peak = population_parameters.sig_peak
 frac_peak = population_parameters.frac_peak
 bq = population_parameters.bq
 
 # Pass these to our SGWB calculator
-omg.setProbs_plPeak(m_min,m_max,dm_min,dm_max,alpha,mu_peak,sig_peak,frac_peak,bq)
+omg.setProbs_plPeak(m_min,m_max,dm_min,dm_max,alpha_m,mu_peak,sig_peak,frac_peak,bq)
 
 # Set up NUTS sampler over our likelihood
 init_params = {'logit_kappa_x':0.,'logit_kappa_y':0.}
