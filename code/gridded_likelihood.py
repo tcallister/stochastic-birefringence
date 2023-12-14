@@ -82,14 +82,14 @@ def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGri
     m_max = population_parameters.m_max
     dm_min = population_parameters.dm_min
     dm_max = population_parameters.dm_max
-    alpha = population_parameters.alpha
+    alpha_m = population_parameters.alpha_m
     mu_peak = population_parameters.mu_peak
     sig_peak = population_parameters.sig_peak
     frac_peak = population_parameters.frac_peak
     bq = population_parameters.bq
 
     # Pass these to our SGWB calculator
-    omg.setProbs_plPeak(m_min,m_max,dm_min,dm_max,alpha,mu_peak,sig_peak,frac_peak,bq)
+    omg.setProbs_plPeak(m_min,m_max,dm_min,dm_max,alpha_m,mu_peak,sig_peak,frac_peak,bq)
 
     # Load data
     f_H1L1_O1,C_H1L1_O1,sigma_H1L1_O1 = np.loadtxt('../input/H1L1_O1.dat',unpack=True,skiprows=1)
