@@ -7,6 +7,7 @@ from constants import *
 from gwBackground import dEdf
 
 logit_std = 2.5
+alt_logit_std = 2.5
 
 def get_value_from_logit(logit_x,x_min,x_max):
 
@@ -459,15 +460,33 @@ def birefringence_variable_evolution_massGrid(spectra,omg_calculator):
     #numpyro.factor("p_kappa_z",logit_kappa_z**2/(2.*logit_std**2)-jnp.log(jac_kappa_z))
     #numpyro.deterministic("kappa_z",kappa_z)
 
+    """
     # Draw first birefringence parameter
-    logit_kappa_x = numpyro.sample("logit_kappa_x",dist.Normal(0,logit_std))
-    kappa_x,jac_kappa_x = get_value_from_logit(logit_kappa_x,-0.5,0.5)
-    numpyro.factor("p_kappa_x",logit_kappa_x**2/(2.*logit_std**2)-jnp.log(jac_kappa_x))
+    logit_kappa_x = numpyro.sample("logit_kappa_x",dist.Normal(0,alt_logit_std))
+    kappa_x,jac_kappa_x = get_value_from_logit(logit_kappa_x,-0.45,0.45)
+    numpyro.factor("p_kappa_x",logit_kappa_x**2/(2.*alt_logit_std**2)-jnp.log(jac_kappa_x))
+    numpyro.deterministic("kappa_x",kappa_x)
 
     # Draw second birefringence parameter
-    logit_kappa_y = numpyro.sample("logit_kappa_y",dist.Normal(0,logit_std))
+    logit_kappa_y = numpyro.sample("logit_kappa_y",dist.Normal(0,alt_logit_std))
     kappa_y,jac_kappa_y = get_value_from_logit(logit_kappa_y,-0.15,0.15)
-    numpyro.factor("p_kappa_y",logit_kappa_y**2/(2.*logit_std**2)-jnp.log(jac_kappa_y))
+    numpyro.factor("p_kappa_y",logit_kappa_y**2/(2.*alt_logit_std**2)-jnp.log(jac_kappa_y))
+    numpyro.deterministic("kappa_y",kappa_y)
+    """
+
+    logit_kappa_rs_cdfs = numpyro.sample("logit_kappa_rs_cdfs",dist.Normal(0,alt_logit_std))
+    kappa_rs_cdfs,jac_kappa_rs_cdfs = get_value_from_logit(logit_kappa_rs_cdfs,0.,1.)
+    numpyro.factor("p_kappa_rs_cdfs",logit_kappa_rs_cdfs**2/(2.*alt_logit_std**2)-jnp.log(jac_kappa_rs_cdfs))
+
+    logit_kappa_thetas = numpyro.sample("logit_kappa_thetas",dist.Normal(0,alt_logit_std))
+    kappa_thetas,jac_kappa_thetas = get_value_from_logit(logit_kappa_thetas,0.,2.*np.pi)
+    numpyro.factor("p_kappa_thetas",logit_kappa_thetas**2/(2.*alt_logit_std**2)-jnp.log(jac_kappa_thetas))
+
+    #kappa_rs_cdfs = numpyro.sample("kappa_rs_cdfs",dist.Uniform(0,1))
+    #kappa_thetas = numpyro.sample("kappa_thetas",dist.Uniform(0.,2.*np.pi))
+    kappa_rs = numpyro.deterministic("kappa_rs",jnp.sqrt(kappa_rs_cdfs))
+    kappa_x = 0.45*kappa_rs*jnp.cos(kappa_thetas)
+    kappa_y = 0.15*kappa_rs*jnp.sin(kappa_thetas)
 
     # Rotate
     phi = np.arctan(-1.9)
@@ -476,35 +495,43 @@ def birefringence_variable_evolution_massGrid(spectra,omg_calculator):
     numpyro.deterministic("kappa_Dc",kappa_Dc)
     numpyro.deterministic("kappa_z",kappa_z)
     
-
     # Draw parameters governing rate of BBHs
     log_R0 = numpyro.sample("log_R0",dist.Normal(jnp.log(16.),jnp.log(20./16.)))
     alpha = numpyro.sample("alpha",dist.Normal(3.,1.5))
     R0 = jnp.exp(log_R0)
+    #log_R0 = numpyro.deterministic("log_R0",jnp.log(16.))
+    #alpha = numpyro.deterministic("alpha",3.)
+    #R0 = jnp.exp(log_R0)
 
     # Draw peak redshift
     logit_zp = numpyro.sample("logit_zp",dist.Normal(0,logit_std))
     zp,jac_zp = get_value_from_logit(logit_zp,0.5,4.)
     numpyro.factor("p_zp",logit_zp**2/(2.*logit_std**2)-jnp.log(jac_zp))
     numpyro.deterministic("zp",zp)
+    #zp = numpyro.sample("zp",dist.Uniform(0.5,4.))
 
     # Draw max redshift
     logit_zMax = numpyro.sample("logit_zMax",dist.Normal(0,logit_std))
     zMax,jac_zMax = get_value_from_logit(logit_zMax,10.,15.)
     numpyro.factor("p_zMax",logit_zMax**2/(2.*logit_std**2)-jnp.log(jac_zMax))
     numpyro.deterministic("zMax",zMax)
+    #zMax = numpyro.sample("zMax",dist.Uniform(10.,15.))
 
     # Draw trailing slope
     logit_beta = numpyro.sample("logit_beta",dist.Normal(0,logit_std))
     beta,jac_beta = get_value_from_logit(logit_beta,1,10)
     numpyro.factor("p_beta",logit_beta**2/(2.*logit_std**2)-jnp.log(jac_beta))
     numpyro.deterministic("beta",beta)
+    #beta = numpyro.sample("beta",dist.Uniform(1,10))
 
     zs = omg_calculator.ref_zs
     dRdV_norm = 1./(1.+jnp.power(1./(1.+zp),alpha+beta))
     dRdV = jnp.power(1.+zs,alpha)/(1.+jnp.power((1.+zs)/(1.+zp),alpha+beta))
     dRdV *= R0/dRdV_norm
-    dRdV = jnp.where(zs<=zMax,dRdV,0.)
+
+    # Calculate and apply truncation
+    truncation = jnp.exp(-(zs-zMax)**2/(2.*0.25**2))
+    dRdV = jnp.where(zs<=zMax,dRdV,dRdV*truncation)
 
     # Save model as well as frequency-dependent effective sample counts
     sample_frequencies = jnp.logspace(np.log10(20.),np.log10(1726.),300)

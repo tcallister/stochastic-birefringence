@@ -266,7 +266,7 @@ class OmegaGW(object):
         cosh_amp,sinh_amp = self.amplification(kappa_d,kappa_z)
         dedf_I = dedf*cosh_amp
         dedf_V = dedf*sinh_amp
-
+        
         # Redshift integrand
         R_invE = dRdV_norm/jnp.sqrt(OmgM*(1.+self.ref_zs)**3.+OmgL)/(1.+self.ref_zs)
 
@@ -278,6 +278,7 @@ class OmegaGW(object):
         # Interpolate onto desired frequencies and return
         final_Omg_I_spectrum = jnp.interp(targetFreqs,self.ref_freqs,Omg_I_spectrum,left=0.,right=0.)
         final_Omg_V_spectrum = jnp.interp(targetFreqs,self.ref_freqs,Omg_V_spectrum,left=0.,right=0.)
+
         return final_Omg_I_spectrum,final_Omg_V_spectrum
 
 class OmegaGW_BBH(OmegaGW):
