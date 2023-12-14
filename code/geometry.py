@@ -376,13 +376,3 @@ def ec(theta,phi):
     n = np.array([np.cos(theta)*np.cos(phi),np.cos(theta)*np.sin(phi),-np.sin(theta)])
     return np.outer(m,n)+np.outer(n,m)
 
-
-
-if __name__=="__main__":
-
-    print("Hanford:")
-    hanford = Detector.H1()
-    print(hanford.pos())
-    print(hanford.xArm())
-    print(hanford.yArm())
-

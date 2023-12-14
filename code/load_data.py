@@ -15,7 +15,6 @@ def read_data(filename,trim_nans=True):
     Returns
     -------
     frequencies : `np.array`
-        
 
     """
 
@@ -32,6 +31,20 @@ def read_data(filename,trim_nans=True):
     return frequencies,Ys,sigmas
 
 def get_all_data(trim_nans=True):
+
+    """
+    Helper function used by `run_birefringence_variable_evolution.py` to load data.
+
+    Parameters
+    ----------
+    trim_nans : `bool`
+        If True, will remove frequencies that have been notched by data quality flags (default True)
+
+    Returns
+    -------
+    spectra_dict : `dict`
+        Dictionary containing frequencies, cross-correlation measurements, and uncertainty spectra for all baselines and observing runs
+    """
 
     H1L1_O1_freqs, H1L1_O1_Ys, H1L1_O1_sigmas = read_data('./../input/H1L1_O1.dat',trim_nans=trim_nans)
     H1L1_O2_freqs, H1L1_O2_Ys, H1L1_O2_sigmas = read_data('./../input/H1L1_O2.dat',trim_nans=trim_nans)

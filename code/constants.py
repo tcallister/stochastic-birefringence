@@ -20,4 +20,5 @@ H0 = Planck18.H0.to(u.s**(-1)).value
 OmgM = Planck18.Om0
 OmgL = Planck18.Ode0
 
+# Critical energy density
 rhoC = 3.*np.power(H0*c,2.)/(8.*np.pi*G)*np.power(Mpc,3.) # Converted to J/Mpc^3

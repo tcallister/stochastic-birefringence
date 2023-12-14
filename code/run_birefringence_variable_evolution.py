@@ -54,11 +54,6 @@ spectra['H1V1_O3'].append(HV_O3_gammaV)
 spectra['L1V1_O3'].append(matlab_orf_L1V1)
 spectra['L1V1_O3'].append(LV_O3_gammaV)
 
-# Get Monte Carlo weights to compute stochastic spectra
-#alpha_ref = 5
-#beta_ref = -5
-#zpeak_ref = 10
-
 def dRdV(z):
     return (1.+10./(1.+np.exp(-(z-9.)/0.5)))*(1.+z)*np.sqrt(0.3*(1.+z)**3+0.7)
 

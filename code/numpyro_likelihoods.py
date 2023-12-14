@@ -5,6 +5,7 @@ import numpyro
 import numpyro.distributions as dist
 from constants import *
 from gwBackground import dEdf
+import population_parameters
 
 logit_std = 2.5
 alt_logit_std = 2.5
@@ -166,7 +167,7 @@ def stokes(spectra):
     log_ps = jnp.array([model_and_observe(*spectra[k]) for k in spectra])
     numpyro.factor("logp",jnp.sum(log_ps))
 
-def generateMonteCarloEnergies(nsamples,freqs,dRdV_function,zMax=10): #alpha=3,beta=5,zpeak=3):
+def generateMonteCarloEnergies(nsamples,freqs,dRdV_function,zMax=10):
 
     """
     Helper function to enable Monte Carlo calculation of stochastic energy-density spectra.
@@ -179,6 +180,10 @@ def generateMonteCarloEnergies(nsamples,freqs,dRdV_function,zMax=10): #alpha=3,b
         Size of BBH ensemble to draw
     freqs : `array`
         Array of frequencies at which to evaluate energy spectra
+    dRdV_function : `func`
+        Function that, when provided a redshift, will return a merger rate per comoving volume
+    zMax : `int`
+        Maximum redshift to consider (default 10)
 
     Returns
     -------
@@ -191,16 +196,16 @@ def generateMonteCarloEnergies(nsamples,freqs,dRdV_function,zMax=10): #alpha=3,b
     """
 
     # Parameters specifying BBH mass distribution
-    R0 = 16.
-    m_min = 9.
-    m_max = 70.
-    dm_min = 0.5
-    dm_max = 10.
-    alpha_m = -3.8
-    mu_peak = 34.
-    sig_peak = 3.
-    frac_peak = 10.**(-2.7)
-    bq = 2
+    R0 = population_parameters.R0
+    m_min = population_parameters.m_min
+    m_max = population_parameters.m_max
+    dm_min = population_parameters.dm_min
+    dm_max = population_parameters.dm_max
+    alpha_m = population_parameters.alpha_m
+    mu_peak = population_parameters.mu_peak
+    sig_peak = population_parameters.sig_peak
+    frac_peak = population_parameters.frac_peak
+    bq = population_parameters.bq
 
     # Construct normalized power law and Gaussian over m1 grid
     m1_grid = np.linspace(2.,100.,1000)
@@ -230,8 +235,6 @@ def generateMonteCarloEnergies(nsamples,freqs,dRdV_function,zMax=10): #alpha=3,b
     z_grid = np.linspace(0,zMax,10000)
     dRdV = dRdV_function(z_grid)
     dRdV *= (R0/1e9/year)/dRdV_function(0)   # Convert to number per Mpc^3 per sec to match units
-    #dRdV = np.power(1.+z_grid,alpha)/(1.+np.power((1.+z_grid)/(1.+zpeak),alpha+beta))
-    #dRdV *= (R0/1e9/year)/dRdV[0]   # Convert to number per Mpc^3 per sec to match units
 
     # Construct full integrand and normalize to obtain a probability distribution
     # Note that this is **not** any kind of physical probability distribution over source redshifts,
@@ -255,9 +258,6 @@ def generateMonteCarloEnergies(nsamples,freqs,dRdV_function,zMax=10): #alpha=3,b
 
     # To enable reweighting, compute the merger rate density that went into our sample
     # We can divide by this if we want to reweight to some other population
-    #dRdV_samples = np.power(1.+z_samples,alpha)/(1.+np.power((1.+z_samples)/(1.+zpeak),alpha+beta))
-    #dRdV_0 = 1./(1.+np.power(1./(1.+zpeak),alpha+beta))
-    #dRdV_samples *= R0/dRdV_0
     dRdV_samples = dRdV_function(z_samples)
     dRdV_samples *= R0/dRdV_function(0)
 
@@ -295,6 +295,7 @@ def birefringence(spectra,weight_dictionary):
 
     """
     Likelihood to perform inference on a birefringently-amplified stochastic background, for use within `numpyro`.
+    Uses Monte Carlo stochastic background calculation scheme associated with `generateMonteCarloEnergies`
 
     Parameters
     ----------
@@ -353,6 +354,8 @@ def birefringence_variable_evolution(spectra,weight_dictionary):
 
     """
     Likelihood to perform inference on a birefringently-amplified stochastic background, for use within `numpyro`.
+    Uses Monte Carlo stochastic background calculation scheme associated with `generateMonteCarloEnergies`
+    Infers the merger rate of BBHs alongside the amplitude birefringence coefficients.
 
     Parameters
     ----------
@@ -435,95 +438,62 @@ def birefringence_variable_evolution_massGrid(spectra,omg_calculator):
 
     """
     Likelihood to perform inference on a birefringently-amplified stochastic background, for use within `numpyro`.
+    Uses grid-based stochastic background calculation.
 
     Parameters
     ----------
     spectra : `dict`
         Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`
-    weight_dictionary : `dict`
-        Dictionary containing ensemble of BBHs and associated contributions to Omega(f); reweighted to perform Monte Carlo calculation of amplified energy-densities
+    omg_calculator : `OmegaGW_BBH`    
+        `OmegaGW_BBH` object, as defined in `gwBackground.py`.
+        Used to perform stochastic energy-density calculations
     """
     
     # Draw comoving-distance and redshift birefringence parameters
-    #kappa_Dc = numpyro.sample("kappa_Dc",dist.Uniform(-0.4,0.4))
-    #kappa_z = numpyro.sample("kappa_z",dist.Uniform(-1.,1.))
+    # To try to maximize sampling efficiency, we will actually draw parameters in a rotated
+    # coordinate space roughly aligned with the principal axes of the kappa_D vs. kappa_z posterior ellipse
 
-    # Draw Dc birefringence parameter
-    #logit_kappa_Dc = numpyro.sample("logit_kappa_Dc",dist.Normal(0,logit_std))
-    #kappa_Dc,jac_kappa_Dc = get_value_from_logit(logit_kappa_Dc,-0.3,0.3)
-    #numpyro.factor("p_kappa_Dc",logit_kappa_Dc**2/(2.*logit_std**2)-jnp.log(jac_kappa_Dc))
-    #numpyro.deterministic("kappa_Dc",kappa_Dc)
-
-    # Draw z birefringence parameter
-    #logit_kappa_z = numpyro.sample("logit_kappa_z",dist.Normal(0,logit_std))
-    #kappa_z,jac_kappa_z = get_value_from_logit(logit_kappa_z,-0.75,0.75)
-    #numpyro.factor("p_kappa_z",logit_kappa_z**2/(2.*logit_std**2)-jnp.log(jac_kappa_z))
-    #numpyro.deterministic("kappa_z",kappa_z)
-
-    """
     # Draw first birefringence parameter
     logit_kappa_x = numpyro.sample("logit_kappa_x",dist.Normal(0,alt_logit_std))
     kappa_x,jac_kappa_x = get_value_from_logit(logit_kappa_x,-0.45,0.45)
     numpyro.factor("p_kappa_x",logit_kappa_x**2/(2.*alt_logit_std**2)-jnp.log(jac_kappa_x))
-    numpyro.deterministic("kappa_x",kappa_x)
 
     # Draw second birefringence parameter
     logit_kappa_y = numpyro.sample("logit_kappa_y",dist.Normal(0,alt_logit_std))
     kappa_y,jac_kappa_y = get_value_from_logit(logit_kappa_y,-0.15,0.15)
     numpyro.factor("p_kappa_y",logit_kappa_y**2/(2.*alt_logit_std**2)-jnp.log(jac_kappa_y))
-    numpyro.deterministic("kappa_y",kappa_y)
-    """
 
-    logit_kappa_rs_cdfs = numpyro.sample("logit_kappa_rs_cdfs",dist.Normal(0,alt_logit_std))
-    kappa_rs_cdfs,jac_kappa_rs_cdfs = get_value_from_logit(logit_kappa_rs_cdfs,0.,1.)
-    numpyro.factor("p_kappa_rs_cdfs",logit_kappa_rs_cdfs**2/(2.*alt_logit_std**2)-jnp.log(jac_kappa_rs_cdfs))
-
-    logit_kappa_thetas = numpyro.sample("logit_kappa_thetas",dist.Normal(0,alt_logit_std))
-    kappa_thetas,jac_kappa_thetas = get_value_from_logit(logit_kappa_thetas,0.,2.*np.pi)
-    numpyro.factor("p_kappa_thetas",logit_kappa_thetas**2/(2.*alt_logit_std**2)-jnp.log(jac_kappa_thetas))
-
-    #kappa_rs_cdfs = numpyro.sample("kappa_rs_cdfs",dist.Uniform(0,1))
-    #kappa_thetas = numpyro.sample("kappa_thetas",dist.Uniform(0.,2.*np.pi))
-    kappa_rs = numpyro.deterministic("kappa_rs",jnp.sqrt(kappa_rs_cdfs))
-    kappa_x = 0.45*kappa_rs*jnp.cos(kappa_thetas)
-    kappa_y = 0.15*kappa_rs*jnp.sin(kappa_thetas)
-
-    # Rotate
+    # Rotate to convert to kappa_Dc and kappa_z parameters
     phi = np.arctan(-1.9)
     rotation = jnp.array([[jnp.cos(phi),-jnp.sin(phi)],[jnp.sin(phi),jnp.cos(phi)]])
     kappa_Dc,kappa_z = rotation@jnp.array([kappa_x,kappa_y])
     numpyro.deterministic("kappa_Dc",kappa_Dc)
     numpyro.deterministic("kappa_z",kappa_z)
-    
+
     # Draw parameters governing rate of BBHs
     log_R0 = numpyro.sample("log_R0",dist.Normal(jnp.log(16.),jnp.log(20./16.)))
     alpha = numpyro.sample("alpha",dist.Normal(3.,1.5))
     R0 = jnp.exp(log_R0)
-    #log_R0 = numpyro.deterministic("log_R0",jnp.log(16.))
-    #alpha = numpyro.deterministic("alpha",3.)
-    #R0 = jnp.exp(log_R0)
 
     # Draw peak redshift
     logit_zp = numpyro.sample("logit_zp",dist.Normal(0,logit_std))
     zp,jac_zp = get_value_from_logit(logit_zp,0.5,4.)
     numpyro.factor("p_zp",logit_zp**2/(2.*logit_std**2)-jnp.log(jac_zp))
     numpyro.deterministic("zp",zp)
-    #zp = numpyro.sample("zp",dist.Uniform(0.5,4.))
 
     # Draw max redshift
     logit_zMax = numpyro.sample("logit_zMax",dist.Normal(0,logit_std))
     zMax,jac_zMax = get_value_from_logit(logit_zMax,10.,15.)
     numpyro.factor("p_zMax",logit_zMax**2/(2.*logit_std**2)-jnp.log(jac_zMax))
     numpyro.deterministic("zMax",zMax)
-    #zMax = numpyro.sample("zMax",dist.Uniform(10.,15.))
 
     # Draw trailing slope
     logit_beta = numpyro.sample("logit_beta",dist.Normal(0,logit_std))
     beta,jac_beta = get_value_from_logit(logit_beta,1,10)
     numpyro.factor("p_beta",logit_beta**2/(2.*logit_std**2)-jnp.log(jac_beta))
     numpyro.deterministic("beta",beta)
-    #beta = numpyro.sample("beta",dist.Uniform(1,10))
 
+    # Compute merger rate per comoving volume
     zs = omg_calculator.ref_zs
     dRdV_norm = 1./(1.+jnp.power(1./(1.+zp),alpha+beta))
     dRdV = jnp.power(1.+zs,alpha)/(1.+jnp.power((1.+zs)/(1.+zp),alpha+beta))

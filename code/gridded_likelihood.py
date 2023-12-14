@@ -1,9 +1,13 @@
 import numpy as np
 from gwBackground import *
 from geometry import *
+import population_parameters
 from tqdm import tqdm
+import jax
+from jax.config import config
+config.update("jax_enable_x64", True)
 
-def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGridSize=(30,29),kappaGridSize=100,baselines=['HLO1','HLO2','HLO3','HVO3','LVO3']):
+def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGridSize=(30,29),kappaGridSize=100,baselines=['HLO1','HLO2','HLO3','HVO3','LVO3'],joint=True):
 
     """
     Function to directly compute likelihoods over grids of birefringence coefficients.
@@ -31,7 +35,7 @@ def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGri
     dRdV : `array`
         An array, defined at `zs`, giving the BBH merger rate as a function of redshift
     clippingFunction : `func`
-        Function to speed up calculation by skipping points in our 2D grid where the likelihood is zero.
+        Function to speed up calculation by skipping points in our 2D grid where the likelihood is known to be zero.
         Takes in two arguments, `kappa_D` and `kappa_z` and returns a Boolean value.
         If True, the point in question will be skipped and the log-likelihood manually fixed to -inf.
         Defaults to `lambda x,y : False`
@@ -50,6 +54,8 @@ def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGri
             * `HVO3` : Hanford-Virgo O3
             * `LVO3` : Livingston-Virgo O3
         Default is ['HLO1','HLO2','HLO3','HVO3','LVO3']
+    joint : `bool`
+        If False, will skip likelihood calculation over 2D grid. Default `True`
 
     Returns
     -------
@@ -71,16 +77,16 @@ def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGri
     omg = OmegaGW_BBH(m_absolute_min,m_absolute_max,zs,gridSize=massGridSize)
 
     # Define hyperparameters describing mass distribution
-    R0 = 16.
-    m_min = 9.
-    m_max = 70.
-    dm_min = 0.5
-    dm_max = 10.
-    alpha = -3.8
-    mu_peak = 34.
-    sig_peak = 3.
-    frac_peak = 10.**(-2.7)
-    bq = 2
+    R0 = population_parameters.R0
+    m_min = population_parameters.m_min
+    m_max = population_parameters.m_max
+    dm_min = population_parameters.dm_min
+    dm_max = population_parameters.dm_max
+    alpha_m = population_parameters.alpha_m
+    mu_peak = population_parameters.mu_peak
+    sig_peak = population_parameters.sig_peak
+    frac_peak = population_parameters.frac_peak
+    bq = population_parameters.bq
 
     # Pass these to our SGWB calculator
     omg.setProbs_plPeak(m_min,m_max,dm_min,dm_max,alpha,mu_peak,sig_peak,frac_peak,bq)
@@ -135,6 +141,9 @@ def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGri
     H1V1_gammaI,H1V1_gammaV = H1V1.stokes_overlap_reduction_functions(f_H1L1_O3)
     L1V1_gammaI,L1V1_gammaV = L1V1.stokes_overlap_reduction_functions(f_H1L1_O3)
 
+    # Dictionary to store results
+    resultsDict = {}
+
     def log_likelihood(kd,kz):
 
         # Construct model backgrounds
@@ -148,15 +157,15 @@ def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGri
         # Given this prediction, add the log-likelihoods of our observations from each baseline
         log_likelihoods_dc = 0
         if 'HLO1' in baselines:
-            log_likelihoods_dc += np.sum(-(C_H1L1_O1-model_background_HL)**2/(2.*sigma_H1L1_O1**2))
+            log_likelihoods_dc += jnp.sum(-(C_H1L1_O1-model_background_HL)**2/(2.*sigma_H1L1_O1**2))
         if 'HLO2' in baselines:
-            log_likelihoods_dc += np.sum(-(C_H1L1_O2-model_background_HL)**2/(2.*sigma_H1L1_O2**2))
+            log_likelihoods_dc += jnp.sum(-(C_H1L1_O2-model_background_HL)**2/(2.*sigma_H1L1_O2**2))
         if 'HLO3' in baselines:
-            log_likelihoods_dc += np.sum(-(C_H1L1_O3-model_background_HL)**2/(2.*sigma_H1L1_O3**2))
+            log_likelihoods_dc += jnp.sum(-(C_H1L1_O3-model_background_HL)**2/(2.*sigma_H1L1_O3**2))
         if 'HVO3' in baselines:
-            log_likelihoods_dc += np.sum(-(C_H1V1_O3-model_background_HV)**2/(2.*sigma_H1V1_O3**2))
+            log_likelihoods_dc += jnp.sum(-(C_H1V1_O3-model_background_HV)**2/(2.*sigma_H1V1_O3**2))
         if 'LVO3' in baselines:
-            log_likelihoods_dc += np.sum(-(C_L1V1_O3-model_background_LV)**2/(2.*sigma_L1V1_O3**2))
+            log_likelihoods_dc += jnp.sum(-(C_L1V1_O3-model_background_LV)**2/(2.*sigma_L1V1_O3**2))
 
         return log_likelihoods_dc
 
@@ -179,6 +188,10 @@ def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGri
     # Normalize to obtain a proper probability distribution
     p_kappa_dc_uniform = likelihoods_dc/np.trapz(likelihoods_dc,kappa_dcs_1D)
 
+    # Store
+    resultsDict['kappa_dcs_1D'] = kappa_dcs_1D
+    resultsDict['probability_kappa_dc_1D'] = p_kappa_dc_uniform
+
     ##########################
     # 2. kappa_z
     ##########################
@@ -196,46 +209,47 @@ def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGri
     likelihoods_z = np.exp(log_likelihoods_z)
     p_kappa_z_uniform = likelihoods_z/np.trapz(likelihoods_z,kappa_zs_1D)
 
+    # Store
+    resultsDict['kappa_zs_1D'] = kappa_zs_1D
+    resultsDict['probability_kappa_z_1D'] = p_kappa_z_uniform
+
     ##########################
     # 3. kappa_z
     ##########################
 
-    # Grid over both kappas
-    kappa_dcs = np.linspace(-0.5,0.5,kappaGridSize)
-    kappa_zs = np.linspace(-1.,1.,kappaGridSize-1)
+    if joint==True:
 
-    # Instantiate array to hold log likelihoods
-    log_likelihoods_joint = np.zeros((kappa_dcs.size,kappa_zs.size))
-    clipped = np.zeros((kappa_dcs.size,kappa_zs.size))
+        # Grid over both kappas
+        kappa_dcs = np.linspace(-0.5,0.5,kappaGridSize)
+        kappa_zs = np.linspace(-1.,1.,kappaGridSize-1)
 
-    # Loop over pairs of kappas
-    for i,kd in tqdm(enumerate(kappa_dcs),total=kappa_dcs.size):
-        for j,kz in enumerate(kappa_zs):
-            
-            # Don't bother evaluating regions that are way outside the region of likelihood support
-            if clippingFunction(kd,kz):
-                log_likelihoods_joint[i,j] = -np.inf
-                clipped[i,j] = 1
+        # Instantiate array to hold log likelihoods
+        log_likelihoods_joint = np.zeros((kappa_dcs.size,kappa_zs.size))
+        clipped = np.zeros((kappa_dcs.size,kappa_zs.size))
 
-            else:
-                log_likelihoods_joint[i,j] = log_likelihood(kd,kz)
+        # Loop over pairs of kappas
+        for i,kd in tqdm(enumerate(kappa_dcs),total=kappa_dcs.size):
+            for j,kz in enumerate(kappa_zs):
+                
+                # Don't bother evaluating regions that are way outside the region of likelihood support
+                if clippingFunction(kd,kz):
+                    log_likelihoods_joint[i,j] = -np.inf
+                    clipped[i,j] = 1
 
-    log_likelihoods_joint[np.isnan(log_likelihoods_joint)] = -np.inf
+                else:
+                    log_likelihoods_joint[i,j] = log_likelihood(kd,kz)
 
-    # Exponentiate and normalize
-    log_likelihoods_joint -= np.max(log_likelihoods_joint)
-    likelihoods_joint = np.exp(log_likelihoods_joint)
-    p_joint_uniform = likelihoods_joint/(np.sum(likelihoods_joint)*(kappa_dcs[1]-kappa_dcs[0])*(kappa_zs[1]-kappa_zs[0]))
+        log_likelihoods_joint[np.isnan(log_likelihoods_joint)] = -np.inf
 
-    resultsDict = {\
-        'kappa_dcs_2D':kappa_dcs,
-        'kappa_zs_2D':kappa_zs,
-        'probabilities':p_joint_uniform,
-        'kappa_dcs_1D':kappa_dcs_1D,
-        'kappa_zs_1D':kappa_zs_1D,
-        'probability_kappa_dc_1D':p_kappa_dc_uniform,
-        'probability_kappa_z_1D':p_kappa_z_uniform
-        }
+        # Exponentiate and normalize
+        log_likelihoods_joint -= np.max(log_likelihoods_joint)
+        likelihoods_joint = np.exp(log_likelihoods_joint)
+        p_joint_uniform = likelihoods_joint/(np.sum(likelihoods_joint)*(kappa_dcs[1]-kappa_dcs[0])*(kappa_zs[1]-kappa_zs[0]))
+
+        # Store
+        resultsDict['kappa_dcs_2D'] = kappa_dcs
+        resultsDict['kappa_zs_2D'] = kappa_zs
+        resultsDict['probabilities'] = p_joint_uniform
 
     return resultsDict
 

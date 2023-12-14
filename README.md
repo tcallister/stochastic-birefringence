@@ -1,9 +1,8 @@
 # stochastic-birefringence
 
-To run any code in this repo, you should be able to build the necessary environment via:
+This repository holds code and data release products behind the paper "**A New Probe of Gravitational Parity Violation
+Through (Non-)Observation of the Stochastic Gravitational Wave Background**" (**[arXiv:2312.?????]()**)
 
-```bash
-conda env create -f environment.yml
-```
+For documentation and instructions for reproducing our results, see **https://tcallister.github.io/stochastic-birefringence/**
 
-At the moment, everything interesting is in the file [birefringence-demo.ipynb](birefringence-demo.ipynb), in which I very crudely estimate the stochastic background from binary black holes under various amplification levels.
+Our datasets themselves are hosted on [Zenodo](). See our documentation pages above for info about how to download, inspect, and plots these datasets.
