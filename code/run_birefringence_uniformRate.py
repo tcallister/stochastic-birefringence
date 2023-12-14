@@ -22,7 +22,7 @@ def toClip(kd,kz):
 results = compute_likelihood_grids(zs_merger,dRdV_uniform,clippingFunction=toClip,kappaGridSize=400)
 
 # Create hdf5 file and write posterior samples
-hfile = h5py.File('./../data/fixed_rate_uniform.hdf','w')
+hfile = h5py.File('./../data/fixed_rate_uniform_jitted.hdf','w')
 posterior = hfile.create_group('result')
 for key,val in results.items():
     posterior.create_dataset(key,data=val)

@@ -1,3 +1,5 @@
+from jax.config import config
+config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 import time
 import sys
@@ -261,6 +263,7 @@ class OmegaGW(object):
         # The result is a 2D array, with dedf[i,j] the population-averaged energy contributed at detector-frame
         # frequency i by binaries at redshift j
         dedf = jnp.tensordot(self.probs,self.ref_energySpectra,axes=2).T
+        dedf_alt = np.tensordot(self.probs,self.ref_energySpectra,axes=2).T
 
         # Birefringently amplify
         cosh_amp,sinh_amp = self.amplification(kappa_d,kappa_z)
