@@ -46,7 +46,7 @@ for key,val in results.items():
 
 # Add some metadata
 hfile.attrs['Created_by'] = "run_birefringence_delayedSFR_HVO3.py"
-hfile.attrs['Downloadable_from'] = ""
+hfile.attrs['Downloadable_from'] = "https://zenodo.org/doi/10.5281/zenodo.10384998"
 hfile.attrs['Source_code'] = "https://github.com/tcallister/stochastic-birefringence"
 hfile.close()
 

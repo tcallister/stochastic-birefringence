@@ -10,7 +10,8 @@ def pi_curve(frequencies,sigmas,alpha_min,alpha_max):
     CAUTION: This code assumes that sigma(f) follows the convention in which the cross-correlation
     measurements C(f) are direct estimates of Omega_I(f), rather than gamma_I*Omega_I + gamma_V*Omega_V.
 
-    INPUTS:
+    Parameters
+    ----------
     frequencies : `array`
         Array of frequencies at which data are defined
     sigmas : `array`
@@ -19,6 +20,11 @@ def pi_curve(frequencies,sigmas,alpha_min,alpha_max):
         Minimum signal power-law index to consider
     alpha_max : `float`
         Maximum signal power-law index to consider
+
+    Returns
+    -------
+    pi : `array`
+        Power-law integrated curve defined across `frequencies`
     """
 
     # Range of power-law indices
@@ -44,6 +50,23 @@ def pi_curve(frequencies,sigmas,alpha_min,alpha_max):
 
 def stokes_I_PI():
 
+    """
+    Function to compute and return PI curve for a Stokes-I gravitational-wave background, integrated
+    over all detector pairs and observing runs, using the `pi_curve` function.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    frequencies : `array`
+        Array of frequencies at which PI curve will be defined
+    manual_PI_curve : `array`
+        PI curve indicating the one-sigma sensitivity of all HLV baselines across all observing run
+    """
+
+    # Read data
     HL_O1_freqs,HL_O1_sigmas = np.loadtxt(script_directory+'/../input/H1L1_O1.dat',unpack=True,skiprows=1,usecols=(0,2))
     HL_O2_freqs,HL_O2_sigmas = np.loadtxt(script_directory+'/../input/H1L1_O2.dat',unpack=True,skiprows=1,usecols=(0,2))
     HL_O3_freqs,HL_O3_sigmas = np.loadtxt(script_directory+'/../input/H1L1_O3.dat',unpack=True,skiprows=1,usecols=(0,2))
@@ -59,6 +82,22 @@ def stokes_I_PI():
     return HL_O1_freqs,manual_PI_curve
 
 def stokes_V_PI():
+
+    """
+    Function to compute and return PI curve for a Stokes-V gravitational-wave background, integrated
+    over all detector pairs and observing runs, using the `pi_curve` function.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    frequencies : `array`
+        Array of frequencies at which PI curve will be defined
+    manual_PI_curve : `array`
+        PI curve indicating the one-sigma sensitivity of all HLV baselines across all observing run
+    """
 
     # Load data
     HL_O1_freqs,HL_O1_sigmas = np.loadtxt(script_directory+'/../input/H1L1_O1.dat',unpack=True,skiprows=1,usecols=(0,2))

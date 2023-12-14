@@ -22,14 +22,14 @@ def toClip(kd,kz):
 results = compute_likelihood_grids(zs_merger,dRdV_uniform,clippingFunction=toClip,kappaGridSize=400)
 
 # Create hdf5 file and write posterior samples
-hfile = h5py.File('./../data/fixed_rate_uniform_jitted.hdf','w')
+hfile = h5py.File('./../data/fixed_rate_uniform.hdf','w')
 posterior = hfile.create_group('result')
 for key,val in results.items():
     posterior.create_dataset(key,data=val)
 
 # Add some metadata
 hfile.attrs['Created_by'] = "run_birefringence_uniformRate.py"
-hfile.attrs['Downloadable_from'] = ""
+hfile.attrs['Downloadable_from'] = "https://zenodo.org/doi/10.5281/zenodo.10384998"
 hfile.attrs['Source_code'] = "https://github.com/tcallister/stochastic-birefringence"
 hfile.close()
 
