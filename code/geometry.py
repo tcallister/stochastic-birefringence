@@ -168,6 +168,13 @@ class Baseline():
        Detector object comprising the first instrument in our baseline 
     Detector2 : Detector
        Detector object comprising the second instrument in our baseline 
+
+    Methods
+    -------
+    circular_overlap_reduction_functions :
+        Function to compute overlap reduction functions for R and L circular polarizations
+    stokes_overlap_reduction_functions :
+        Function to compute overlap reduction functions for Stokes I and V parameters
     """
 
     def __init__(self,Detector1,Detector2):
