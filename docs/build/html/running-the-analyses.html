@@ -51,6 +51,8 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Running the analyses</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#inference-of-birefringence-parameters-with-fixed-bbh-merger-rates">Inference of birefringence parameters with fixed BBH merger rates</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#uniform-in-comoving-volume-merger-rate">1. Uniform-in-comoving volume merger rate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#merger-rate-tracing-global-star-formation">2. Merger rate tracing global star formation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#merger-rate-tracing-delayed-low-metallicity-star-formation">3. Merger rate tracing delayed low-metallicity star formation</a></li>
 </ul>
 </li>
 </ul>
@@ -87,14 +89,14 @@
 <p>Here, we detail how to rerun our code to recreate the data stored at <a class="reference external" href="https://doi.org/10.5281/zenodo.10384998">https://doi.org/10.5281/zenodo.10384998</a>.</p>
 <section id="inference-of-birefringence-parameters-with-fixed-bbh-merger-rates">
 <h2>Inference of birefringence parameters with fixed BBH merger rates<a class="headerlink" href="#inference-of-birefringence-parameters-with-fixed-bbh-merger-rates" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>In Sect.~5 of our paper, we obtain posteriors on birefringent parameters <span class="math notranslate nohighlight">\(\kappa_D\)</span> and <span class="math notranslate nohighlight">\(\kappa_z\)</span> with a few different fixed merger rates:</dt><dd><ol class="arabic simple">
+<p>In Sect.~5 of our paper, we obtain posteriors on birefringent parameters <span class="math notranslate nohighlight">\(\kappa_D\)</span> and <span class="math notranslate nohighlight">\(\kappa_z\)</span> with a few different fixed merger rates:</p>
+<blockquote>
+<div><ol class="arabic simple">
 <li><p>A uniform-in-comoving volume merger rate</p></li>
 <li><p>A merger rate tracing star formation</p></li>
 <li><p>A merger rate tracing low-metallicity star formation, subject to a distribution of evolutionary time delays</p></li>
 </ol>
-</dd>
-</dl>
+</div></blockquote>
 <section id="uniform-in-comoving-volume-merger-rate">
 <h3>1. Uniform-in-comoving volume merger rate<a class="headerlink" href="#uniform-in-comoving-volume-merger-rate" title="Link to this heading"></a></h3>
 <p>To reproduce results using a uniform-in-comoving volume merger rate, do the following:</p>
@@ -123,6 +125,66 @@ You will need to edit it to use the appropriate queue and account on your own cl
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>A notebook that demonstrates how to load in, inspect, and manipulate this output file can be found <a class="reference external" href="https://github.com/tcallister/stochastic-birefringence/blob/main/data/inspect_birefringence_uniformRate.ipynb">here</a></p>
+</div>
+</section>
+<section id="merger-rate-tracing-global-star-formation">
+<h3>2. Merger rate tracing global star formation<a class="headerlink" href="#merger-rate-tracing-global-star-formation" title="Link to this heading"></a></h3>
+<p>To reproduce results using a star-formation-tracing merger rate, do the following:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>conda<span class="w"> </span>activate<span class="w"> </span>stochastic-birefringence
+$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>code/
+$<span class="w"> </span>python<span class="w"> </span>run_birefringence_SFR.py
+</pre></div>
+</div>
+<p>This script will call code defined in <code class="file docutils literal notranslate"><span class="pre">gridded_likelihood.py</span></code> to compute one-dimensional posteriors on <span class="math notranslate nohighlight">\(\kappa_D\)</span> and <span class="math notranslate nohighlight">\(\kappa_z\)</span>, as well as a joint posterior on both paramters.
+Because this is only a two-dimensional space, we do this calculation via direct evaluation over grids of both parameters.</p>
+<p>If on a computer cluster with slurm, you can instead queue a job to perform this calculation via:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>conda<span class="w"> </span>activate<span class="w"> </span>stochastic-birefringence
+$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>code/
+$<span class="w"> </span>sbatch<span class="w"> </span>launch_birefringence_SFR.sbatch
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The slurm batchfile noted above is set up to work on the KICP partition of Midway3 at the University of Chicago.
+You will need to edit it to use the appropriate queue and account on your own cluster!</p>
+</div>
+<p>The result will be a file containing one- and two-dimensional probability distributionsn over each birefringent parameter, created at the following location:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>data/fixed_rate_SFR.hdf
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A notebook that demonstrates how to load in, inspect, and manipulate this output file can be found <a class="reference external" href="https://github.com/tcallister/stochastic-birefringence/blob/main/data/inspect_birefringence_SFR.ipynb">here</a></p>
+</div>
+</section>
+<section id="merger-rate-tracing-delayed-low-metallicity-star-formation">
+<h3>3. Merger rate tracing delayed low-metallicity star formation<a class="headerlink" href="#merger-rate-tracing-delayed-low-metallicity-star-formation" title="Link to this heading"></a></h3>
+<p>To reproduce results using a merger rate following a delayed low-metallicity star formation rate, do the following:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>conda<span class="w"> </span>activate<span class="w"> </span>stochastic-birefringence
+$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>code/
+$<span class="w"> </span>python<span class="w"> </span>run_birefringence_delayedSFR.py
+</pre></div>
+</div>
+<p>This script will call code defined in <code class="file docutils literal notranslate"><span class="pre">gridded_likelihood.py</span></code> to compute one-dimensional posteriors on <span class="math notranslate nohighlight">\(\kappa_D\)</span> and <span class="math notranslate nohighlight">\(\kappa_z\)</span>, as well as a joint posterior on both paramters.
+Because this is only a two-dimensional space, we do this calculation via direct evaluation over grids of both parameters.</p>
+<p>If on a computer cluster with slurm, you can instead queue a job to perform this calculation via:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>conda<span class="w"> </span>activate<span class="w"> </span>stochastic-birefringence
+$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>code/
+$<span class="w"> </span>sbatch<span class="w"> </span>launch_birefringence_delayedSFR.sbatch
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The slurm batchfile noted above is set up to work on the KICP partition of Midway3 at the University of Chicago.
+You will need to edit it to use the appropriate queue and account on your own cluster!</p>
+</div>
+<p>The result will be a file containing one- and two-dimensional probability distributionsn over each birefringent parameter, created at the following location:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>data/fixed_rate_delayedSFR.hdf
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A notebook that demonstrates how to load in, inspect, and manipulate this output file can be found <a class="reference external" href="https://github.com/tcallister/stochastic-birefringence/blob/main/data/inspect_birefringence_delayedSFR.ipynb">here</a></p>
 </div>
 </section>
 </section>
