@@ -38,7 +38,7 @@ def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGri
         Function to speed up calculation by skipping points in our 2D grid where the likelihood is known to be zero.
         Takes in two arguments, `kappa_D` and `kappa_z` and returns a Boolean value.
         If True, the point in question will be skipped and the log-likelihood manually fixed to -inf.
-        Defaults to `lambda x,y : False`
+        Defaults to :python:`lambda x,y : False`
     massGridSize : `tuple`
         A two element tuple determining the number of mass values over which to integrate when computing the stochastic background.
         Defaults to `(30,29)`.
@@ -65,12 +65,12 @@ def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGri
         Dictionary containing results of the three direct likelihood calculations.
         Keys are the following:
 
-        * `kappa_dcs_1D` : Array of $\kappa_D$ values across which 1D likelihood is computing
+        * `kappa_dcs_1D` : Array of :math:`\kappa_D` values across which 1D likelihood is computing
         * `probability_kappa_dc_1D` : Corresponding array of posterior probabilities
-        * `kappa_zs_1D` : Array of $\kappa_z$ values across which 1D likelihood is computed
+        * `kappa_zs_1D` : Array of :math:`\kappa_z` values across which 1D likelihood is computed
         * `probability_kappa_z_1D` : Corresponding array of posterior probabilities
-        * `kappa_dcs_2D` : Array of $\kappa_D$ values specifying gridpoints in 2D calculation
-        * `kappa_zs_2D` : Array of $\kappa_z$ values specifying gridpoints in 2D calculation
+        * `kappa_dcs_2D` : Array of :math:`\kappa_D` values specifying gridpoints in 2D calculation
+        * `kappa_zs_2D` : Array of :math:`\kappa_z` values specifying gridpoints in 2D calculation
         * `probabilities` : 2D array of posterior probabilities, where `probabilities[i,j]` gives the posterior at `kappa_dcs_2D[i]` and `kappa_zs_2D[j]`
     """
 

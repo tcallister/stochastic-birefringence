@@ -116,7 +116,7 @@ In particular, three calculations are done:</p>
 <dt><strong>clippingFunction</strong><span class="classifier"><cite>func</cite></span></dt><dd><p>Function to speed up calculation by skipping points in our 2D grid where the likelihood is known to be zero.
 Takes in two arguments, <cite>kappa_D</cite> and <cite>kappa_z</cite> and returns a Boolean value.
 If True, the point in question will be skipped and the log-likelihood manually fixed to -inf.
-Defaults to <cite>lambda x,y : False</cite></p>
+Defaults to <a href="#id1"><span class="problematic" id="id2">:python:`lambda x,y : False`</span></a></p>
 </dd>
 <dt><strong>massGridSize</strong><span class="classifier"><cite>tuple</cite></span></dt><dd><p>A two element tuple determining the number of mass values over which to integrate when computing the stochastic background.
 Defaults to <cite>(30,29)</cite>.</p>
@@ -144,12 +144,12 @@ Options are</p>
 <dt><strong>resultsDict</strong><span class="classifier"><cite>dict</cite></span></dt><dd><p>Dictionary containing results of the three direct likelihood calculations.
 Keys are the following:</p>
 <ul class="simple">
-<li><p><cite>kappa_dcs_1D</cite> : Array of $kappa_D$ values across which 1D likelihood is computing</p></li>
+<li><p><cite>kappa_dcs_1D</cite> : Array of <span class="math notranslate nohighlight">\(\kappa_D\)</span> values across which 1D likelihood is computing</p></li>
 <li><p><cite>probability_kappa_dc_1D</cite> : Corresponding array of posterior probabilities</p></li>
-<li><p><cite>kappa_zs_1D</cite> : Array of $kappa_z$ values across which 1D likelihood is computed</p></li>
+<li><p><cite>kappa_zs_1D</cite> : Array of <span class="math notranslate nohighlight">\(\kappa_z\)</span> values across which 1D likelihood is computed</p></li>
 <li><p><cite>probability_kappa_z_1D</cite> : Corresponding array of posterior probabilities</p></li>
-<li><p><cite>kappa_dcs_2D</cite> : Array of $kappa_D$ values specifying gridpoints in 2D calculation</p></li>
-<li><p><cite>kappa_zs_2D</cite> : Array of $kappa_z$ values specifying gridpoints in 2D calculation</p></li>
+<li><p><cite>kappa_dcs_2D</cite> : Array of <span class="math notranslate nohighlight">\(\kappa_D\)</span> values specifying gridpoints in 2D calculation</p></li>
+<li><p><cite>kappa_zs_2D</cite> : Array of <span class="math notranslate nohighlight">\(\kappa_z\)</span> values specifying gridpoints in 2D calculation</p></li>
 <li><p><cite>probabilities</cite> : 2D array of posterior probabilities, where <cite>probabilities[i,j]</cite> gives the posterior at <cite>kappa_dcs_2D[i]</cite> and <cite>kappa_zs_2D[j]</cite></p></li>
 </ul>
 </dd>
