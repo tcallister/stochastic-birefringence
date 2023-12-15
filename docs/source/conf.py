@@ -28,6 +28,8 @@ extensions = ['numpydoc','sphinx_rtd_theme','sphinx.ext.autosectionlabel', 'sphi
 templates_path = ['templates']
 exclude_patterns = ['build', 'Thumbs.db', '.DS_Store']
 
+numpydoc_show_class_members = False 
+
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
