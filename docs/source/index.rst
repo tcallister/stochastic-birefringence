@@ -21,4 +21,5 @@ Contents:
 
    getting-started
    making-figures
+   running-the-analyses
    modules

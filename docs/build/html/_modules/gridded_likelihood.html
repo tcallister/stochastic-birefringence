@@ -44,6 +44,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../making-figures.html">Figure generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-the-analyses.html">Running the analyses</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">Modules</a></li>
 </ul>
 
@@ -106,22 +107,22 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    zs : `array`</span>
+<span class="sd">    zs : array</span>
 <span class="sd">        An array of redshifts over which to integrate when computing the stochastic background</span>
-<span class="sd">    dRdV : `array`</span>
+<span class="sd">    dRdV : array</span>
 <span class="sd">        An array, defined at `zs`, giving the BBH merger rate as a function of redshift</span>
-<span class="sd">    clippingFunction : `func`</span>
+<span class="sd">    clippingFunction : func</span>
 <span class="sd">        Function to speed up calculation by skipping points in our 2D grid where the likelihood is known to be zero.</span>
 <span class="sd">        Takes in two arguments, `kappa_D` and `kappa_z` and returns a Boolean value.</span>
 <span class="sd">        If True, the point in question will be skipped and the log-likelihood manually fixed to -inf.</span>
 <span class="sd">        Defaults to :code:`lambda x,y : False`</span>
-<span class="sd">    massGridSize : `tuple`</span>
+<span class="sd">    massGridSize : tuple</span>
 <span class="sd">        A two element tuple determining the number of mass values over which to integrate when computing the stochastic background.</span>
 <span class="sd">        Defaults to `(30,29)`.</span>
-<span class="sd">    kappaGridSize : `int`</span>
+<span class="sd">    kappaGridSize : int</span>
 <span class="sd">        Determines the number of gridpoints at which we compute likelihoods in the 2D calculation.</span>
 <span class="sd">        Defaults to `100`</span>
-<span class="sd">    baselines : `list`</span>
+<span class="sd">    baselines : list</span>
 <span class="sd">        Allows for variations in which set of baselines/observing runs to include as observational input.</span>
 <span class="sd">        Options are</span>
 
@@ -137,7 +138,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    resultsDict : `dict`</span>
+<span class="sd">    resultsDict : dict</span>
 <span class="sd">        Dictionary containing results of the three direct likelihood calculations.</span>
 <span class="sd">        Keys are the following:</span>
 

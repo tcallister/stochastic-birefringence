@@ -14,14 +14,14 @@ def timeDelay(zMerge,zForm):
 
     Parameters
     ----------
-    zMerge : `int`
+    zMerge : int
         Redshift at binary merger
-    zForm: `int`
+    zForm: int
         Redshift at binary formation
 
     Returns
     -------
-    time_delay : `int`
+    time_delay : int
         Source-frame time delay between `zMerge` and `zForm` in Gyr        
     """
 
@@ -51,7 +51,7 @@ def generateTimeDelayData(zMax=10):
 
     Parameters
     ----------
-    zMax : `int`
+    zMax : int
         Maximum formation redshift to consider (default 10)
 
     Returns

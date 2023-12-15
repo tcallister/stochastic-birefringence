@@ -46,6 +46,7 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="making-figures.html">Figure generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-the-analyses.html">Running the analyses</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="geometry.html">geometry module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="makeDelayedRateData.html">makeDelayedRateData module</a></li>
@@ -93,16 +94,16 @@
 <dt class="sig sig-object py" id="load_data.get_all_data">
 <span class="sig-prename descclassname"><span class="pre">load_data.</span></span><span class="sig-name descname"><span class="pre">get_all_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trim_nans</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/load_data.html#get_all_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#load_data.get_all_data" title="Link to this definition"></a></dt>
 <dd><p>Helper function used by <cite>run_birefringence_variable_evolution.py</cite> to load data.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>trim_nans</strong><span class="classifier"><cite>bool</cite></span></dt><dd><p>If True, will remove frequencies that have been notched by data quality flags (default True)</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>trim_nans</strong><span class="classifier">bool</span></dt><dd><p>If True, will remove frequencies that have been notched by data quality flags (default True)</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
-<dt><strong>spectra_dict</strong><span class="classifier"><cite>dict</cite></span></dt><dd><p>Dictionary containing frequencies, cross-correlation measurements, and uncertainty spectra for all baselines and observing runs</p>
+<dd class="field-even"><dl class="simple">
+<dt><strong>spectra_dict</strong><span class="classifier">dict</span></dt><dd><p>Dictionary containing frequencies, cross-correlation measurements, and uncertainty spectra for all baselines and observing runs</p>
 </dd>
 </dl>
 </dd>
@@ -113,18 +114,18 @@
 <dt class="sig sig-object py" id="load_data.read_data">
 <span class="sig-prename descclassname"><span class="pre">load_data.</span></span><span class="sig-name descname"><span class="pre">read_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trim_nans</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/load_data.html#read_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#load_data.read_data" title="Link to this definition"></a></dt>
 <dd><p>Helper function to load cross-correlation data from file.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>filename</strong><span class="classifier"><cite>str</cite></span></dt><dd><p>Target filename</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>filename</strong><span class="classifier">str</span></dt><dd><p>Target filename</p>
 </dd>
-<dt><strong>trim_nans</strong><span class="classifier"><cite>bool</cite></span></dt><dd><p>If True, will remove frequencies that have been notched by data quality flags (default True)</p>
+<dt><strong>trim_nans</strong><span class="classifier">bool</span></dt><dd><p>If True, will remove frequencies that have been notched by data quality flags (default True)</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
-<dt><strong>frequencies</strong><span class="classifier"><cite>np.array</cite></span></dt><dd></dd>
+<dd class="field-even"><dl class="simple">
+<dt><strong>frequencies</strong><span class="classifier">np.array</span></dt><dd></dd>
 </dl>
 </dd>
 </dl>

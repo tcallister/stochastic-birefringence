@@ -12,18 +12,18 @@ def pi_curve(frequencies,sigmas,alpha_min,alpha_max):
 
     Parameters
     ----------
-    frequencies : `array`
+    frequencies : array
         Array of frequencies at which data are defined
-    sigmas : `array`
+    sigmas : array
         Corresponding array of narrowband uncertainties. See note above about normalization
-    alpha_min : `float`
+    alpha_min : float
         Minimum signal power-law index to consider
-    alpha_max : `float`
+    alpha_max : float
         Maximum signal power-law index to consider
 
     Returns
     -------
-    pi : `array`
+    pi : array
         Power-law integrated curve defined across `frequencies`
     """
 
@@ -60,9 +60,9 @@ def stokes_I_PI():
 
     Returns
     -------
-    frequencies : `array`
+    frequencies : array
         Array of frequencies at which PI curve will be defined
-    manual_PI_curve : `array`
+    manual_PI_curve : array
         PI curve indicating the one-sigma sensitivity of all HLV baselines across all observing run
     """
 
@@ -93,9 +93,9 @@ def stokes_V_PI():
 
     Returns
     -------
-    frequencies : `array`
+    frequencies : array
         Array of frequencies at which PI curve will be defined
-    manual_PI_curve : `array`
+    manual_PI_curve : array
         PI curve indicating the one-sigma sensitivity of all HLV baselines across all observing run
     """
 

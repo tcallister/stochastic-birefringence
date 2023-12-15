@@ -7,14 +7,14 @@ def read_data(filename,trim_nans=True):
 
     Parameters
     ----------
-    filename : `str`
+    filename : str
         Target filename
-    trim_nans : `bool`
+    trim_nans : bool
         If True, will remove frequencies that have been notched by data quality flags (default True)
 
     Returns
     -------
-    frequencies : `np.array`
+    frequencies : np.array
 
     """
 
@@ -37,12 +37,12 @@ def get_all_data(trim_nans=True):
 
     Parameters
     ----------
-    trim_nans : `bool`
+    trim_nans : bool
         If True, will remove frequencies that have been notched by data quality flags (default True)
 
     Returns
     -------
-    spectra_dict : `dict`
+    spectra_dict : dict
         Dictionary containing frequencies, cross-correlation measurements, and uncertainty spectra for all baselines and observing runs
     """
 

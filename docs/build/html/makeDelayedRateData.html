@@ -47,6 +47,7 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="making-figures.html">Figure generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-the-analyses.html">Running the analyses</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="geometry.html">geometry module</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">makeDelayedRateData module</a><ul>
@@ -103,10 +104,10 @@ integration. Specifically, the following are computed:</p>
 <li><p><cite>formationRedshifts</cite>: A 2D array of formation redshifts corresponding to each combination of <em>merger</em> redshifts and time delays. The value <cite>formationRedshifts[i,j]</cite> corresponds to the formation redshift of a binary that mergers at zs[i] after a time delay tds[j].</p></li>
 <li><p><cite>formationRates</cite>: A 2D array of the SFR (not metallicity weighted) at each of the redshifts in <cite>formationRedshifts</cite></p></li>
 </ul>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>zMax</strong><span class="classifier"><cite>int</cite></span></dt><dd><p>Maximum formation redshift to consider (default 10)</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>zMax</strong><span class="classifier">int</span></dt><dd><p>Maximum formation redshift to consider (default 10)</p>
 </dd>
 </dl>
 </dd>
@@ -123,18 +124,18 @@ integration. Specifically, the following are computed:</p>
 <dt class="sig sig-object py" id="makeDelayedRateData.timeDelay">
 <span class="sig-prename descclassname"><span class="pre">makeDelayedRateData.</span></span><span class="sig-name descname"><span class="pre">timeDelay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zMerge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zForm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/makeDelayedRateData.html#timeDelay"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#makeDelayedRateData.timeDelay" title="Link to this definition"></a></dt>
 <dd><p>Function to compute the proper time occuring between redshifts zForm and zMerge</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>zMerge</strong><span class="classifier"><cite>int</cite></span></dt><dd><p>Redshift at binary merger</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>zMerge</strong><span class="classifier">int</span></dt><dd><p>Redshift at binary merger</p>
 </dd>
-<dt><strong>zForm: `int`</strong></dt><dd><p>Redshift at binary formation</p>
+<dt><strong>zForm: int</strong></dt><dd><p>Redshift at binary formation</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
-<dt><strong>time_delay</strong><span class="classifier"><cite>int</cite></span></dt><dd><p>Source-frame time delay between <cite>zMerge</cite> and <cite>zForm</cite> in Gyr</p>
+<dd class="field-even"><dl class="simple">
+<dt><strong>time_delay</strong><span class="classifier">int</span></dt><dd><p>Source-frame time delay between <cite>zMerge</cite> and <cite>zForm</cite> in Gyr</p>
 </dd>
 </dl>
 </dd>

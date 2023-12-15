@@ -49,7 +49,7 @@ def dEdf(Mtot,freqs,eta=0.25,PN=True):
 
     Returns
     -------
-    dEdf : `np.array`
+    dEdf : np.array
         Energy spectrum in units of J/Hz
     """
 

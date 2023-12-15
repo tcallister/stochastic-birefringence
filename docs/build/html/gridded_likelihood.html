@@ -48,6 +48,7 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="making-figures.html">Figure generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-the-analyses.html">Running the analyses</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="geometry.html">geometry module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="makeDelayedRateData.html">makeDelayedRateData module</a></li>
@@ -114,22 +115,22 @@ In particular, three calculations are done:</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>zs</strong><span class="classifier"><cite>array</cite></span></dt><dd><p>An array of redshifts over which to integrate when computing the stochastic background</p>
+<dt><strong>zs</strong><span class="classifier">array</span></dt><dd><p>An array of redshifts over which to integrate when computing the stochastic background</p>
 </dd>
-<dt><strong>dRdV</strong><span class="classifier"><cite>array</cite></span></dt><dd><p>An array, defined at <cite>zs</cite>, giving the BBH merger rate as a function of redshift</p>
+<dt><strong>dRdV</strong><span class="classifier">array</span></dt><dd><p>An array, defined at <cite>zs</cite>, giving the BBH merger rate as a function of redshift</p>
 </dd>
-<dt><strong>clippingFunction</strong><span class="classifier"><cite>func</cite></span></dt><dd><p>Function to speed up calculation by skipping points in our 2D grid where the likelihood is known to be zero.
+<dt><strong>clippingFunction</strong><span class="classifier">func</span></dt><dd><p>Function to speed up calculation by skipping points in our 2D grid where the likelihood is known to be zero.
 Takes in two arguments, <cite>kappa_D</cite> and <cite>kappa_z</cite> and returns a Boolean value.
 If True, the point in question will be skipped and the log-likelihood manually fixed to -inf.
 Defaults to <code class="code docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">x,y</span> <span class="pre">:</span> <span class="pre">False</span></code></p>
 </dd>
-<dt><strong>massGridSize</strong><span class="classifier"><cite>tuple</cite></span></dt><dd><p>A two element tuple determining the number of mass values over which to integrate when computing the stochastic background.
+<dt><strong>massGridSize</strong><span class="classifier">tuple</span></dt><dd><p>A two element tuple determining the number of mass values over which to integrate when computing the stochastic background.
 Defaults to <cite>(30,29)</cite>.</p>
 </dd>
-<dt><strong>kappaGridSize</strong><span class="classifier"><cite>int</cite></span></dt><dd><p>Determines the number of gridpoints at which we compute likelihoods in the 2D calculation.
+<dt><strong>kappaGridSize</strong><span class="classifier">int</span></dt><dd><p>Determines the number of gridpoints at which we compute likelihoods in the 2D calculation.
 Defaults to <cite>100</cite></p>
 </dd>
-<dt><strong>baselines</strong><span class="classifier"><cite>list</cite></span></dt><dd><p>Allows for variations in which set of baselines/observing runs to include as observational input.
+<dt><strong>baselines</strong><span class="classifier">list</span></dt><dd><p>Allows for variations in which set of baselines/observing runs to include as observational input.
 Options are</p>
 <ul class="simple">
 <li><p><cite>HLO1</cite> : Hanford-Livingston O1</p></li>
@@ -145,8 +146,8 @@ Options are</p>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
-<dt><strong>resultsDict</strong><span class="classifier"><cite>dict</cite></span></dt><dd><p>Dictionary containing results of the three direct likelihood calculations.
+<dd class="field-even"><dl class="simple">
+<dt><strong>resultsDict</strong><span class="classifier">dict</span></dt><dd><p>Dictionary containing results of the three direct likelihood calculations.
 Keys are the following:</p>
 <ul class="simple">
 <li><p><cite>kappa_dcs_1D</cite> : Array of <span class="math notranslate nohighlight">\(\kappa_D\)</span> values across which 1D likelihood is computing</p></li>

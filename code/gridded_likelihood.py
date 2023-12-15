@@ -30,22 +30,22 @@ def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGri
 
     Parameters
     ----------
-    zs : `array`
+    zs : array
         An array of redshifts over which to integrate when computing the stochastic background
-    dRdV : `array`
+    dRdV : array
         An array, defined at `zs`, giving the BBH merger rate as a function of redshift
-    clippingFunction : `func`
+    clippingFunction : func
         Function to speed up calculation by skipping points in our 2D grid where the likelihood is known to be zero.
         Takes in two arguments, `kappa_D` and `kappa_z` and returns a Boolean value.
         If True, the point in question will be skipped and the log-likelihood manually fixed to -inf.
         Defaults to :code:`lambda x,y : False`
-    massGridSize : `tuple`
+    massGridSize : tuple
         A two element tuple determining the number of mass values over which to integrate when computing the stochastic background.
         Defaults to `(30,29)`.
-    kappaGridSize : `int`
+    kappaGridSize : int
         Determines the number of gridpoints at which we compute likelihoods in the 2D calculation.
         Defaults to `100`
-    baselines : `list`
+    baselines : list
         Allows for variations in which set of baselines/observing runs to include as observational input.
         Options are
 
@@ -61,7 +61,7 @@ def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGri
 
     Returns
     -------
-    resultsDict : `dict`
+    resultsDict : dict
         Dictionary containing results of the three direct likelihood calculations.
         Keys are the following:
 

@@ -47,6 +47,7 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="making-figures.html">Figure generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-the-analyses.html">Running the analyses</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="geometry.html">geometry module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="makeDelayedRateData.html">makeDelayedRateData module</a></li>
@@ -97,22 +98,22 @@
 <dd><p>Function to compute PI curve corresponding to a set of narrowband sigma(f) uncertainties.
 CAUTION: This code assumes that sigma(f) follows the convention in which the cross-correlation
 measurements C(f) are direct estimates of Omega_I(f), rather than gamma_I*Omega_I + gamma_V*Omega_V.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>frequencies</strong><span class="classifier"><cite>array</cite></span></dt><dd><p>Array of frequencies at which data are defined</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>frequencies</strong><span class="classifier">array</span></dt><dd><p>Array of frequencies at which data are defined</p>
 </dd>
-<dt><strong>sigmas</strong><span class="classifier"><cite>array</cite></span></dt><dd><p>Corresponding array of narrowband uncertainties. See note above about normalization</p>
+<dt><strong>sigmas</strong><span class="classifier">array</span></dt><dd><p>Corresponding array of narrowband uncertainties. See note above about normalization</p>
 </dd>
-<dt><strong>alpha_min</strong><span class="classifier"><cite>float</cite></span></dt><dd><p>Minimum signal power-law index to consider</p>
+<dt><strong>alpha_min</strong><span class="classifier">float</span></dt><dd><p>Minimum signal power-law index to consider</p>
 </dd>
-<dt><strong>alpha_max</strong><span class="classifier"><cite>float</cite></span></dt><dd><p>Maximum signal power-law index to consider</p>
+<dt><strong>alpha_max</strong><span class="classifier">float</span></dt><dd><p>Maximum signal power-law index to consider</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
-<dt><strong>pi</strong><span class="classifier"><cite>array</cite></span></dt><dd><p>Power-law integrated curve defined across <cite>frequencies</cite></p>
+<dd class="field-even"><dl class="simple">
+<dt><strong>pi</strong><span class="classifier">array</span></dt><dd><p>Power-law integrated curve defined across <cite>frequencies</cite></p>
 </dd>
 </dl>
 </dd>
@@ -124,17 +125,17 @@ measurements C(f) are direct estimates of Omega_I(f), rather than gamma_I*Omega_
 <span class="sig-prename descclassname"><span class="pre">piCurve.</span></span><span class="sig-name descname"><span class="pre">stokes_I_PI</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/piCurve.html#stokes_I_PI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#piCurve.stokes_I_PI" title="Link to this definition"></a></dt>
 <dd><p>Function to compute and return PI curve for a Stokes-I gravitational-wave background, integrated
 over all detector pairs and observing runs, using the <cite>pi_curve</cite> function.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>None</strong></dt><dd></dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
-<dt><strong>frequencies</strong><span class="classifier"><cite>array</cite></span></dt><dd><p>Array of frequencies at which PI curve will be defined</p>
+<dd class="field-even"><dl class="simple">
+<dt><strong>frequencies</strong><span class="classifier">array</span></dt><dd><p>Array of frequencies at which PI curve will be defined</p>
 </dd>
-<dt><strong>manual_PI_curve</strong><span class="classifier"><cite>array</cite></span></dt><dd><p>PI curve indicating the one-sigma sensitivity of all HLV baselines across all observing run</p>
+<dt><strong>manual_PI_curve</strong><span class="classifier">array</span></dt><dd><p>PI curve indicating the one-sigma sensitivity of all HLV baselines across all observing run</p>
 </dd>
 </dl>
 </dd>
@@ -146,17 +147,17 @@ over all detector pairs and observing runs, using the <cite>pi_curve</cite> func
 <span class="sig-prename descclassname"><span class="pre">piCurve.</span></span><span class="sig-name descname"><span class="pre">stokes_V_PI</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/piCurve.html#stokes_V_PI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#piCurve.stokes_V_PI" title="Link to this definition"></a></dt>
 <dd><p>Function to compute and return PI curve for a Stokes-V gravitational-wave background, integrated
 over all detector pairs and observing runs, using the <cite>pi_curve</cite> function.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>None</strong></dt><dd></dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
-<dt><strong>frequencies</strong><span class="classifier"><cite>array</cite></span></dt><dd><p>Array of frequencies at which PI curve will be defined</p>
+<dd class="field-even"><dl class="simple">
+<dt><strong>frequencies</strong><span class="classifier">array</span></dt><dd><p>Array of frequencies at which PI curve will be defined</p>
 </dd>
-<dt><strong>manual_PI_curve</strong><span class="classifier"><cite>array</cite></span></dt><dd><p>PI curve indicating the one-sigma sensitivity of all HLV baselines across all observing run</p>
+<dt><strong>manual_PI_curve</strong><span class="classifier">array</span></dt><dd><p>PI curve indicating the one-sigma sensitivity of all HLV baselines across all observing run</p>
 </dd>
 </dl>
 </dd>
