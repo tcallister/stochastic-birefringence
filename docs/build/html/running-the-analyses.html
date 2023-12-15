@@ -49,12 +49,13 @@
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="making-figures.html">Figure generation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Running the analyses</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#inference-of-birefringence-parameters-with-fixed-bbh-merger-rates">Inference of birefringence parameters with fixed BBH merger rates</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#inference-with-fixed-bbh-merger-rates">Inference with fixed BBH merger rates</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#uniform-in-comoving-volume-merger-rate">1. Uniform-in-comoving volume merger rate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#merger-rate-tracing-global-star-formation">2. Merger rate tracing global star formation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#merger-rate-tracing-delayed-low-metallicity-star-formation">3. Merger rate tracing delayed low-metallicity star formation</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Inference with fixed BBH merger rates</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">Modules</a></li>
@@ -87,9 +88,9 @@
   <section id="running-the-analyses">
 <h1>Running the analyses<a class="headerlink" href="#running-the-analyses" title="Link to this heading"></a></h1>
 <p>Here, we detail how to rerun our code to recreate the data stored at <a class="reference external" href="https://doi.org/10.5281/zenodo.10384998">https://doi.org/10.5281/zenodo.10384998</a>.</p>
-<section id="inference-of-birefringence-parameters-with-fixed-bbh-merger-rates">
-<h2>Inference of birefringence parameters with fixed BBH merger rates<a class="headerlink" href="#inference-of-birefringence-parameters-with-fixed-bbh-merger-rates" title="Link to this heading"></a></h2>
-<p>In Sect.~5 of our paper, we obtain posteriors on birefringent parameters <span class="math notranslate nohighlight">\(\kappa_D\)</span> and <span class="math notranslate nohighlight">\(\kappa_z\)</span> with a few different fixed merger rates:</p>
+<section id="inference-with-fixed-bbh-merger-rates">
+<h2>Inference with fixed BBH merger rates<a class="headerlink" href="#inference-with-fixed-bbh-merger-rates" title="Link to this heading"></a></h2>
+<p>In Sect.~5.A of our paper, we obtain posteriors on birefringent parameters <span class="math notranslate nohighlight">\(\kappa_D\)</span> and <span class="math notranslate nohighlight">\(\kappa_z\)</span> with a few different fixed merger rates:</p>
 <blockquote>
 <div><ol class="arabic simple">
 <li><p>A uniform-in-comoving volume merger rate</p></li>
@@ -118,7 +119,7 @@ $<span class="w"> </span>sbatch<span class="w"> </span>launch_birefringence_unif
 <p>The slurm batchfile noted above is set up to work on the KICP partition of Midway3 at the University of Chicago.
 You will need to edit it to use the appropriate queue and account on your own cluster!</p>
 </div>
-<p>The result will be a file containing one- and two-dimensional probability distributionsn over each birefringent parameter, created at the following location:</p>
+<p>The result will be a file containing one- and two-dimensional probability distributions over each birefringent parameter, created at the following location:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>data/fixed_rate_uniform.hdf
 </pre></div>
 </div>
@@ -148,7 +149,7 @@ $<span class="w"> </span>sbatch<span class="w"> </span>launch_birefringence_SFR.
 <p>The slurm batchfile noted above is set up to work on the KICP partition of Midway3 at the University of Chicago.
 You will need to edit it to use the appropriate queue and account on your own cluster!</p>
 </div>
-<p>The result will be a file containing one- and two-dimensional probability distributionsn over each birefringent parameter, created at the following location:</p>
+<p>The result will be a file containing one- and two-dimensional probability distributions over each birefringent parameter, created at the following location:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>data/fixed_rate_SFR.hdf
 </pre></div>
 </div>
@@ -178,7 +179,7 @@ $<span class="w"> </span>sbatch<span class="w"> </span>launch_birefringence_dela
 <p>The slurm batchfile noted above is set up to work on the KICP partition of Midway3 at the University of Chicago.
 You will need to edit it to use the appropriate queue and account on your own cluster!</p>
 </div>
-<p>The result will be a file containing one- and two-dimensional probability distributionsn over each birefringent parameter, created at the following location:</p>
+<p>The result will be a file containing one- and two-dimensional probability distributions over each birefringent parameter, created at the following location:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>data/fixed_rate_delayedSFR.hdf
 </pre></div>
 </div>
@@ -187,6 +188,44 @@ You will need to edit it to use the appropriate queue and account on your own cl
 <p>A notebook that demonstrates how to load in, inspect, and manipulate this output file can be found <a class="reference external" href="https://github.com/tcallister/stochastic-birefringence/blob/main/data/inspect_birefringence_delayedSFR.ipynb">here</a></p>
 </div>
 </section>
+</section>
+<section id="id1">
+<h2>Inference with fixed BBH merger rates<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<p>In Sect.~5.B, we then infer birefringent parameters while simultaneously inferring and marginalizing over the redshift-dependent merger rate of BBHs.
+We strongly recommend doing this analysis using a GPU on a computing cluster.
+To do so, do the following:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>conda<span class="w"> </span>activate<span class="w"> </span>stochastic-birefringence-cuda
+$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>code/
+$<span class="w"> </span>sbatch<span class="w"> </span>launch_birefringence_variable_evolution.sbatch
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The slurm batchfile noted above is set up to work on the KICP partition of Midway3 at the University of Chicago.
+You will need to edit it to use the appropriate queue and account on your own cluster!</p>
+</div>
+<p>It is not strictly necessary to use a GPU/cluster; instead you can perform the analysis on your local machine with</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>conda<span class="w"> </span>activate<span class="w"> </span>stochastic-birefringence
+$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>code/
+$<span class="w"> </span>sbatch<span class="w"> </span>run_birefringence_variable_evolution.py
+</pre></div>
+</div>
+<p>Running locally, however, will likely take a significantly longer amount of time (perhaps several hours), rather than several minutes with a GPU.</p>
+<p>However you choose to run this code, the result will be the following file:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>data/birefringence_variable_evolution.cdf
+</pre></div>
+</div>
+<p>This file will contain the raw sampling chains from <code class="code docutils literal notranslate"><span class="pre">numpyro</span></code> as well as miscellaneous diagnostics.
+To make this output a bit easier to work with for downstream applications, we will perform some post-processing and repackaging of samples into an <code class="code docutils literal notranslate"><span class="pre">hdf</span></code> format.
+To do so, run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>data/
+$<span class="w"> </span>python<span class="w"> </span>process_birefringence_variable_evolution.py
+</pre></div>
+</div>
+<p>This will finally create the following file:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>data/birefringence_variable_evolution.hdf
+</pre></div>
+</div>
 </section>
 </section>
 

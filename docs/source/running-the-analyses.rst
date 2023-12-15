@@ -3,10 +3,10 @@ Running the analyses
 
 Here, we detail how to rerun our code to recreate the data stored at https://doi.org/10.5281/zenodo.10384998.
 
-Inference of birefringence parameters with fixed BBH merger rates
------------------------------------------------------------------
+Inference with fixed BBH merger rates
+-------------------------------------
 
-In Sect.~5 of our paper, we obtain posteriors on birefringent parameters :math:`\kappa_D` and :math:`\kappa_z` with a few different fixed merger rates:
+In Sect.~5.A of our paper, we obtain posteriors on birefringent parameters :math:`\kappa_D` and :math:`\kappa_z` with a few different fixed merger rates:
 
     1. A uniform-in-comoving volume merger rate
     2. A merger rate tracing star formation
@@ -39,7 +39,7 @@ If on a computer cluster with slurm, you can instead queue a job to perform this
     The slurm batchfile noted above is set up to work on the KICP partition of Midway3 at the University of Chicago.
     You will need to edit it to use the appropriate queue and account on your own cluster!
 
-The result will be a file containing one- and two-dimensional probability distributionsn over each birefringent parameter, created at the following location:
+The result will be a file containing one- and two-dimensional probability distributions over each birefringent parameter, created at the following location:
 
 .. code-block:: bash
 
@@ -76,7 +76,7 @@ If on a computer cluster with slurm, you can instead queue a job to perform this
     The slurm batchfile noted above is set up to work on the KICP partition of Midway3 at the University of Chicago.
     You will need to edit it to use the appropriate queue and account on your own cluster!
 
-The result will be a file containing one- and two-dimensional probability distributionsn over each birefringent parameter, created at the following location:
+The result will be a file containing one- and two-dimensional probability distributions over each birefringent parameter, created at the following location:
 
 .. code-block:: bash
 
@@ -113,7 +113,7 @@ If on a computer cluster with slurm, you can instead queue a job to perform this
     The slurm batchfile noted above is set up to work on the KICP partition of Midway3 at the University of Chicago.
     You will need to edit it to use the appropriate queue and account on your own cluster!
 
-The result will be a file containing one- and two-dimensional probability distributionsn over each birefringent parameter, created at the following location:
+The result will be a file containing one- and two-dimensional probability distributions over each birefringent parameter, created at the following location:
 
 .. code-block:: bash
 
@@ -122,3 +122,52 @@ The result will be a file containing one- and two-dimensional probability distri
 .. note::
 
     A notebook that demonstrates how to load in, inspect, and manipulate this output file can be found `here <https://github.com/tcallister/stochastic-birefringence/blob/main/data/inspect_birefringence_delayedSFR.ipynb>`__
+
+Inference with fixed BBH merger rates
+-------------------------------------
+
+In Sect.~5.B, we then infer birefringent parameters while simultaneously inferring and marginalizing over the redshift-dependent merger rate of BBHs.
+We strongly recommend doing this analysis using a GPU on a computing cluster.
+To do so, do the following:
+
+.. code-block:: bash
+
+    $ conda activate stochastic-birefringence-cuda
+    $ cd code/
+    $ sbatch launch_birefringence_variable_evolution.sbatch
+
+.. warning::
+
+    The slurm batchfile noted above is set up to work on the KICP partition of Midway3 at the University of Chicago.
+    You will need to edit it to use the appropriate queue and account on your own cluster!
+
+It is not strictly necessary to use a GPU/cluster; instead you can perform the analysis on your local machine with
+
+.. code-block:: bash
+
+    $ conda activate stochastic-birefringence
+    $ cd code/
+    $ sbatch run_birefringence_variable_evolution.py
+
+Running locally, however, will likely take a significantly longer amount of time (perhaps several hours), rather than several minutes with a GPU.
+
+However you choose to run this code, the result will be the following file:
+
+.. code-block:: bash
+
+    data/birefringence_variable_evolution.cdf
+
+This file will contain the raw sampling chains from :code:`numpyro` as well as miscellaneous diagnostics.
+To make this output a bit easier to work with for downstream applications, we will perform some post-processing and repackaging of samples into an :code:`hdf` format.
+To do so, run
+
+.. code-block:: bash
+
+    $ cd data/
+    $ python process_birefringence_variable_evolution.py
+
+This will finally create the following file:
+
+.. code-block:: bash
+
+    data/birefringence_variable_evolution.hdf
