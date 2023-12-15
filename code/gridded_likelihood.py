@@ -13,9 +13,9 @@ def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGri
     Function to directly compute likelihoods over grids of birefringence coefficients.
     In particular, three calculations are done:
 
-    1. A 1D calculation for the likelihood of $\kappa_D$, fixing $\kappa_z = 0$.
-    2. A 1D calculation for the likelihood of $\kappa_z$, fixing $\kappa_D = 0$.
-    3. A 2D calculation across both non-zero $\kappa_D$ and $\kappa_z$.
+    1. A 1D calculation for the likelihood of :math:`\kappa_D`, fixing :math:`\kappa_z = 0`.
+    2. A 1D calculation for the likelihood of :math:`\kappa_z`, fixing :math:`\kappa_D = 0`.
+    3. A 2D calculation across both non-zero :math:`\kappa_D` and :math:`\kappa_z`.
 
     This function is called by
 
