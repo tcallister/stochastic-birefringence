@@ -123,8 +123,8 @@ The result will be a file containing one- and two-dimensional probability distri
 
     A notebook that demonstrates how to load in, inspect, and manipulate this output file can be found `here <https://github.com/tcallister/stochastic-birefringence/blob/main/data/inspect_birefringence_delayedSFR.ipynb>`__
 
-Inference with fixed BBH merger rates
--------------------------------------
+Inference with variable BBH merger rate
+---------------------------------------
 
 In Sect.~5.B, we then infer birefringent parameters while simultaneously inferring and marginalizing over the redshift-dependent merger rate of BBHs.
 We strongly recommend doing this analysis using a GPU on a computing cluster.
