@@ -21,6 +21,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="gwBackground module" href="gwBackground.html" />
     <link rel="prev" title="Modules" href="modules.html" /> 
 </head>
 
@@ -72,6 +73,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#geometry.n"><code class="docutils literal notranslate"><span class="pre">n()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="gwBackground.html">gwBackground module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridded_likelihood.html">gridded_likelihood module</a></li>
 </ul>
 </li>
 </ul>
@@ -294,14 +297,21 @@
 <dt class="sig sig-object py" id="geometry.Omega">
 <span class="sig-prename descclassname"><span class="pre">geometry.</span></span><span class="sig-name descname"><span class="pre">Omega</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#Omega"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.Omega" title="Link to this definition"></a></dt>
 <dd><p>Unit vector along the direction of a GW’s propagation.
-Vectors <cite>Omega</cite>, <cite>m</cite>, and <cite>n</cite> form an orthonormal triad.
-:param theta: Polar angle from which plane wave originates (range 0-pi)
-:type theta: float
-:param phi: Azimuthal angle of wave (range 0-2pi)
-:type phi: float</p>
+Vectors <cite>Omega</cite>, <cite>m</cite>, and <cite>n</cite> form an orthonormal triad.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Unit vector (shape (3,) array) along direction of propagation</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>Polar angle from which plane wave originates (range 0-pi)</p>
+</dd>
+<dt><strong>phi</strong><span class="classifier">float</span></dt><dd><p>Azimuthal angle of wave (range 0-2pi)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>Omega</strong><span class="classifier">array</span></dt><dd><p>Unit vector (shape (3,) array) along direction of propagation</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -309,14 +319,21 @@ Vectors <cite>Omega</cite>, <cite>m</cite>, and <cite>n</cite> form an orthonorm
 <dl class="py function">
 <dt class="sig sig-object py" id="geometry.ec">
 <span class="sig-prename descclassname"><span class="pre">geometry.</span></span><span class="sig-name descname"><span class="pre">ec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#ec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.ec" title="Link to this definition"></a></dt>
-<dd><p>Computes the cross-polarization basis tensor for a GW from a particular sky location.
-:param theta: Polar angle from which plane wave originates (range 0-pi)
-:type theta: float
-:param phi: Azimuthal angle of wave (range 0-2pi)
-:type phi: float</p>
+<dd><p>Computes the cross-polarization basis tensor for a GW from a particular sky location.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Basis tensor (shape (3,3) array)</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>Polar angle from which plane wave originates (range 0-pi)</p>
+</dd>
+<dt><strong>phi</strong><span class="classifier">float</span></dt><dd><p>Azimuthal angle of wave (range 0-2pi)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>ec</strong><span class="classifier">array</span></dt><dd><p>Basis tensor (shape (3,3) array)</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -324,14 +341,21 @@ Vectors <cite>Omega</cite>, <cite>m</cite>, and <cite>n</cite> form an orthonorm
 <dl class="py function">
 <dt class="sig sig-object py" id="geometry.ep">
 <span class="sig-prename descclassname"><span class="pre">geometry.</span></span><span class="sig-name descname"><span class="pre">ep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#ep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.ep" title="Link to this definition"></a></dt>
-<dd><p>Computes the plus-polarization basis tensor for a GW from a particular sky location.
-:param theta: Polar angle from which plane wave originates (range 0-pi)
-:type theta: float
-:param phi: Azimuthal angle of wave (range 0-2pi)
-:type phi: float</p>
+<dd><p>Computes the plus-polarization basis tensor for a GW from a particular sky location.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Basis tensor (shape (3,3) array)</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>Polar angle from which plane wave originates (range 0-pi)</p>
+</dd>
+<dt><strong>phi</strong><span class="classifier">float</span></dt><dd><p>Azimuthal angle of wave (range 0-2pi)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>ep</strong><span class="classifier">array</span></dt><dd><p>Basis tensor (shape (3,3) array)</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -340,14 +364,21 @@ Vectors <cite>Omega</cite>, <cite>m</cite>, and <cite>n</cite> form an orthonorm
 <dt class="sig sig-object py" id="geometry.m">
 <span class="sig-prename descclassname"><span class="pre">geometry.</span></span><span class="sig-name descname"><span class="pre">m</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#m"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.m" title="Link to this definition"></a></dt>
 <dd><p>Unit vector in the plane transverse to a GW’s direction of propagation.
-Vectors <cite>Omega</cite>, <cite>m</cite>, and <cite>n</cite> form an orthonormal triad.
-:param theta: Polar angle from which plane wave originates (range 0-pi)
-:type theta: float
-:param phi: Azimuthal angle of wave (range 0-2pi)
-:type phi: float</p>
+Vectors <cite>Omega</cite>, <cite>m</cite>, and <cite>n</cite> form an orthonormal triad.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Unit vector (shape (3,) array) transverse to direction of propagation.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>Polar angle from which plane wave originates (range 0-pi)</p>
+</dd>
+<dt><strong>phi</strong><span class="classifier">float</span></dt><dd><p>Azimuthal angle of wave (range 0-2pi)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>m</strong><span class="classifier">array</span></dt><dd><p>Unit vector (shape (3,) array) transverse to direction of propagation.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -356,14 +387,21 @@ Vectors <cite>Omega</cite>, <cite>m</cite>, and <cite>n</cite> form an orthonorm
 <dt class="sig sig-object py" id="geometry.n">
 <span class="sig-prename descclassname"><span class="pre">geometry.</span></span><span class="sig-name descname"><span class="pre">n</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#n"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.n" title="Link to this definition"></a></dt>
 <dd><p>Unit vector in the plane transverse to a GW’s direction of propagation.
-Vectors <cite>Omega</cite>, <cite>m</cite>, and <cite>n</cite> form an orthonormal triad.
-:param theta: Polar angle from which plane wave originates (range 0-pi)
-:type theta: float
-:param phi: Azimuthal angle of wave (range 0-2pi)
-:type phi: float</p>
+Vectors <cite>Omega</cite>, <cite>m</cite>, and <cite>n</cite> form an orthonormal triad.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Unit vector (shape (3,) array) transverse to direction of propagation.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>Polar angle from which plane wave originates (range 0-pi)</p>
+</dd>
+<dt><strong>phi</strong><span class="classifier">float</span></dt><dd><p>Azimuthal angle of wave (range 0-2pi)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>n</strong><span class="classifier">array</span></dt><dd><p>Unit vector (shape (3,) array) transverse to direction of propagation.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -375,6 +413,7 @@ Vectors <cite>Omega</cite>, <cite>m</cite>, and <cite>n</cite> form an orthonorm
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="modules.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gwBackground.html" class="btn btn-neutral float-right" title="gwBackground module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

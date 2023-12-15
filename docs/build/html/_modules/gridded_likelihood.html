@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gridded_likelihood &mdash; stochastic-birefringence  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            stochastic-birefringence
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../making-figures.html">Figure generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Modules</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">stochastic-birefringence</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gridded_likelihood</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gridded_likelihood</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">gwBackground</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">geometry</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">population_parameters</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span> <span class="nn">jax</span>
+<span class="kn">from</span> <span class="nn">jax.config</span> <span class="kn">import</span> <span class="n">config</span>
+<span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s2">&quot;jax_enable_x64&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="compute_likelihood_grids">
+<a class="viewcode-back" href="../gridded_likelihood.html#gridded_likelihood.compute_likelihood_grids">[docs]</a>
+<span class="k">def</span> <span class="nf">compute_likelihood_grids</span><span class="p">(</span><span class="n">zs</span><span class="p">,</span><span class="n">dRdV</span><span class="p">,</span><span class="n">clippingFunction</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="p">:</span> <span class="kc">False</span><span class="p">,</span><span class="n">massGridSize</span><span class="o">=</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span><span class="mi">29</span><span class="p">),</span><span class="n">kappaGridSize</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span><span class="n">baselines</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;HLO1&#39;</span><span class="p">,</span><span class="s1">&#39;HLO2&#39;</span><span class="p">,</span><span class="s1">&#39;HLO3&#39;</span><span class="p">,</span><span class="s1">&#39;HVO3&#39;</span><span class="p">,</span><span class="s1">&#39;LVO3&#39;</span><span class="p">],</span><span class="n">joint</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function to directly compute likelihoods over grids of birefringence coefficients.</span>
+<span class="sd">    In particular, three calculations are done:</span>
+
+<span class="sd">    * 1. A 1D calculation for the likelihood of $\kappa_D$, fixing $\kappa_z = 0$.</span>
+<span class="sd">    * 2. A 1D calculation for the likelihood of $\kappa_z$, fixing $\kappa_D = 0$.</span>
+<span class="sd">    * 3. A 2D calculation across both non-zero $\kappa_D$ and $\kappa_z$.</span>
+
+<span class="sd">    This function is called by</span>
+
+<span class="sd">    * `run_birefringence_uniformRate.py`</span>
+<span class="sd">    * `run_birefringence_SFR.py`</span>
+<span class="sd">    * `run_birefringence_delayedSFR.py`</span>
+<span class="sd">    * `run_birefringence_delayedSFR_HLO1.py`</span>
+<span class="sd">    * `run_birefringence_delayedSFR_HLO2.py`</span>
+<span class="sd">    * `run_birefringence_delayedSFR_HLO3.py`</span>
+<span class="sd">    * `run_birefringence_delayedSFR_HVO3.py`</span>
+<span class="sd">    * `run_birefringence_delayedSFR_LVO3.py`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    zs : `array`</span>
+<span class="sd">        An array of redshifts over which to integrate when computing the stochastic background</span>
+<span class="sd">    dRdV : `array`</span>
+<span class="sd">        An array, defined at `zs`, giving the BBH merger rate as a function of redshift</span>
+<span class="sd">    clippingFunction : `func`</span>
+<span class="sd">        Function to speed up calculation by skipping points in our 2D grid where the likelihood is known to be zero.</span>
+<span class="sd">        Takes in two arguments, `kappa_D` and `kappa_z` and returns a Boolean value.</span>
+<span class="sd">        If True, the point in question will be skipped and the log-likelihood manually fixed to -inf.</span>
+<span class="sd">        Defaults to `lambda x,y : False`</span>
+<span class="sd">    massGridSize : `tuple`</span>
+<span class="sd">        A two element tuple determining the number of mass values over which to integrate when computing the stochastic background.</span>
+<span class="sd">        Defaults to `(30,29)`.</span>
+<span class="sd">    kappaGridSize : `int`</span>
+<span class="sd">        Determines the number of gridpoints at which we compute likelihoods in the 2D calculation.</span>
+<span class="sd">        Defaults to `100`</span>
+<span class="sd">    baselines : `list`</span>
+<span class="sd">        Allows for variations in which set of baselines/observing runs to include as observational input.</span>
+<span class="sd">        Options are</span>
+<span class="sd">        * `HLO1` : Hanford-Livingston O1</span>
+<span class="sd">        * `HLO2` : Hanford-Livingston O2</span>
+<span class="sd">        * `HLO3` : Hanford-Livingston O3</span>
+<span class="sd">        * `HVO3` : Hanford-Virgo O3</span>
+<span class="sd">        * `LVO3` : Livingston-Virgo O3</span>
+<span class="sd">        Default is [&#39;HLO1&#39;,&#39;HLO2&#39;,&#39;HLO3&#39;,&#39;HVO3&#39;,&#39;LVO3&#39;]</span>
+<span class="sd">    joint : `bool`</span>
+<span class="sd">        If False, will skip likelihood calculation over 2D grid. Default `True`</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    resultsDict : `dict`</span>
+<span class="sd">        Dictionary containing results of the three direct likelihood calculations.</span>
+<span class="sd">        Keys are the following:</span>
+<span class="sd">        * `kappa_dcs_1D` : Array of $\kappa_D$ values across which 1D likelihood is computing</span>
+<span class="sd">        * `probability_kappa_dc_1D` : Corresponding array of posterior probabilities</span>
+<span class="sd">        * `kappa_zs_1D` : Array of $\kappa_z$ values across which 1D likelihood is computed</span>
+<span class="sd">        * `probability_kappa_z_1D` : Corresponding array of posterior probabilities</span>
+<span class="sd">        * `kappa_dcs_2D` : Array of $\kappa_D$ values specifying gridpoints in 2D calculation</span>
+<span class="sd">        * `kappa_zs_2D` : Array of $\kappa_z$ values specifying gridpoints in 2D calculation</span>
+<span class="sd">        * `probabilities` : 2D array of posterior probabilities, where `probabilities[i,j]` gives the posterior at `kappa_dcs_2D[i]` and `kappa_zs_2D[j]`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Instantiate SGWB calculator</span>
+    <span class="n">m_absolute_min</span> <span class="o">=</span> <span class="mf">2.</span>
+    <span class="n">m_absolute_max</span> <span class="o">=</span> <span class="mf">100.</span>
+    <span class="n">omg</span> <span class="o">=</span> <span class="n">OmegaGW_BBH</span><span class="p">(</span><span class="n">m_absolute_min</span><span class="p">,</span><span class="n">m_absolute_max</span><span class="p">,</span><span class="n">zs</span><span class="p">,</span><span class="n">gridSize</span><span class="o">=</span><span class="n">massGridSize</span><span class="p">)</span>
+
+    <span class="c1"># Define hyperparameters describing mass distribution</span>
+    <span class="n">R0</span> <span class="o">=</span> <span class="n">population_parameters</span><span class="o">.</span><span class="n">R0</span>
+    <span class="n">m_min</span> <span class="o">=</span> <span class="n">population_parameters</span><span class="o">.</span><span class="n">m_min</span>
+    <span class="n">m_max</span> <span class="o">=</span> <span class="n">population_parameters</span><span class="o">.</span><span class="n">m_max</span>
+    <span class="n">dm_min</span> <span class="o">=</span> <span class="n">population_parameters</span><span class="o">.</span><span class="n">dm_min</span>
+    <span class="n">dm_max</span> <span class="o">=</span> <span class="n">population_parameters</span><span class="o">.</span><span class="n">dm_max</span>
+    <span class="n">alpha_m</span> <span class="o">=</span> <span class="n">population_parameters</span><span class="o">.</span><span class="n">alpha_m</span>
+    <span class="n">mu_peak</span> <span class="o">=</span> <span class="n">population_parameters</span><span class="o">.</span><span class="n">mu_peak</span>
+    <span class="n">sig_peak</span> <span class="o">=</span> <span class="n">population_parameters</span><span class="o">.</span><span class="n">sig_peak</span>
+    <span class="n">frac_peak</span> <span class="o">=</span> <span class="n">population_parameters</span><span class="o">.</span><span class="n">frac_peak</span>
+    <span class="n">bq</span> <span class="o">=</span> <span class="n">population_parameters</span><span class="o">.</span><span class="n">bq</span>
+
+    <span class="c1"># Pass these to our SGWB calculator</span>
+    <span class="n">omg</span><span class="o">.</span><span class="n">setProbs_plPeak</span><span class="p">(</span><span class="n">m_min</span><span class="p">,</span><span class="n">m_max</span><span class="p">,</span><span class="n">dm_min</span><span class="p">,</span><span class="n">dm_max</span><span class="p">,</span><span class="n">alpha_m</span><span class="p">,</span><span class="n">mu_peak</span><span class="p">,</span><span class="n">sig_peak</span><span class="p">,</span><span class="n">frac_peak</span><span class="p">,</span><span class="n">bq</span><span class="p">)</span>
+
+    <span class="c1"># Load data</span>
+    <span class="n">f_H1L1_O1</span><span class="p">,</span><span class="n">C_H1L1_O1</span><span class="p">,</span><span class="n">sigma_H1L1_O1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;../input/H1L1_O1.dat&#39;</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">f_H1L1_O2</span><span class="p">,</span><span class="n">C_H1L1_O2</span><span class="p">,</span><span class="n">sigma_H1L1_O2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;../input/H1L1_O2.dat&#39;</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">f_H1L1_O3</span><span class="p">,</span><span class="n">C_H1L1_O3</span><span class="p">,</span><span class="n">sigma_H1L1_O3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;../input/H1L1_O3.dat&#39;</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">f_H1V1_O3</span><span class="p">,</span><span class="n">C_H1V1_O3</span><span class="p">,</span><span class="n">sigma_H1V1_O3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;../input/H1V1_O3.dat&#39;</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">f_L1V1_O3</span><span class="p">,</span><span class="n">C_L1V1_O3</span><span class="p">,</span><span class="n">sigma_L1V1_O3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;../input/L1V1_O3.dat&#39;</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># We have to do some cleanup of mistakes/oddities introduced upstream into the above data files</span>
+
+    <span class="c1"># First, as discussed in the paper text, when constructing our signal model below it is necessary to divide</span>
+    <span class="c1"># the Stokes-I overlap reduction function (ORF). As the ORF is an oscillatory function about zero, the resulting</span>
+    <span class="c1"># signal model diverges to infinity at the roots of the ORF. Differences between the ORFs computed with python (our code) and</span>
+    <span class="c1"># matlab libraries (LVK analysis code stochastic.m) place very high-order roots of the ORF at very slightly different locations, which</span>
+    <span class="c1"># nevertheless yield statistically signficant differences in the likelihood calculation. When dividing by the ORF to construct</span>
+    <span class="c1"># our signal model, it is therefore necessary to use the *same identical matlab calculation* of the ORF as in the upstream stochastic.m</span>
+    <span class="c1"># analysis. Load this matlab-based ORF in preparation.</span>
+    <span class="n">matlab_orf_freqs</span><span class="p">,</span><span class="n">matlab_orf_H1L1</span><span class="p">,</span><span class="n">matlab_orf_H1V1</span><span class="p">,</span><span class="n">matlab_orf_L1V1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;../input/matlab_orfs.dat&#39;</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Second, the frequency arrays associated with the above LVK data files have been rounded to an insufficiently </span>
+    <span class="c1"># low number of significant digits. As a result, the precise frequencies are incorrect at the mHz level.</span>
+    <span class="c1"># The frequency arrays should be regular grids with 1/32 Hz = 0.03125 Hz spacing.</span>
+    <span class="c1"># At low frequencies the above arrays behave as expected:</span>
+    <span class="c1"># </span>
+    <span class="c1"># &gt;&gt;&gt; print(f_H1L1_O1[0:3])</span>
+    <span class="c1">#   [20.      20.03125 20.0625 ]</span>
+    <span class="c1">#</span>
+    <span class="c1"># But at high frequencies rounding means that the precise grid spacing is no longer respected:</span>
+    <span class="c1">#</span>
+    <span class="c1"># &gt;&gt;&gt; print(f_H1L1_O1[15360:15363])</span>
+    <span class="c1">#   [500.     500.0312 500.0625]</span>
+    <span class="c1">#</span>
+    <span class="c1"># These small differences in frequencies are enough to noticeably perturb the signal model in places where the ORF</span>
+    <span class="c1"># is near zero (e.g. the signal model is sent to infinity in slightly different locations)</span>
+    <span class="c1"># Because of this, overwrite frequencies with array loaded in from original matlab calculation, which preserves</span>
+    <span class="c1"># the correct frequency spacing.</span>
+    <span class="n">f_H1L1_O3</span> <span class="o">=</span> <span class="n">matlab_orf_freqs</span><span class="p">[</span><span class="n">matlab_orf_freqs</span><span class="o">&lt;=</span><span class="mi">1726</span><span class="p">]</span>
+    <span class="n">matlab_orf_H1L1</span> <span class="o">=</span> <span class="n">matlab_orf_H1L1</span><span class="p">[</span><span class="n">matlab_orf_freqs</span><span class="o">&lt;=</span><span class="mi">1726</span><span class="p">]</span>
+    <span class="n">matlab_orf_H1V1</span> <span class="o">=</span> <span class="n">matlab_orf_H1V1</span><span class="p">[</span><span class="n">matlab_orf_freqs</span><span class="o">&lt;=</span><span class="mi">1726</span><span class="p">]</span>
+    <span class="n">matlab_orf_L1V1</span> <span class="o">=</span> <span class="n">matlab_orf_L1V1</span><span class="p">[</span><span class="n">matlab_orf_freqs</span><span class="o">&lt;=</span><span class="mi">1726</span><span class="p">]</span>
+
+    <span class="c1"># Instantiate baseline objects</span>
+    <span class="n">H1L1</span> <span class="o">=</span> <span class="n">Baseline</span><span class="p">(</span><span class="n">Detector</span><span class="o">.</span><span class="n">H1</span><span class="p">(),</span><span class="n">Detector</span><span class="o">.</span><span class="n">L1</span><span class="p">())</span>
+    <span class="n">H1V1</span> <span class="o">=</span> <span class="n">Baseline</span><span class="p">(</span><span class="n">Detector</span><span class="o">.</span><span class="n">H1</span><span class="p">(),</span><span class="n">Detector</span><span class="o">.</span><span class="n">V1</span><span class="p">())</span>
+    <span class="n">L1V1</span> <span class="o">=</span> <span class="n">Baseline</span><span class="p">(</span><span class="n">Detector</span><span class="o">.</span><span class="n">L1</span><span class="p">(),</span><span class="n">Detector</span><span class="o">.</span><span class="n">V1</span><span class="p">())</span>
+
+    <span class="c1"># Use baseline objects to compute overlap reduction functions for Stokes-I and Stokes-V signals</span>
+    <span class="n">H1L1_gammaI</span><span class="p">,</span><span class="n">H1L1_gammaV</span> <span class="o">=</span> <span class="n">H1L1</span><span class="o">.</span><span class="n">stokes_overlap_reduction_functions</span><span class="p">(</span><span class="n">f_H1L1_O3</span><span class="p">)</span>
+    <span class="n">H1V1_gammaI</span><span class="p">,</span><span class="n">H1V1_gammaV</span> <span class="o">=</span> <span class="n">H1V1</span><span class="o">.</span><span class="n">stokes_overlap_reduction_functions</span><span class="p">(</span><span class="n">f_H1L1_O3</span><span class="p">)</span>
+    <span class="n">L1V1_gammaI</span><span class="p">,</span><span class="n">L1V1_gammaV</span> <span class="o">=</span> <span class="n">L1V1</span><span class="o">.</span><span class="n">stokes_overlap_reduction_functions</span><span class="p">(</span><span class="n">f_H1L1_O3</span><span class="p">)</span>
+
+    <span class="c1"># Dictionary to store results</span>
+    <span class="n">resultsDict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">log_likelihood</span><span class="p">(</span><span class="n">kd</span><span class="p">,</span><span class="n">kz</span><span class="p">):</span>
+
+        <span class="c1"># Construct model backgrounds</span>
+        <span class="n">OmgI</span><span class="p">,</span><span class="n">OmgV</span> <span class="o">=</span> <span class="n">omg</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">R0</span><span class="p">,</span><span class="n">dRdV</span><span class="p">,</span><span class="n">f_H1L1_O3</span><span class="p">,</span><span class="n">kd</span><span class="p">,</span><span class="n">kz</span><span class="p">)</span>
+        
+        <span class="c1"># Construct baseline-dependent models</span>
+        <span class="n">model_background_HL</span> <span class="o">=</span> <span class="n">OmgI</span> <span class="o">+</span> <span class="p">(</span><span class="n">H1L1_gammaV</span><span class="o">/</span><span class="n">matlab_orf_H1L1</span><span class="p">)</span><span class="o">*</span><span class="n">OmgV</span>
+        <span class="n">model_background_HV</span> <span class="o">=</span> <span class="n">OmgI</span> <span class="o">+</span> <span class="p">(</span><span class="n">H1V1_gammaV</span><span class="o">/</span><span class="n">matlab_orf_H1V1</span><span class="p">)</span><span class="o">*</span><span class="n">OmgV</span>
+        <span class="n">model_background_LV</span> <span class="o">=</span> <span class="n">OmgI</span> <span class="o">+</span> <span class="p">(</span><span class="n">L1V1_gammaV</span><span class="o">/</span><span class="n">matlab_orf_L1V1</span><span class="p">)</span><span class="o">*</span><span class="n">OmgV</span>
+        
+        <span class="c1"># Given this prediction, add the log-likelihoods of our observations from each baseline</span>
+        <span class="n">log_likelihoods_dc</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="s1">&#39;HLO1&#39;</span> <span class="ow">in</span> <span class="n">baselines</span><span class="p">:</span>
+            <span class="n">log_likelihoods_dc</span> <span class="o">+=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">C_H1L1_O1</span><span class="o">-</span><span class="n">model_background_HL</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">sigma_H1L1_O1</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">if</span> <span class="s1">&#39;HLO2&#39;</span> <span class="ow">in</span> <span class="n">baselines</span><span class="p">:</span>
+            <span class="n">log_likelihoods_dc</span> <span class="o">+=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">C_H1L1_O2</span><span class="o">-</span><span class="n">model_background_HL</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">sigma_H1L1_O2</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">if</span> <span class="s1">&#39;HLO3&#39;</span> <span class="ow">in</span> <span class="n">baselines</span><span class="p">:</span>
+            <span class="n">log_likelihoods_dc</span> <span class="o">+=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">C_H1L1_O3</span><span class="o">-</span><span class="n">model_background_HL</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">sigma_H1L1_O3</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">if</span> <span class="s1">&#39;HVO3&#39;</span> <span class="ow">in</span> <span class="n">baselines</span><span class="p">:</span>
+            <span class="n">log_likelihoods_dc</span> <span class="o">+=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">C_H1V1_O3</span><span class="o">-</span><span class="n">model_background_HV</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">sigma_H1V1_O3</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">if</span> <span class="s1">&#39;LVO3&#39;</span> <span class="ow">in</span> <span class="n">baselines</span><span class="p">:</span>
+            <span class="n">log_likelihoods_dc</span> <span class="o">+=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">C_L1V1_O3</span><span class="o">-</span><span class="n">model_background_LV</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">sigma_L1V1_O3</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">log_likelihoods_dc</span>
+
+    <span class="c1">##########################</span>
+    <span class="c1"># 1. kappa_D</span>
+    <span class="c1">##########################</span>
+
+    <span class="c1"># Range of kappa parameters</span>
+    <span class="c1"># Instantiate an array to hold log likelihood values, and loop across kappas</span>
+    <span class="n">kappa_dcs_1D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mi">400</span><span class="p">)</span>
+    <span class="n">log_likelihoods_dc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">kappa_dcs_1D</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">k</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">kappa_dcs_1D</span><span class="p">),</span><span class="n">total</span><span class="o">=</span><span class="n">kappa_dcs_1D</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">log_likelihoods_dc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">log_likelihood</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        
+    <span class="c1"># Subtract off the max so numpy doesn&#39;t freak out when we exponentiate, then exponentiate</span>
+    <span class="n">log_likelihoods_dc</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">log_likelihoods_dc</span><span class="p">)</span>
+    <span class="n">likelihoods_dc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_likelihoods_dc</span><span class="p">)</span>
+
+    <span class="c1"># Normalize to obtain a proper probability distribution</span>
+    <span class="n">p_kappa_dc_uniform</span> <span class="o">=</span> <span class="n">likelihoods_dc</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">likelihoods_dc</span><span class="p">,</span><span class="n">kappa_dcs_1D</span><span class="p">)</span>
+
+    <span class="c1"># Store</span>
+    <span class="n">resultsDict</span><span class="p">[</span><span class="s1">&#39;kappa_dcs_1D&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kappa_dcs_1D</span>
+    <span class="n">resultsDict</span><span class="p">[</span><span class="s1">&#39;probability_kappa_dc_1D&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_kappa_dc_uniform</span>
+
+    <span class="c1">##########################</span>
+    <span class="c1"># 2. kappa_z</span>
+    <span class="c1">##########################</span>
+
+    <span class="c1"># Grid of kappas</span>
+    <span class="n">kappa_zs_1D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mi">400</span><span class="p">)</span>
+
+    <span class="c1"># Loop across kappas</span>
+    <span class="n">log_likelihoods_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">kappa_zs_1D</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">k</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">kappa_zs_1D</span><span class="p">),</span><span class="n">total</span><span class="o">=</span><span class="n">kappa_zs_1D</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">log_likelihoods_z</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">log_likelihood</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">k</span><span class="p">)</span>
+
+    <span class="c1"># Exponentiate and form a normalized probability distribution</span>
+    <span class="n">log_likelihoods_z</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">log_likelihoods_z</span><span class="p">)</span>
+    <span class="n">likelihoods_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_likelihoods_z</span><span class="p">)</span>
+    <span class="n">p_kappa_z_uniform</span> <span class="o">=</span> <span class="n">likelihoods_z</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">likelihoods_z</span><span class="p">,</span><span class="n">kappa_zs_1D</span><span class="p">)</span>
+
+    <span class="c1"># Store</span>
+    <span class="n">resultsDict</span><span class="p">[</span><span class="s1">&#39;kappa_zs_1D&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kappa_zs_1D</span>
+    <span class="n">resultsDict</span><span class="p">[</span><span class="s1">&#39;probability_kappa_z_1D&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_kappa_z_uniform</span>
+
+    <span class="c1">##########################</span>
+    <span class="c1"># 3. kappa_z</span>
+    <span class="c1">##########################</span>
+
+    <span class="k">if</span> <span class="n">joint</span><span class="o">==</span><span class="kc">True</span><span class="p">:</span>
+
+        <span class="c1"># Grid over both kappas</span>
+        <span class="n">kappa_dcs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="n">kappaGridSize</span><span class="p">)</span>
+        <span class="n">kappa_zs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span><span class="mf">1.</span><span class="p">,</span><span class="n">kappaGridSize</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Instantiate array to hold log likelihoods</span>
+        <span class="n">log_likelihoods_joint</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">kappa_dcs</span><span class="o">.</span><span class="n">size</span><span class="p">,</span><span class="n">kappa_zs</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">clipped</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">kappa_dcs</span><span class="o">.</span><span class="n">size</span><span class="p">,</span><span class="n">kappa_zs</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+
+        <span class="c1"># Loop over pairs of kappas</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">kd</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">kappa_dcs</span><span class="p">),</span><span class="n">total</span><span class="o">=</span><span class="n">kappa_dcs</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span><span class="n">kz</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">kappa_zs</span><span class="p">):</span>
+                
+                <span class="c1"># Don&#39;t bother evaluating regions that are way outside the region of likelihood support</span>
+                <span class="k">if</span> <span class="n">clippingFunction</span><span class="p">(</span><span class="n">kd</span><span class="p">,</span><span class="n">kz</span><span class="p">):</span>
+                    <span class="n">log_likelihoods_joint</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+                    <span class="n">clipped</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">log_likelihoods_joint</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">log_likelihood</span><span class="p">(</span><span class="n">kd</span><span class="p">,</span><span class="n">kz</span><span class="p">)</span>
+
+        <span class="n">log_likelihoods_joint</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">log_likelihoods_joint</span><span class="p">)]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+
+        <span class="c1"># Exponentiate and normalize</span>
+        <span class="n">log_likelihoods_joint</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">log_likelihoods_joint</span><span class="p">)</span>
+        <span class="n">likelihoods_joint</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_likelihoods_joint</span><span class="p">)</span>
+        <span class="n">p_joint_uniform</span> <span class="o">=</span> <span class="n">likelihoods_joint</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">likelihoods_joint</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">kappa_dcs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">kappa_dcs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="n">kappa_zs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">kappa_zs</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="c1"># Store</span>
+        <span class="n">resultsDict</span><span class="p">[</span><span class="s1">&#39;kappa_dcs_2D&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kappa_dcs</span>
+        <span class="n">resultsDict</span><span class="p">[</span><span class="s1">&#39;kappa_zs_2D&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kappa_zs</span>
+        <span class="n">resultsDict</span><span class="p">[</span><span class="s1">&#39;probabilities&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_joint_uniform</span>
+
+    <span class="k">return</span> <span class="n">resultsDict</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, T. Callister, L. Jenks, D. Holz, N. Yunes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

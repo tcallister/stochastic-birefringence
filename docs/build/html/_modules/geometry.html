@@ -410,75 +410,95 @@
 <div class="viewcode-block" id="Omega">
 <a class="viewcode-back" href="../geometry.html#geometry.Omega">[docs]</a>
 <span class="k">def</span> <span class="nf">Omega</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="n">phi</span><span class="p">):</span>
+
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Unit vector along the direction of a GW&#39;s propagation.</span>
 <span class="sd">    Vectors `Omega`, `m`, and `n` form an orthonormal triad.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    theta : float</span>
 <span class="sd">        Polar angle from which plane wave originates (range 0-pi)</span>
 <span class="sd">    phi : float</span>
 <span class="sd">        Azimuthal angle of wave (range 0-2pi)</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    Unit vector (shape (3,) array) along direction of propagation</span>
+<span class="sd">    Omega : array</span>
+<span class="sd">        Unit vector (shape (3,) array) along direction of propagation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)])</span></div>
 
 
 <div class="viewcode-block" id="m">
 <a class="viewcode-back" href="../geometry.html#geometry.m">[docs]</a>
 <span class="k">def</span> <span class="nf">m</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="n">phi</span><span class="p">):</span>
+
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Unit vector in the plane transverse to a GW&#39;s direction of propagation.</span>
 <span class="sd">    Vectors `Omega`, `m`, and `n` form an orthonormal triad.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    theta : float</span>
 <span class="sd">        Polar angle from which plane wave originates (range 0-pi)</span>
 <span class="sd">    phi : float</span>
 <span class="sd">        Azimuthal angle of wave (range 0-2pi)</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    Unit vector (shape (3,) array) transverse to direction of propagation.</span>
+<span class="sd">    m : array</span>
+<span class="sd">        Unit vector (shape (3,) array) transverse to direction of propagation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="mf">0.</span><span class="p">])</span></div>
 
 
 <div class="viewcode-block" id="n">
 <a class="viewcode-back" href="../geometry.html#geometry.n">[docs]</a>
 <span class="k">def</span> <span class="nf">n</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="n">phi</span><span class="p">):</span>
+
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Unit vector in the plane transverse to a GW&#39;s direction of propagation.</span>
 <span class="sd">    Vectors `Omega`, `m`, and `n` form an orthonormal triad.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    theta : float</span>
 <span class="sd">        Polar angle from which plane wave originates (range 0-pi)</span>
 <span class="sd">    phi : float</span>
 <span class="sd">        Azimuthal angle of wave (range 0-2pi)</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    Unit vector (shape (3,) array) transverse to direction of propagation.</span>
+<span class="sd">    n : array</span>
+<span class="sd">        Unit vector (shape (3,) array) transverse to direction of propagation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)])</span></div>
 
 
 <div class="viewcode-block" id="ep">
 <a class="viewcode-back" href="../geometry.html#geometry.ep">[docs]</a>
 <span class="k">def</span> <span class="nf">ep</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="n">phi</span><span class="p">):</span>
+
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the plus-polarization basis tensor for a GW from a particular sky location.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    theta : float</span>
 <span class="sd">        Polar angle from which plane wave originates (range 0-pi)</span>
 <span class="sd">    phi : float</span>
 <span class="sd">        Azimuthal angle of wave (range 0-2pi)</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    Basis tensor (shape (3,3) array)</span>
+<span class="sd">    ep : array</span>
+<span class="sd">        Basis tensor (shape (3,3) array)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="mf">0.</span><span class="p">])</span>
     <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)])</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">m</span><span class="p">)</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">n</span><span class="p">)</span></div>
@@ -487,18 +507,23 @@
 <div class="viewcode-block" id="ec">
 <a class="viewcode-back" href="../geometry.html#geometry.ec">[docs]</a>
 <span class="k">def</span> <span class="nf">ec</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="n">phi</span><span class="p">):</span>
+
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the cross-polarization basis tensor for a GW from a particular sky location.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    theta : float</span>
 <span class="sd">        Polar angle from which plane wave originates (range 0-pi)</span>
 <span class="sd">    phi : float</span>
 <span class="sd">        Azimuthal angle of wave (range 0-2pi)</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    Basis tensor (shape (3,3) array)</span>
+<span class="sd">    ec : array</span>
+<span class="sd">        Basis tensor (shape (3,3) array)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="mf">0.</span><span class="p">])</span>
     <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)])</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">)</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">)</span></div>

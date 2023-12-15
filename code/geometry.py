@@ -168,13 +168,6 @@ class Baseline():
        Detector object comprising the first instrument in our baseline 
     Detector2 : Detector
        Detector object comprising the second instrument in our baseline 
-
-    Methods
-    -------
-    circular_overlap_reduction_functions :
-        Function to compute overlap reduction functions for R and L circular polarizations
-    stokes_overlap_reduction_functions :
-        Function to compute overlap reduction functions for Stokes I and V parameters
     """
 
     def __init__(self,Detector1,Detector2):
@@ -302,83 +295,108 @@ class Baseline():
         return GammaR,GammaL
 
 def Omega(theta,phi):
+
     """
     Unit vector along the direction of a GW's propagation.
     Vectors `Omega`, `m`, and `n` form an orthonormal triad.
+
     Parameters
     ----------
     theta : float
         Polar angle from which plane wave originates (range 0-pi)
     phi : float
         Azimuthal angle of wave (range 0-2pi)
+
     Returns
     -------
-    Unit vector (shape (3,) array) along direction of propagation
+    Omega : array
+        Unit vector (shape (3,) array) along direction of propagation
     """
+
     return -np.array([np.sin(theta)*np.cos(phi),np.sin(theta)*np.sin(phi),np.cos(theta)])
 
 def m(theta,phi):
+
     """
     Unit vector in the plane transverse to a GW's direction of propagation.
     Vectors `Omega`, `m`, and `n` form an orthonormal triad.
+
     Parameters
     ----------
     theta : float
         Polar angle from which plane wave originates (range 0-pi)
     phi : float
         Azimuthal angle of wave (range 0-2pi)
+
     Returns
     -------
-    Unit vector (shape (3,) array) transverse to direction of propagation.
+    m : array
+        Unit vector (shape (3,) array) transverse to direction of propagation.
     """
+
     return np.array([np.sin(phi),-np.cos(phi),0.])
 
 def n(theta,phi):
+
     """
     Unit vector in the plane transverse to a GW's direction of propagation.
     Vectors `Omega`, `m`, and `n` form an orthonormal triad.
+
     Parameters
     ----------
     theta : float
         Polar angle from which plane wave originates (range 0-pi)
     phi : float
         Azimuthal angle of wave (range 0-2pi)
+
     Returns
     -------
-    Unit vector (shape (3,) array) transverse to direction of propagation.
+    n : array
+        Unit vector (shape (3,) array) transverse to direction of propagation.
     """
+
     return np.array([np.cos(theta)*np.cos(phi),np.cos(theta)*np.sin(phi),-np.sin(theta)])
 
 def ep(theta,phi):
+
     """
     Computes the plus-polarization basis tensor for a GW from a particular sky location.
+
     Parameters
     ----------
     theta : float
         Polar angle from which plane wave originates (range 0-pi)
     phi : float
         Azimuthal angle of wave (range 0-2pi)
+
     Returns
     -------
-    Basis tensor (shape (3,3) array)
+    ep : array
+        Basis tensor (shape (3,3) array)
     """
+
     m = np.array([-np.sin(phi),np.cos(phi),0.])
     n = np.array([np.cos(theta)*np.cos(phi),np.cos(theta)*np.sin(phi),-np.sin(theta)])
     return np.outer(m,m)-np.outer(n,n)
 
 def ec(theta,phi):
+
     """
     Computes the cross-polarization basis tensor for a GW from a particular sky location.
+
     Parameters
     ----------
     theta : float
         Polar angle from which plane wave originates (range 0-pi)
     phi : float
         Azimuthal angle of wave (range 0-2pi)
+
     Returns
     -------
-    Basis tensor (shape (3,3) array)
+    ec : array
+        Basis tensor (shape (3,3) array)
     """
+
     m = np.array([-np.sin(phi),np.cos(phi),0.])
     n = np.array([np.cos(theta)*np.cos(phi),np.cos(theta)*np.sin(phi),-np.sin(theta)])
     return np.outer(m,n)+np.outer(n,m)

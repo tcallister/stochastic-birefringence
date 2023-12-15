@@ -16,8 +16,8 @@ def v(Mtot,f):
     """
     Helper function computing the PN expansion parameter (pi*M*f)**(1/3) and returning a tuple of its first three powers.
 
-    Inputs
-    ------
+    Parameters
+    ----------
     Mtot : `float`
         Total binary mass in units of solar masses
     f : `float` or `np.array`
@@ -36,8 +36,8 @@ def dEdf(Mtot,freqs,eta=0.25,PN=True):
     """
     Function to compute the energy spectrum radiated by a CBC
     
-    Inputs
-    ------
+    Parameters
+    ----------
     Mtot : `float`
         Total mass in units of Msun
     freqs : `np.array`
@@ -144,8 +144,8 @@ class OmegaGW(object):
         energy spectrum, we will take a weighted sum across this grid. Weights are imposed by redefining `self.probs`, implemented
         in child classes via the `setProbs()` function.
 
-        Inputs
-        ------
+        Parameters
+        ----------
         ref_mMin: `float`
             Minimum component mass to consider in mass grid
         ref_mMax: `float`
@@ -209,8 +209,8 @@ class OmegaGW(object):
         """
         Helper function to compute exponential factor by which GW energies are birefringently amplified
 
-        Inputs
-        ------
+        Parameters
+        ----------
         kappa_d : `float`
             Coefficient determining degree of amplitude birefringence with comoving distance
         kappa_z : `float`
@@ -238,8 +238,8 @@ class OmegaGW(object):
         """
         Given a prescription for the local merger rate and its evolution over redshift, compute Omega(f)
 
-        Inputs
-        ------
+        Parameters
+        ----------
         R0 : `float`
             Local merger rate density in units Gpc^{-3} yr^{-1}
         dRdV : `np.array`
@@ -306,8 +306,8 @@ class OmegaGW_BBH(OmegaGW):
         Function to set mass-dependent weights over precomputed energy-density spectra in order
         to implement and integrate over a realistic black hole mass distribution.
 
-        Inputs
-        ------
+        Parameters
+        ----------
         mMin : `float`
             Mass below which the black hole primary mass distribution is truncated to zero
         mMax : `float`
