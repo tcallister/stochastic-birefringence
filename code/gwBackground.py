@@ -18,14 +18,14 @@ def v(Mtot,f):
 
     Parameters
     ----------
-    Mtot : `float`
+    Mtot : float
         Total binary mass in units of solar masses
-    f : `float` or `np.array`
+    f : float or np.array
         Frequency or frequencies at which to evaluate
 
     Returns
     -------
-    pn_params : `np.array`
+    pn_params : np.array
         Array containing the first, second, and third powers of the PN expansion parameter
     """
 
@@ -38,13 +38,13 @@ def dEdf(Mtot,freqs,eta=0.25,PN=True):
     
     Parameters
     ----------
-    Mtot : `float`
+    Mtot : float
         Total mass in units of Msun
-    freqs : `np.array`
+    freqs : np.array
         Array of frequencies at which we want to evaluate dEdf
-    eta : `float`
+    eta : float
         Reduced mass ratio. Defaults to 0.25 (equal mass)
-    PN: `bool`
+    PN: bool
         If True, will include PN corrections to radiated energy spectrum (Default True) 
 
     Returns
@@ -146,13 +146,13 @@ class OmegaGW(object):
 
         Parameters
         ----------
-        ref_mMin: `float`
+        ref_mMin: float
             Minimum component mass to consider in mass grid
-        ref_mMax: `float`
+        ref_mMax: float
             Maximum component mass to consider in mass grid
-        ref_zs: `np.array`
+        ref_zs: np.array
             Redshift array across which we will integrate to compute Omega(f)
-        fMax: `float`
+        fMax: float
             Maximum detector-frame frequency to consider
         """
 
@@ -211,16 +211,16 @@ class OmegaGW(object):
 
         Parameters
         ----------
-        kappa_d : `float`
+        kappa_d : float
             Coefficient determining degree of amplitude birefringence with comoving distance
-        kappa_z : `float`
+        kappa_z : float
             Coefficient determining degree of amplitude birefringence with redshift
 
         Returns
         -------
-        cosh_amplification_factor : `np.array`
+        cosh_amplification_factor : np.array
             2D array of cosh amplification factors modifying the energy radiated at detector-frame frequencies `self.ref_freqs` from sources at `self.ref_zs`; used to compute Stokes I background
-        sinh_amplification_factor : `np.array`
+        sinh_amplification_factor : np.array
             2D array of sinh amplification factors modifying the energy radiated at detector-frame frequencies `self.ref_freqs` from sources at `self.ref_zs`; used to compute Stokes V background
         """
 
@@ -240,22 +240,22 @@ class OmegaGW(object):
 
         Parameters
         ----------
-        R0 : `float`
+        R0 : float
             Local merger rate density in units Gpc^{-3} yr^{-1}
-        dRdV : `np.array`
+        dRdV : np.array
             Arbitrarily normalized merger rate density as a function of redshift. Should be defined at the same redshifts specified in `self.ref_zs`
-        targetFreqs : `np.array`
+        targetFreqs : np.array
             Array of frequencies at which we want Omega(f). Must be above 10 and below the `fmax` used to initialize the object
-        kappa_d : `float`
+        kappa_d : float
             Coefficient governing birefringence with respect to comoving distance
-        kappa_z : `float`
+        kappa_z : float
             Coefficient governing birefringence with respect to redshift
 
         Returns
         -------
-        final_Omg_I_spectrum : `np.array`
+        final_Omg_I_spectrum : np.array
             Array containing Stokes I energy density spectrum
-        final_Omg_V_spectrum : `np.array`
+        final_Omg_V_spectrum : np.array
             Array containing Stokes V energy density spectrum
         """
 
@@ -308,24 +308,24 @@ class OmegaGW_BBH(OmegaGW):
 
         Parameters
         ----------
-        mMin : `float`
+        mMin : float
             Mass below which the black hole primary mass distribution is truncated to zero
-        mMax : `float`
+        mMax : float
             Mass above which the black hole primary mass distribution is truncated to zero
-        dmMin : `float`
+        dmMin : float
             Scale of the exponential truncation applied below `mMin`
-        dmMax : `float`
+        dmMax : float
             Scale of the exponential truncation applied above `mMax`
-        lmbda : `float`
+        lmbda : float
             Power-law exponent describing the bulk of the primary mass distribution
-        mu_peak : `float`
+        mu_peak : float
             The location of a Gaussian excess in the primary mass distribution
-        sig_peak : `float`
+        sig_peak : float
             Standard deviation of the gaussian excess
-        frac_peak : `float`
+        frac_peak : float
             The mixture fraction between power law and Gaussian components of the primary mass distribution.
             (Note that the exponential truncations make this mixture fraction only approximate)
-        bq : `float`
+        bq : float
             Power-law exponent governing mass ratio distribution
         """
         

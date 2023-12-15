@@ -48,8 +48,6 @@
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="making-figures.html">Figure generation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="constants.html">constants module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="population_parameters.html">population_parameters module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="geometry.html">geometry module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="makeDelayedRateData.html">makeDelayedRateData module</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">gwBackground module</a><ul>
@@ -112,20 +110,20 @@ via array multiplication. Different mass distributions are imposed by specifying
 <dt class="sig sig-object py" id="gwBackground.OmegaGW.amplification">
 <span class="sig-name descname"><span class="pre">amplification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kappa_d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kappa_z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gwBackground.html#OmegaGW.amplification"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwBackground.OmegaGW.amplification" title="Link to this definition"></a></dt>
 <dd><p>Helper function to compute exponential factor by which GW energies are birefringently amplified</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>kappa_d</strong><span class="classifier"><cite>float</cite></span></dt><dd><p>Coefficient determining degree of amplitude birefringence with comoving distance</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>kappa_d</strong><span class="classifier">float</span></dt><dd><p>Coefficient determining degree of amplitude birefringence with comoving distance</p>
 </dd>
-<dt><strong>kappa_z</strong><span class="classifier"><cite>float</cite></span></dt><dd><p>Coefficient determining degree of amplitude birefringence with redshift</p>
+<dt><strong>kappa_z</strong><span class="classifier">float</span></dt><dd><p>Coefficient determining degree of amplitude birefringence with redshift</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
-<dt><strong>cosh_amplification_factor</strong><span class="classifier"><cite>np.array</cite></span></dt><dd><p>2D array of cosh amplification factors modifying the energy radiated at detector-frame frequencies <cite>self.ref_freqs</cite> from sources at <cite>self.ref_zs</cite>; used to compute Stokes I background</p>
+<dd class="field-even"><dl class="simple">
+<dt><strong>cosh_amplification_factor</strong><span class="classifier">np.array</span></dt><dd><p>2D array of cosh amplification factors modifying the energy radiated at detector-frame frequencies <cite>self.ref_freqs</cite> from sources at <cite>self.ref_zs</cite>; used to compute Stokes I background</p>
 </dd>
-<dt><strong>sinh_amplification_factor</strong><span class="classifier"><cite>np.array</cite></span></dt><dd><p>2D array of sinh amplification factors modifying the energy radiated at detector-frame frequencies <cite>self.ref_freqs</cite> from sources at <cite>self.ref_zs</cite>; used to compute Stokes V background</p>
+<dt><strong>sinh_amplification_factor</strong><span class="classifier">np.array</span></dt><dd><p>2D array of sinh amplification factors modifying the energy radiated at detector-frame frequencies <cite>self.ref_freqs</cite> from sources at <cite>self.ref_zs</cite>; used to compute Stokes V background</p>
 </dd>
 </dl>
 </dd>
@@ -136,26 +134,26 @@ via array multiplication. Different mass distributions are imposed by specifying
 <dt class="sig sig-object py" id="gwBackground.OmegaGW.eval">
 <span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dRdV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targetFreqs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kappa_d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kappa_z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gwBackground.html#OmegaGW.eval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwBackground.OmegaGW.eval" title="Link to this definition"></a></dt>
 <dd><p>Given a prescription for the local merger rate and its evolution over redshift, compute Omega(f)</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>R0</strong><span class="classifier"><cite>float</cite></span></dt><dd><p>Local merger rate density in units Gpc^{-3} yr^{-1}</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>R0</strong><span class="classifier">float</span></dt><dd><p>Local merger rate density in units Gpc^{-3} yr^{-1}</p>
 </dd>
-<dt><strong>dRdV</strong><span class="classifier"><cite>np.array</cite></span></dt><dd><p>Arbitrarily normalized merger rate density as a function of redshift. Should be defined at the same redshifts specified in <cite>self.ref_zs</cite></p>
+<dt><strong>dRdV</strong><span class="classifier">np.array</span></dt><dd><p>Arbitrarily normalized merger rate density as a function of redshift. Should be defined at the same redshifts specified in <cite>self.ref_zs</cite></p>
 </dd>
-<dt><strong>targetFreqs</strong><span class="classifier"><cite>np.array</cite></span></dt><dd><p>Array of frequencies at which we want Omega(f). Must be above 10 and below the <cite>fmax</cite> used to initialize the object</p>
+<dt><strong>targetFreqs</strong><span class="classifier">np.array</span></dt><dd><p>Array of frequencies at which we want Omega(f). Must be above 10 and below the <cite>fmax</cite> used to initialize the object</p>
 </dd>
-<dt><strong>kappa_d</strong><span class="classifier"><cite>float</cite></span></dt><dd><p>Coefficient governing birefringence with respect to comoving distance</p>
+<dt><strong>kappa_d</strong><span class="classifier">float</span></dt><dd><p>Coefficient governing birefringence with respect to comoving distance</p>
 </dd>
-<dt><strong>kappa_z</strong><span class="classifier"><cite>float</cite></span></dt><dd><p>Coefficient governing birefringence with respect to redshift</p>
+<dt><strong>kappa_z</strong><span class="classifier">float</span></dt><dd><p>Coefficient governing birefringence with respect to redshift</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
-<dt><strong>final_Omg_I_spectrum</strong><span class="classifier"><cite>np.array</cite></span></dt><dd><p>Array containing Stokes I energy density spectrum</p>
+<dd class="field-even"><dl class="simple">
+<dt><strong>final_Omg_I_spectrum</strong><span class="classifier">np.array</span></dt><dd><p>Array containing Stokes I energy density spectrum</p>
 </dd>
-<dt><strong>final_Omg_V_spectrum</strong><span class="classifier"><cite>np.array</cite></span></dt><dd><p>Array containing Stokes V energy density spectrum</p>
+<dt><strong>final_Omg_V_spectrum</strong><span class="classifier">np.array</span></dt><dd><p>Array containing Stokes V energy density spectrum</p>
 </dd>
 </dl>
 </dd>
@@ -176,27 +174,27 @@ a population averaged energy spectrum</p>
 <span class="sig-name descname"><span class="pre">setProbs_plPeak</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mMin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mMax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dmMin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dmMax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lmbda</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu_peak</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig_peak</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac_peak</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gwBackground.html#OmegaGW_BBH.setProbs_plPeak"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwBackground.OmegaGW_BBH.setProbs_plPeak" title="Link to this definition"></a></dt>
 <dd><p>Function to set mass-dependent weights over precomputed energy-density spectra in order
 to implement and integrate over a realistic black hole mass distribution.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>mMin</strong><span class="classifier"><cite>float</cite></span></dt><dd><p>Mass below which the black hole primary mass distribution is truncated to zero</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>mMin</strong><span class="classifier">float</span></dt><dd><p>Mass below which the black hole primary mass distribution is truncated to zero</p>
 </dd>
-<dt><strong>mMax</strong><span class="classifier"><cite>float</cite></span></dt><dd><p>Mass above which the black hole primary mass distribution is truncated to zero</p>
+<dt><strong>mMax</strong><span class="classifier">float</span></dt><dd><p>Mass above which the black hole primary mass distribution is truncated to zero</p>
 </dd>
-<dt><strong>dmMin</strong><span class="classifier"><cite>float</cite></span></dt><dd><p>Scale of the exponential truncation applied below <cite>mMin</cite></p>
+<dt><strong>dmMin</strong><span class="classifier">float</span></dt><dd><p>Scale of the exponential truncation applied below <cite>mMin</cite></p>
 </dd>
-<dt><strong>dmMax</strong><span class="classifier"><cite>float</cite></span></dt><dd><p>Scale of the exponential truncation applied above <cite>mMax</cite></p>
+<dt><strong>dmMax</strong><span class="classifier">float</span></dt><dd><p>Scale of the exponential truncation applied above <cite>mMax</cite></p>
 </dd>
-<dt><strong>lmbda</strong><span class="classifier"><cite>float</cite></span></dt><dd><p>Power-law exponent describing the bulk of the primary mass distribution</p>
+<dt><strong>lmbda</strong><span class="classifier">float</span></dt><dd><p>Power-law exponent describing the bulk of the primary mass distribution</p>
 </dd>
-<dt><strong>mu_peak</strong><span class="classifier"><cite>float</cite></span></dt><dd><p>The location of a Gaussian excess in the primary mass distribution</p>
+<dt><strong>mu_peak</strong><span class="classifier">float</span></dt><dd><p>The location of a Gaussian excess in the primary mass distribution</p>
 </dd>
-<dt><strong>sig_peak</strong><span class="classifier"><cite>float</cite></span></dt><dd><p>Standard deviation of the gaussian excess</p>
+<dt><strong>sig_peak</strong><span class="classifier">float</span></dt><dd><p>Standard deviation of the gaussian excess</p>
 </dd>
-<dt><strong>frac_peak</strong><span class="classifier"><cite>float</cite></span></dt><dd><p>The mixture fraction between power law and Gaussian components of the primary mass distribution.
+<dt><strong>frac_peak</strong><span class="classifier">float</span></dt><dd><p>The mixture fraction between power law and Gaussian components of the primary mass distribution.
 (Note that the exponential truncations make this mixture fraction only approximate)</p>
 </dd>
-<dt><strong>bq</strong><span class="classifier"><cite>float</cite></span></dt><dd><p>Power-law exponent governing mass ratio distribution</p>
+<dt><strong>bq</strong><span class="classifier">float</span></dt><dd><p>Power-law exponent governing mass ratio distribution</p>
 </dd>
 </dl>
 </dd>
@@ -211,14 +209,14 @@ to implement and integrate over a realistic black hole mass distribution.</p>
 <dd><p>Function to compute the energy spectrum radiated by a CBC</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>Mtot</strong><span class="classifier"><cite>float</cite></span></dt><dd><p>Total mass in units of Msun</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>Mtot</strong><span class="classifier">float</span></dt><dd><p>Total mass in units of Msun</p>
 </dd>
-<dt><strong>freqs</strong><span class="classifier"><cite>np.array</cite></span></dt><dd><p>Array of frequencies at which we want to evaluate dEdf</p>
+<dt><strong>freqs</strong><span class="classifier">np.array</span></dt><dd><p>Array of frequencies at which we want to evaluate dEdf</p>
 </dd>
-<dt><strong>eta</strong><span class="classifier"><cite>float</cite></span></dt><dd><p>Reduced mass ratio. Defaults to 0.25 (equal mass)</p>
+<dt><strong>eta</strong><span class="classifier">float</span></dt><dd><p>Reduced mass ratio. Defaults to 0.25 (equal mass)</p>
 </dd>
-<dt><strong>PN: `bool`</strong></dt><dd><p>If True, will include PN corrections to radiated energy spectrum (Default True)</p>
+<dt><strong>PN: bool</strong></dt><dd><p>If True, will include PN corrections to radiated energy spectrum (Default True)</p>
 </dd>
 </dl>
 </dd>
@@ -235,18 +233,18 @@ to implement and integrate over a realistic black hole mass distribution.</p>
 <dt class="sig sig-object py" id="gwBackground.v">
 <span class="sig-prename descclassname"><span class="pre">gwBackground.</span></span><span class="sig-name descname"><span class="pre">v</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Mtot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gwBackground.html#v"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gwBackground.v" title="Link to this definition"></a></dt>
 <dd><p>Helper function computing the PN expansion parameter (pi*M*f)**(1/3) and returning a tuple of its first three powers.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>Mtot</strong><span class="classifier"><cite>float</cite></span></dt><dd><p>Total binary mass in units of solar masses</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>Mtot</strong><span class="classifier">float</span></dt><dd><p>Total binary mass in units of solar masses</p>
 </dd>
-<dt><strong>f</strong><span class="classifier"><cite>float</cite> or <cite>np.array</cite></span></dt><dd><p>Frequency or frequencies at which to evaluate</p>
+<dt><strong>f</strong><span class="classifier">float or np.array</span></dt><dd><p>Frequency or frequencies at which to evaluate</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
-<dt><strong>pn_params</strong><span class="classifier"><cite>np.array</cite></span></dt><dd><p>Array containing the first, second, and third powers of the PN expansion parameter</p>
+<dd class="field-even"><dl class="simple">
+<dt><strong>pn_params</strong><span class="classifier">np.array</span></dt><dd><p>Array containing the first, second, and third powers of the PN expansion parameter</p>
 </dd>
 </dl>
 </dd>

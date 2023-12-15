@@ -48,8 +48,6 @@
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="making-figures.html">Figure generation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="constants.html">constants module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="population_parameters.html">population_parameters module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="geometry.html">geometry module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="makeDelayedRateData.html">makeDelayedRateData module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gwBackground.html">gwBackground module</a></li>
@@ -131,12 +129,12 @@ to distance i and frequency j</p>
 <span class="sig-prename descclassname"><span class="pre">numpyro_likelihoods.</span></span><span class="sig-name descname"><span class="pre">birefringence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_dictionary</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/numpyro_likelihoods.html#birefringence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numpyro_likelihoods.birefringence" title="Link to this definition"></a></dt>
 <dd><p>Likelihood to perform inference on a birefringently-amplified stochastic background, for use within <cite>numpyro</cite>.
 Uses Monte Carlo stochastic background calculation scheme associated with <cite>generateMonteCarloEnergies</cite></p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>spectra</strong><span class="classifier"><cite>dict</cite></span></dt><dd><p>Dictionary containing cross-correlation measurements and uncertainties, as prepared by <cite>load_data.get_all_data()</cite></p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>spectra</strong><span class="classifier">dict</span></dt><dd><p>Dictionary containing cross-correlation measurements and uncertainties, as prepared by <cite>load_data.get_all_data()</cite></p>
 </dd>
-<dt><strong>weight_dictionary</strong><span class="classifier"><cite>dict</cite></span></dt><dd><p>Dictionary containing ensemble of BBHs and associated contributions to Omega(f); reweighted to perform Monte Carlo calculation of amplified energy-densities</p>
+<dt><strong>weight_dictionary</strong><span class="classifier">dict</span></dt><dd><p>Dictionary containing ensemble of BBHs and associated contributions to Omega(f); reweighted to perform Monte Carlo calculation of amplified energy-densities</p>
 </dd>
 </dl>
 </dd>
@@ -149,12 +147,12 @@ Uses Monte Carlo stochastic background calculation scheme associated with <cite>
 <dd><p>Likelihood to perform inference on a birefringently-amplified stochastic background, for use within <cite>numpyro</cite>.
 Uses Monte Carlo stochastic background calculation scheme associated with <cite>generateMonteCarloEnergies</cite>
 Infers the merger rate of BBHs alongside the amplitude birefringence coefficients.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>spectra</strong><span class="classifier"><cite>dict</cite></span></dt><dd><p>Dictionary containing cross-correlation measurements and uncertainties, as prepared by <cite>load_data.get_all_data()</cite></p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>spectra</strong><span class="classifier">dict</span></dt><dd><p>Dictionary containing cross-correlation measurements and uncertainties, as prepared by <cite>load_data.get_all_data()</cite></p>
 </dd>
-<dt><strong>weight_dictionary</strong><span class="classifier"><cite>dict</cite></span></dt><dd><p>Dictionary containing ensemble of BBHs and associated contributions to Omega(f); reweighted to perform Monte Carlo calculation of amplified energy-densities</p>
+<dt><strong>weight_dictionary</strong><span class="classifier">dict</span></dt><dd><p>Dictionary containing ensemble of BBHs and associated contributions to Omega(f); reweighted to perform Monte Carlo calculation of amplified energy-densities</p>
 </dd>
 </dl>
 </dd>
@@ -166,12 +164,12 @@ Infers the merger rate of BBHs alongside the amplitude birefringence coefficient
 <span class="sig-prename descclassname"><span class="pre">numpyro_likelihoods.</span></span><span class="sig-name descname"><span class="pre">birefringence_variable_evolution_massGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omg_calculator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/numpyro_likelihoods.html#birefringence_variable_evolution_massGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#numpyro_likelihoods.birefringence_variable_evolution_massGrid" title="Link to this definition"></a></dt>
 <dd><p>Likelihood to perform inference on a birefringently-amplified stochastic background, for use within <cite>numpyro</cite>.
 Uses grid-based stochastic background calculation.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>spectra</strong><span class="classifier"><cite>dict</cite></span></dt><dd><p>Dictionary containing cross-correlation measurements and uncertainties, as prepared by <cite>load_data.get_all_data()</cite></p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>spectra</strong><span class="classifier">dict</span></dt><dd><p>Dictionary containing cross-correlation measurements and uncertainties, as prepared by <cite>load_data.get_all_data()</cite></p>
 </dd>
-<dt><strong>omg_calculator</strong><span class="classifier"><cite>OmegaGW_BBH</cite></span></dt><dd><p><cite>OmegaGW_BBH</cite> object, as defined in <cite>gwBackground.py</cite>.
+<dt><strong>omg_calculator</strong><span class="classifier">OmegaGW_BBH</span></dt><dd><p><cite>OmegaGW_BBH</cite> object, as defined in <cite>gwBackground.py</cite>.
 Used to perform stochastic energy-density calculations</p>
 </dd>
 </dl>
@@ -185,26 +183,26 @@ Used to perform stochastic energy-density calculations</p>
 <dd><p>Helper function to enable Monte Carlo calculation of stochastic energy-density spectra.
 Draws an ensemble of BBHs and their associated energy densities; these energy densities can then be
 reweighted to compute Omega(f) under a variety of BBH populations and/or birefringent scenarios</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>nsamples</strong><span class="classifier"><cite>int</cite></span></dt><dd><p>Size of BBH ensemble to draw</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>nsamples</strong><span class="classifier">int</span></dt><dd><p>Size of BBH ensemble to draw</p>
 </dd>
-<dt><strong>freqs</strong><span class="classifier"><cite>array</cite></span></dt><dd><p>Array of frequencies at which to evaluate energy spectra</p>
+<dt><strong>freqs</strong><span class="classifier">array</span></dt><dd><p>Array of frequencies at which to evaluate energy spectra</p>
 </dd>
-<dt><strong>dRdV_function</strong><span class="classifier"><cite>func</cite></span></dt><dd><p>Function that, when provided a redshift, will return a merger rate per comoving volume</p>
+<dt><strong>dRdV_function</strong><span class="classifier">func</span></dt><dd><p>Function that, when provided a redshift, will return a merger rate per comoving volume</p>
 </dd>
-<dt><strong>zMax</strong><span class="classifier"><cite>int</cite></span></dt><dd><p>Maximum redshift to consider (default 10)</p>
+<dt><strong>zMax</strong><span class="classifier">int</span></dt><dd><p>Maximum redshift to consider (default 10)</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl>
-<dt><strong>mc_weights</strong><span class="classifier"><cite>array</cite></span></dt><dd><p>The mean of these weights gives the stochastic energy density Omega(f) arising from our default BBH population</p>
+<dd class="field-even"><dl class="simple">
+<dt><strong>mc_weights</strong><span class="classifier">array</span></dt><dd><p>The mean of these weights gives the stochastic energy density Omega(f) arising from our default BBH population</p>
 </dd>
-<dt><strong>z_samples</strong><span class="classifier"><cite>array</cite></span></dt><dd><p>Redshifts of each BBH in our ensemble</p>
+<dt><strong>z_samples</strong><span class="classifier">array</span></dt><dd><p>Redshifts of each BBH in our ensemble</p>
 </dd>
-<dt><strong>dRdV_samples</strong><span class="classifier"><cite>array</cite></span></dt><dd><p>The comoving merger rate density at each redshift in <cite>z_samples</cite>; divide by this if you wish to reweight <cite>mc_weights</cite> to another redshift distribution</p>
+<dt><strong>dRdV_samples</strong><span class="classifier">array</span></dt><dd><p>The comoving merger rate density at each redshift in <cite>z_samples</cite>; divide by this if you wish to reweight <cite>mc_weights</cite> to another redshift distribution</p>
 </dd>
 </dl>
 </dd>
@@ -249,10 +247,10 @@ Stochastic background is parametrized by right vs. left energy-densities, with t
 <li><p><cite>log_Omega_R</cite> : log10 of the energy-density amplitude at f=25 Hz in right-circular polarizations</p></li>
 <li><p><cite>log_Omega_L</cite> : log10 of the energy-density amplitude at f=25 Hz in left-circular polarizations</p></li>
 </ul>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>spectra</strong><span class="classifier"><cite>dict</cite></span></dt><dd><p>Dictionary containing cross-correlation measurements and uncertainties, as prepared by <cite>load_data.get_all_data()</cite></p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>spectra</strong><span class="classifier">dict</span></dt><dd><p>Dictionary containing cross-correlation measurements and uncertainties, as prepared by <cite>load_data.get_all_data()</cite></p>
 </dd>
 </dl>
 </dd>
@@ -267,10 +265,10 @@ Stochastic background is parametrized by Stokes I and V amplitudes, with the fol
 * <cite>alpha_I</cite> : Power-law index on total energy density
 * <cite>log_Omega_I</cite> : log10 of the total energy-density amplitude at f=25 Hz
 * <cite>log_Omega_L</cite> : log10 of the energy-density amplitude at f=25 Hz in left-circular polarizations</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>spectra</strong><span class="classifier"><cite>dict</cite></span></dt><dd><p>Dictionary containing cross-correlation measurements and uncertainties, as prepared by <cite>load_data.get_all_data()</cite></p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>spectra</strong><span class="classifier">dict</span></dt><dd><p>Dictionary containing cross-correlation measurements and uncertainties, as prepared by <cite>load_data.get_all_data()</cite></p>
 </dd>
 </dl>
 </dd>
@@ -284,10 +282,10 @@ Stochastic background is parametrized by Stokes I and V amplitudes, with the fol
 Stochastic background is assumed to be unpolarized and governed by two parameters:
 * <cite>alpha</cite> : Power-law index on energy density
 * <cite>log_Omega</cite> : log10 of the energy-density amplitude at f=25 Hz</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>spectra</strong><span class="classifier"><cite>dict</cite></span></dt><dd><p>Dictionary containing cross-correlation measurements and uncertainties, as prepared by <cite>load_data.get_all_data()</cite></p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>spectra</strong><span class="classifier">dict</span></dt><dd><p>Dictionary containing cross-correlation measurements and uncertainties, as prepared by <cite>load_data.get_all_data()</cite></p>
 </dd>
 </dl>
 </dd>

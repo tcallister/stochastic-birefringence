@@ -49,7 +49,7 @@ def unpolarized(spectra):
 
     Parameters
     ----------
-    spectra : `dict`
+    spectra : dict
         Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`
     """
 
@@ -85,7 +85,7 @@ def right_left(spectra):
 
     Parameters
     ----------
-    spectra : `dict`
+    spectra : dict
         Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`
     """
 
@@ -133,7 +133,7 @@ def stokes(spectra):
 
     Parameters
     ----------
-    spectra : `dict`
+    spectra : dict
         Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`
     """
 
@@ -177,22 +177,22 @@ def generateMonteCarloEnergies(nsamples,freqs,dRdV_function,zMax=10):
 
     Parameters
     ----------
-    nsamples : `int`
+    nsamples : int
         Size of BBH ensemble to draw
-    freqs : `array`
+    freqs : array
         Array of frequencies at which to evaluate energy spectra
-    dRdV_function : `func`
+    dRdV_function : func
         Function that, when provided a redshift, will return a merger rate per comoving volume
-    zMax : `int`
+    zMax : int
         Maximum redshift to consider (default 10)
 
     Returns
     -------
-    mc_weights : `array`
+    mc_weights : array
         The mean of these weights gives the stochastic energy density Omega(f) arising from our default BBH population
-    z_samples : `array`
+    z_samples : array
         Redshifts of each BBH in our ensemble
-    dRdV_samples : `array`
+    dRdV_samples : array
         The comoving merger rate density at each redshift in `z_samples`; divide by this if you wish to reweight `mc_weights` to another redshift distribution
     """
 
@@ -300,9 +300,9 @@ def birefringence(spectra,weight_dictionary):
 
     Parameters
     ----------
-    spectra : `dict`
+    spectra : dict
         Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`
-    weight_dictionary : `dict`
+    weight_dictionary : dict
         Dictionary containing ensemble of BBHs and associated contributions to Omega(f); reweighted to perform Monte Carlo calculation of amplified energy-densities
     """
     
@@ -360,9 +360,9 @@ def birefringence_variable_evolution(spectra,weight_dictionary):
 
     Parameters
     ----------
-    spectra : `dict`
+    spectra : dict
         Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`
-    weight_dictionary : `dict`
+    weight_dictionary : dict
         Dictionary containing ensemble of BBHs and associated contributions to Omega(f); reweighted to perform Monte Carlo calculation of amplified energy-densities
     """
     
@@ -443,9 +443,9 @@ def birefringence_variable_evolution_massGrid(spectra,omg_calculator):
 
     Parameters
     ----------
-    spectra : `dict`
+    spectra : dict
         Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`
-    omg_calculator : `OmegaGW_BBH`    
+    omg_calculator : OmegaGW_BBH    
         `OmegaGW_BBH` object, as defined in `gwBackground.py`.
         Used to perform stochastic energy-density calculations
     """

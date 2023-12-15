@@ -4,8 +4,6 @@ Modules
 .. toctree::
    :maxdepth: 1
 
-   constants
-   population_parameters
    geometry
    makeDelayedRateData
    gwBackground

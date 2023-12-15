@@ -128,7 +128,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    spectra : `dict`</span>
+<span class="sd">    spectra : dict</span>
 <span class="sd">        Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -167,7 +167,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    spectra : `dict`</span>
+<span class="sd">    spectra : dict</span>
 <span class="sd">        Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -218,7 +218,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    spectra : `dict`</span>
+<span class="sd">    spectra : dict</span>
 <span class="sd">        Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -265,22 +265,22 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    nsamples : `int`</span>
+<span class="sd">    nsamples : int</span>
 <span class="sd">        Size of BBH ensemble to draw</span>
-<span class="sd">    freqs : `array`</span>
+<span class="sd">    freqs : array</span>
 <span class="sd">        Array of frequencies at which to evaluate energy spectra</span>
-<span class="sd">    dRdV_function : `func`</span>
+<span class="sd">    dRdV_function : func</span>
 <span class="sd">        Function that, when provided a redshift, will return a merger rate per comoving volume</span>
-<span class="sd">    zMax : `int`</span>
+<span class="sd">    zMax : int</span>
 <span class="sd">        Maximum redshift to consider (default 10)</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    mc_weights : `array`</span>
+<span class="sd">    mc_weights : array</span>
 <span class="sd">        The mean of these weights gives the stochastic energy density Omega(f) arising from our default BBH population</span>
-<span class="sd">    z_samples : `array`</span>
+<span class="sd">    z_samples : array</span>
 <span class="sd">        Redshifts of each BBH in our ensemble</span>
-<span class="sd">    dRdV_samples : `array`</span>
+<span class="sd">    dRdV_samples : array</span>
 <span class="sd">        The comoving merger rate density at each redshift in `z_samples`; divide by this if you wish to reweight `mc_weights` to another redshift distribution</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -394,9 +394,9 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    spectra : `dict`</span>
+<span class="sd">    spectra : dict</span>
 <span class="sd">        Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`</span>
-<span class="sd">    weight_dictionary : `dict`</span>
+<span class="sd">    weight_dictionary : dict</span>
 <span class="sd">        Dictionary containing ensemble of BBHs and associated contributions to Omega(f); reweighted to perform Monte Carlo calculation of amplified energy-densities</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
@@ -457,9 +457,9 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    spectra : `dict`</span>
+<span class="sd">    spectra : dict</span>
 <span class="sd">        Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`</span>
-<span class="sd">    weight_dictionary : `dict`</span>
+<span class="sd">    weight_dictionary : dict</span>
 <span class="sd">        Dictionary containing ensemble of BBHs and associated contributions to Omega(f); reweighted to perform Monte Carlo calculation of amplified energy-densities</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
@@ -543,9 +543,9 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    spectra : `dict`</span>
+<span class="sd">    spectra : dict</span>
 <span class="sd">        Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`</span>
-<span class="sd">    omg_calculator : `OmegaGW_BBH`    </span>
+<span class="sd">    omg_calculator : OmegaGW_BBH    </span>
 <span class="sd">        `OmegaGW_BBH` object, as defined in `gwBackground.py`.</span>
 <span class="sd">        Used to perform stochastic energy-density calculations</span>
 <span class="sd">    &quot;&quot;&quot;</span>

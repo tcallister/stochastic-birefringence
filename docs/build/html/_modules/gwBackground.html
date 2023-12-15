@@ -94,14 +94,14 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    Mtot : `float`</span>
+<span class="sd">    Mtot : float</span>
 <span class="sd">        Total binary mass in units of solar masses</span>
-<span class="sd">    f : `float` or `np.array`</span>
+<span class="sd">    f : float or np.array</span>
 <span class="sd">        Frequency or frequencies at which to evaluate</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    pn_params : `np.array`</span>
+<span class="sd">    pn_params : np.array</span>
 <span class="sd">        Array containing the first, second, and third powers of the PN expansion parameter</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -117,13 +117,13 @@
 <span class="sd">    </span>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    Mtot : `float`</span>
+<span class="sd">    Mtot : float</span>
 <span class="sd">        Total mass in units of Msun</span>
-<span class="sd">    freqs : `np.array`</span>
+<span class="sd">    freqs : np.array</span>
 <span class="sd">        Array of frequencies at which we want to evaluate dEdf</span>
-<span class="sd">    eta : `float`</span>
+<span class="sd">    eta : float</span>
 <span class="sd">        Reduced mass ratio. Defaults to 0.25 (equal mass)</span>
-<span class="sd">    PN: `bool`</span>
+<span class="sd">    PN: bool</span>
 <span class="sd">        If True, will include PN corrections to radiated energy spectrum (Default True) </span>
 
 <span class="sd">    Returns</span>
@@ -228,13 +228,13 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        ref_mMin: `float`</span>
+<span class="sd">        ref_mMin: float</span>
 <span class="sd">            Minimum component mass to consider in mass grid</span>
-<span class="sd">        ref_mMax: `float`</span>
+<span class="sd">        ref_mMax: float</span>
 <span class="sd">            Maximum component mass to consider in mass grid</span>
-<span class="sd">        ref_zs: `np.array`</span>
+<span class="sd">        ref_zs: np.array</span>
 <span class="sd">            Redshift array across which we will integrate to compute Omega(f)</span>
-<span class="sd">        fMax: `float`</span>
+<span class="sd">        fMax: float</span>
 <span class="sd">            Maximum detector-frame frequency to consider</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -295,16 +295,16 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        kappa_d : `float`</span>
+<span class="sd">        kappa_d : float</span>
 <span class="sd">            Coefficient determining degree of amplitude birefringence with comoving distance</span>
-<span class="sd">        kappa_z : `float`</span>
+<span class="sd">        kappa_z : float</span>
 <span class="sd">            Coefficient determining degree of amplitude birefringence with redshift</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        cosh_amplification_factor : `np.array`</span>
+<span class="sd">        cosh_amplification_factor : np.array</span>
 <span class="sd">            2D array of cosh amplification factors modifying the energy radiated at detector-frame frequencies `self.ref_freqs` from sources at `self.ref_zs`; used to compute Stokes I background</span>
-<span class="sd">        sinh_amplification_factor : `np.array`</span>
+<span class="sd">        sinh_amplification_factor : np.array</span>
 <span class="sd">            2D array of sinh amplification factors modifying the energy radiated at detector-frame frequencies `self.ref_freqs` from sources at `self.ref_zs`; used to compute Stokes V background</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -327,22 +327,22 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        R0 : `float`</span>
+<span class="sd">        R0 : float</span>
 <span class="sd">            Local merger rate density in units Gpc^{-3} yr^{-1}</span>
-<span class="sd">        dRdV : `np.array`</span>
+<span class="sd">        dRdV : np.array</span>
 <span class="sd">            Arbitrarily normalized merger rate density as a function of redshift. Should be defined at the same redshifts specified in `self.ref_zs`</span>
-<span class="sd">        targetFreqs : `np.array`</span>
+<span class="sd">        targetFreqs : np.array</span>
 <span class="sd">            Array of frequencies at which we want Omega(f). Must be above 10 and below the `fmax` used to initialize the object</span>
-<span class="sd">        kappa_d : `float`</span>
+<span class="sd">        kappa_d : float</span>
 <span class="sd">            Coefficient governing birefringence with respect to comoving distance</span>
-<span class="sd">        kappa_z : `float`</span>
+<span class="sd">        kappa_z : float</span>
 <span class="sd">            Coefficient governing birefringence with respect to redshift</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        final_Omg_I_spectrum : `np.array`</span>
+<span class="sd">        final_Omg_I_spectrum : np.array</span>
 <span class="sd">            Array containing Stokes I energy density spectrum</span>
-<span class="sd">        final_Omg_V_spectrum : `np.array`</span>
+<span class="sd">        final_Omg_V_spectrum : np.array</span>
 <span class="sd">            Array containing Stokes V energy density spectrum</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -401,24 +401,24 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        mMin : `float`</span>
+<span class="sd">        mMin : float</span>
 <span class="sd">            Mass below which the black hole primary mass distribution is truncated to zero</span>
-<span class="sd">        mMax : `float`</span>
+<span class="sd">        mMax : float</span>
 <span class="sd">            Mass above which the black hole primary mass distribution is truncated to zero</span>
-<span class="sd">        dmMin : `float`</span>
+<span class="sd">        dmMin : float</span>
 <span class="sd">            Scale of the exponential truncation applied below `mMin`</span>
-<span class="sd">        dmMax : `float`</span>
+<span class="sd">        dmMax : float</span>
 <span class="sd">            Scale of the exponential truncation applied above `mMax`</span>
-<span class="sd">        lmbda : `float`</span>
+<span class="sd">        lmbda : float</span>
 <span class="sd">            Power-law exponent describing the bulk of the primary mass distribution</span>
-<span class="sd">        mu_peak : `float`</span>
+<span class="sd">        mu_peak : float</span>
 <span class="sd">            The location of a Gaussian excess in the primary mass distribution</span>
-<span class="sd">        sig_peak : `float`</span>
+<span class="sd">        sig_peak : float</span>
 <span class="sd">            Standard deviation of the gaussian excess</span>
-<span class="sd">        frac_peak : `float`</span>
+<span class="sd">        frac_peak : float</span>
 <span class="sd">            The mixture fraction between power law and Gaussian components of the primary mass distribution.</span>
 <span class="sd">            (Note that the exponential truncations make this mixture fraction only approximate)</span>
-<span class="sd">        bq : `float`</span>
+<span class="sd">        bq : float</span>
 <span class="sd">            Power-law exponent governing mass ratio distribution</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
