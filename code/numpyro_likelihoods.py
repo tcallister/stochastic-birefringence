@@ -44,8 +44,8 @@ def unpolarized(spectra):
     """
     Likelihood to perform a standard power-law inference on the stochastic background, for use within `numpyro`.
     Stochastic background is assumed to be unpolarized and governed by two parameters:
-       * `alpha` : Power-law index on energy density
-       * `log_Omega` : log10 of the energy-density amplitude at f=25 Hz
+    * `alpha` : Power-law index on energy density
+    * `log_Omega` : log10 of the energy-density amplitude at f=25 Hz
 
     Parameters
     ----------
@@ -77,10 +77,11 @@ def right_left(spectra):
     """
     Likelihood to perform inference on a possibly-circularly-polarized stochastic background, for use within `numpyro`.
     Stochastic background is parametrized by right vs. left energy-densities, with the following four parameters:
-       * `alpha_R` : Power-law index on energy density in right-circular polarizations
-       * `alpha_L` : Power-law index on energy density in left-circular polarizations
-       * `log_Omega_R` : log10 of the energy-density amplitude at f=25 Hz in right-circular polarizations
-       * `log_Omega_L` : log10 of the energy-density amplitude at f=25 Hz in left-circular polarizations
+
+    * `alpha_R` : Power-law index on energy density in right-circular polarizations
+    * `alpha_L` : Power-law index on energy density in left-circular polarizations
+    * `log_Omega_R` : log10 of the energy-density amplitude at f=25 Hz in right-circular polarizations
+    * `log_Omega_L` : log10 of the energy-density amplitude at f=25 Hz in left-circular polarizations
 
     Parameters
     ----------
@@ -126,9 +127,9 @@ def stokes(spectra):
     """
     Likelihood to perform inference on a possibly-circularly-polarized stochastic background, for use within `numpyro`.
     Stochastic background is parametrized by Stokes I and V amplitudes, with the following four parameters:
-       * `alpha_I` : Power-law index on total energy density
-       * `log_Omega_I` : log10 of the total energy-density amplitude at f=25 Hz 
-       * `log_Omega_L` : log10 of the energy-density amplitude at f=25 Hz in left-circular polarizations
+    * `alpha_I` : Power-law index on total energy density
+    * `log_Omega_I` : log10 of the total energy-density amplitude at f=25 Hz 
+    * `log_Omega_L` : log10 of the energy-density amplitude at f=25 Hz in left-circular polarizations
 
     Parameters
     ----------

@@ -38,7 +38,7 @@ def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGri
         Function to speed up calculation by skipping points in our 2D grid where the likelihood is known to be zero.
         Takes in two arguments, `kappa_D` and `kappa_z` and returns a Boolean value.
         If True, the point in question will be skipped and the log-likelihood manually fixed to -inf.
-        Defaults to :python:`lambda x,y : False`
+        Defaults to :code:`lambda x,y : False`
     massGridSize : `tuple`
         A two element tuple determining the number of mass values over which to integrate when computing the stochastic background.
         Defaults to `(30,29)`.

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>makeDelayedRateData &mdash; stochastic-birefringence  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            stochastic-birefringence
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../making-figures.html">Figure generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Modules</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">stochastic-birefringence</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">makeDelayedRateData</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for makeDelayedRateData</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">constants</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">astropy.cosmology</span> <span class="kn">import</span> <span class="n">Planck18</span>
+<span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="n">codeDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+
+<div class="viewcode-block" id="timeDelay">
+<a class="viewcode-back" href="../makeDelayedRateData.html#makeDelayedRateData.timeDelay">[docs]</a>
+<span class="k">def</span> <span class="nf">timeDelay</span><span class="p">(</span><span class="n">zMerge</span><span class="p">,</span><span class="n">zForm</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function to compute the proper time occuring between redshifts zForm and zMerge</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    zMerge : `int`</span>
+<span class="sd">        Redshift at binary merger</span>
+<span class="sd">    zForm: `int`</span>
+<span class="sd">        Redshift at binary formation</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    time_delay : `int`</span>
+<span class="sd">        Source-frame time delay between `zMerge` and `zForm` in Gyr        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># We better be merging after we&#39;ve formed...</span>
+    <span class="k">if</span> <span class="n">zMerge</span><span class="o">&gt;</span><span class="n">zForm</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="c1"># Take integral</span>
+        <span class="n">zs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">zMerge</span><span class="p">,</span><span class="n">zForm</span><span class="p">,</span><span class="mi">500</span><span class="p">)</span>
+        <span class="n">timeDelayIntegrands</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">Gyr</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">((</span><span class="mf">1.</span><span class="o">+</span><span class="n">zs</span><span class="p">)</span><span class="o">*</span><span class="n">H0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">OmgM</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">zs</span><span class="p">,</span><span class="mf">3.</span><span class="p">)</span><span class="o">+</span><span class="n">OmgL</span><span class="p">),</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">timeDelayIntegrands</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">zs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">zs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="generateTimeDelayData">
+<a class="viewcode-back" href="../makeDelayedRateData.html#makeDelayedRateData.generateTimeDelayData">[docs]</a>
+<span class="k">def</span> <span class="nf">generateTimeDelayData</span><span class="p">(</span><span class="n">zMax</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    When computing stochastic backgrounds, we will need to integrate energies radiated by compact binaries</span>
+<span class="sd">    across a range of source formation redshifts as well as a range of time delays.</span>
+<span class="sd">    This helper script precomputes a set of grids over possible redshifts and time delays to enable downstream</span>
+<span class="sd">    integration. Specifically, the following are computed:</span>
+
+<span class="sd">    * `zs`: A 1D array of merger redshifts</span>
+<span class="sd">    * `tds`: A 1D array of delay times (units of Gyr) between 0.01 Gyr -- 13.5 Gyr</span>
+<span class="sd">    * `formationRedshifts`: A 2D array of formation redshifts corresponding to each combination of *merger* redshifts and time delays. The value `formationRedshifts[i,j]` corresponds to the formation redshift of a binary that mergers at zs[i] after a time delay tds[j].</span>
+<span class="sd">    * `formationRates`: A 2D array of the SFR (not metallicity weighted) at each of the redshifts in `formationRedshifts`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    zMax : `int`</span>
+<span class="sd">        Maximum formation redshift to consider (default 10)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    delayedRateDict : dict</span>
+<span class="sd">        Dictionary containing the above keys</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># MD rate density parameters</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="mf">2.7</span>
+    <span class="n">beta</span> <span class="o">=</span> <span class="mf">5.6</span>
+    <span class="n">zpeak</span> <span class="o">=</span> <span class="mf">1.9</span>
+
+    <span class="c1"># Set up grids of possible merger redshifts and evolutionary time delays (Gyr)</span>
+    <span class="n">zs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">zMax</span><span class="p">,</span><span class="mf">0.01</span><span class="p">)</span>
+    <span class="n">tds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.005</span><span class="p">,</span><span class="mf">13.5</span><span class="p">,</span><span class="mf">0.005</span><span class="p">)</span>
+
+    <span class="c1"># Also set up a 2D grid that will hold the **formation redshifts** zf(zm,td)</span>
+    <span class="c1"># corresponding to a merger at z=zm after a time delay td</span>
+    <span class="n">formationRedshifts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">zs</span><span class="o">.</span><span class="n">size</span><span class="p">,</span><span class="n">tds</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+
+    <span class="c1"># Prepare to save the SFR at these formation redshifts</span>
+    <span class="n">formationRates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">zs</span><span class="o">.</span><span class="n">size</span><span class="p">,</span><span class="n">tds</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+
+    <span class="c1"># Loop across merger redshifts</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">zm</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">zs</span><span class="p">):</span>
+
+        <span class="c1"># At each merger redshift, build an interpolator to map from time delays back to a formation redshift</span>
+        <span class="c1"># First define a reference array of formation redshifts</span>
+        <span class="c1"># Our resolution is given by solving for the step size dz that will give us time delays &lt; 10 Myr</span>
+        <span class="n">dz</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.003</span><span class="o">*</span><span class="n">Gyr</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="mf">0.</span><span class="p">)</span><span class="o">*</span><span class="n">H0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">OmgM</span><span class="o">+</span><span class="n">OmgL</span><span class="p">)</span>
+        <span class="n">zf_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">zm</span><span class="p">,</span><span class="mf">15.</span><span class="p">,</span><span class="n">dz</span><span class="p">)</span>               
+
+        <span class="c1"># Now compute time delays between the given merger redshift zm and each of the zf&#39;s</span>
+        <span class="n">timeDelayIntegrands</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">Gyr</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">((</span><span class="mf">1.</span><span class="o">+</span><span class="n">zf_data</span><span class="p">)</span><span class="o">*</span><span class="n">H0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">OmgM</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">zf_data</span><span class="p">,</span><span class="mf">3.</span><span class="p">)</span><span class="o">+</span><span class="n">OmgL</span><span class="p">),</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span>
+        <span class="n">td_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">timeDelayIntegrands</span><span class="p">)</span><span class="o">*</span><span class="n">dz</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># Evaluate formation redshifts corresponding to each time delay in &quot;tds&quot;</span>
+        <span class="n">zfs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">tds</span><span class="p">,</span><span class="n">td_data</span><span class="p">,</span><span class="n">zf_data</span><span class="p">)</span>
+        <span class="n">formationRedshifts</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">zfs</span>
+
+        <span class="c1"># Get the star formation rate at this *formation* redshift</span>
+        <span class="n">formationRates</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">zfs</span><span class="p">,</span><span class="n">alpha</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">((</span><span class="mf">1.</span><span class="o">+</span><span class="n">zfs</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">zpeak</span><span class="p">),</span><span class="n">beta</span><span class="p">))</span>
+        <span class="n">formationRates</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">zfs</span><span class="o">!=</span><span class="n">zfs</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">formationRates</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">zfs</span><span class="o">&gt;</span><span class="n">zMax</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Store</span>
+    <span class="n">delayedRateDict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">delayedRateDict</span><span class="p">[</span><span class="s1">&#39;formationRates&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">formationRates</span>
+    <span class="n">delayedRateDict</span><span class="p">[</span><span class="s1">&#39;formationRedshifts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">formationRedshifts</span>
+    <span class="n">delayedRateDict</span><span class="p">[</span><span class="s1">&#39;zs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">zs</span>
+    <span class="n">delayedRateDict</span><span class="p">[</span><span class="s1">&#39;tds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tds</span>
+
+    <span class="k">return</span> <span class="n">delayedRateDict</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, T. Callister, L. Jenks, D. Holz, N. Yunes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

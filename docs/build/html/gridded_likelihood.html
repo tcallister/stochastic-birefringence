@@ -22,7 +22,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="gwBackground module" href="gwBackground.html" /> 
+    <link rel="next" title="numpyro_likelihoods module" href="numpyro_likelihoods.html" />
+    <link rel="prev" title="piCurve module" href="piCurve.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,12 +49,18 @@
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="making-figures.html">Figure generation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="constants.html">constants module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="population_parameters.html">population_parameters module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="geometry.html">geometry module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="makeDelayedRateData.html">makeDelayedRateData module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gwBackground.html">gwBackground module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="piCurve.html">piCurve module</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">gridded_likelihood module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#gridded_likelihood.compute_likelihood_grids"><code class="docutils literal notranslate"><span class="pre">compute_likelihood_grids()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="numpyro_likelihoods.html">numpyro_likelihoods module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="load_data.html">load_data module</a></li>
 </ul>
 </li>
 </ul>
@@ -116,7 +123,7 @@ In particular, three calculations are done:</p>
 <dt><strong>clippingFunction</strong><span class="classifier"><cite>func</cite></span></dt><dd><p>Function to speed up calculation by skipping points in our 2D grid where the likelihood is known to be zero.
 Takes in two arguments, <cite>kappa_D</cite> and <cite>kappa_z</cite> and returns a Boolean value.
 If True, the point in question will be skipped and the log-likelihood manually fixed to -inf.
-Defaults to <a href="#id1"><span class="problematic" id="id2">:python:`lambda x,y : False`</span></a></p>
+Defaults to <code class="code docutils literal notranslate"><span class="pre">lambda</span> <span class="pre">x,y</span> <span class="pre">:</span> <span class="pre">False</span></code></p>
 </dd>
 <dt><strong>massGridSize</strong><span class="classifier"><cite>tuple</cite></span></dt><dd><p>A two element tuple determining the number of mass values over which to integrate when computing the stochastic background.
 Defaults to <cite>(30,29)</cite>.</p>
@@ -164,7 +171,8 @@ Keys are the following:</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="gwBackground.html" class="btn btn-neutral float-left" title="gwBackground module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="piCurve.html" class="btn btn-neutral float-left" title="piCurve module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="numpyro_likelihoods.html" class="btn btn-neutral float-right" title="numpyro_likelihoods module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>piCurve &mdash; stochastic-birefringence  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            stochastic-birefringence
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../making-figures.html">Figure generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Modules</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">stochastic-birefringence</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">piCurve</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for piCurve</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">geometry</span> <span class="kn">import</span> <span class="n">Detector</span><span class="p">,</span><span class="n">Baseline</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span><span class="nn">os</span>
+<span class="n">script_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+
+<div class="viewcode-block" id="pi_curve">
+<a class="viewcode-back" href="../piCurve.html#piCurve.pi_curve">[docs]</a>
+<span class="k">def</span> <span class="nf">pi_curve</span><span class="p">(</span><span class="n">frequencies</span><span class="p">,</span><span class="n">sigmas</span><span class="p">,</span><span class="n">alpha_min</span><span class="p">,</span><span class="n">alpha_max</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function to compute PI curve corresponding to a set of narrowband sigma(f) uncertainties.</span>
+<span class="sd">    CAUTION: This code assumes that sigma(f) follows the convention in which the cross-correlation</span>
+<span class="sd">    measurements C(f) are direct estimates of Omega_I(f), rather than gamma_I*Omega_I + gamma_V*Omega_V.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    frequencies : `array`</span>
+<span class="sd">        Array of frequencies at which data are defined</span>
+<span class="sd">    sigmas : `array`</span>
+<span class="sd">        Corresponding array of narrowband uncertainties. See note above about normalization</span>
+<span class="sd">    alpha_min : `float`</span>
+<span class="sd">        Minimum signal power-law index to consider</span>
+<span class="sd">    alpha_max : `float`</span>
+<span class="sd">        Maximum signal power-law index to consider</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pi : `array`</span>
+<span class="sd">        Power-law integrated curve defined across `frequencies`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Range of power-law indices</span>
+    <span class="n">alphas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">alpha_min</span><span class="p">,</span><span class="n">alpha_max</span><span class="p">,</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">amplitudes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">alphas</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+    <span class="c1"># Loop across indices</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">alpha</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">alphas</span><span class="p">):</span>
+
+        <span class="c1"># Compute power-law model with a reference amplitude of one</span>
+        <span class="n">omega_unscaled</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">frequencies</span><span class="o">/</span><span class="mf">25.</span><span class="p">,</span><span class="n">alpha</span><span class="p">)</span>
+
+        <span class="c1"># Compute reference snr</span>
+        <span class="n">reference_snr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">omega_unscaled</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">sigmas</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">detectable_amp</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="n">reference_snr</span>
+        <span class="n">amplitudes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">detectable_amp</span>
+
+    <span class="c1"># Define arrays holding all power-laws</span>
+    <span class="n">power_law_locus</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">amplitudes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">frequencies</span><span class="o">/</span><span class="mf">25.</span><span class="p">)</span><span class="o">**</span><span class="n">alphas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">alphas</span><span class="o">.</span><span class="n">size</span><span class="p">)])</span>
+
+    <span class="n">pi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">power_law_locus</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pi</span></div>
+
+
+<div class="viewcode-block" id="stokes_I_PI">
+<a class="viewcode-back" href="../piCurve.html#piCurve.stokes_I_PI">[docs]</a>
+<span class="k">def</span> <span class="nf">stokes_I_PI</span><span class="p">():</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function to compute and return PI curve for a Stokes-I gravitational-wave background, integrated</span>
+<span class="sd">    over all detector pairs and observing runs, using the `pi_curve` function.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    None</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    frequencies : `array`</span>
+<span class="sd">        Array of frequencies at which PI curve will be defined</span>
+<span class="sd">    manual_PI_curve : `array`</span>
+<span class="sd">        PI curve indicating the one-sigma sensitivity of all HLV baselines across all observing run</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Read data</span>
+    <span class="n">HL_O1_freqs</span><span class="p">,</span><span class="n">HL_O1_sigmas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">script_directory</span><span class="o">+</span><span class="s1">&#39;/../input/H1L1_O1.dat&#39;</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">usecols</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">HL_O2_freqs</span><span class="p">,</span><span class="n">HL_O2_sigmas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">script_directory</span><span class="o">+</span><span class="s1">&#39;/../input/H1L1_O2.dat&#39;</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">usecols</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">HL_O3_freqs</span><span class="p">,</span><span class="n">HL_O3_sigmas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">script_directory</span><span class="o">+</span><span class="s1">&#39;/../input/H1L1_O3.dat&#39;</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">usecols</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">HV_O3_freqs</span><span class="p">,</span><span class="n">HV_O3_sigmas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">script_directory</span><span class="o">+</span><span class="s1">&#39;/../input/H1V1_O3.dat&#39;</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">usecols</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">LV_O3_freqs</span><span class="p">,</span><span class="n">LV_O3_sigmas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">script_directory</span><span class="o">+</span><span class="s1">&#39;/../input/L1V1_O3.dat&#39;</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">usecols</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="c1"># Optimally combine uncertainties</span>
+    <span class="n">inv_full_sigmas_squared</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="n">HL_O1_sigmas</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mf">1.</span><span class="o">/</span><span class="n">HL_O2_sigmas</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mf">1.</span><span class="o">/</span><span class="n">HL_O3_sigmas</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mf">1.</span><span class="o">/</span><span class="n">HV_O3_sigmas</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mf">1.</span><span class="o">/</span><span class="n">LV_O3_sigmas</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">full_sigmas</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">inv_full_sigmas_squared</span><span class="p">)</span>
+
+    <span class="c1"># And compute PI curve</span>
+    <span class="n">manual_PI_curve</span> <span class="o">=</span> <span class="n">pi_curve</span><span class="p">(</span><span class="n">HL_O1_freqs</span><span class="p">,</span><span class="n">full_sigmas</span><span class="p">,</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">HL_O1_freqs</span><span class="p">,</span><span class="n">manual_PI_curve</span></div>
+
+
+<div class="viewcode-block" id="stokes_V_PI">
+<a class="viewcode-back" href="../piCurve.html#piCurve.stokes_V_PI">[docs]</a>
+<span class="k">def</span> <span class="nf">stokes_V_PI</span><span class="p">():</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function to compute and return PI curve for a Stokes-V gravitational-wave background, integrated</span>
+<span class="sd">    over all detector pairs and observing runs, using the `pi_curve` function.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    None</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    frequencies : `array`</span>
+<span class="sd">        Array of frequencies at which PI curve will be defined</span>
+<span class="sd">    manual_PI_curve : `array`</span>
+<span class="sd">        PI curve indicating the one-sigma sensitivity of all HLV baselines across all observing run</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Load data</span>
+    <span class="n">HL_O1_freqs</span><span class="p">,</span><span class="n">HL_O1_sigmas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">script_directory</span><span class="o">+</span><span class="s1">&#39;/../input/H1L1_O1.dat&#39;</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">usecols</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">HL_O2_freqs</span><span class="p">,</span><span class="n">HL_O2_sigmas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">script_directory</span><span class="o">+</span><span class="s1">&#39;/../input/H1L1_O2.dat&#39;</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">usecols</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">HL_O3_freqs</span><span class="p">,</span><span class="n">HL_O3_sigmas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">script_directory</span><span class="o">+</span><span class="s1">&#39;/../input/H1L1_O3.dat&#39;</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">usecols</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">HV_O3_freqs</span><span class="p">,</span><span class="n">HV_O3_sigmas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">script_directory</span><span class="o">+</span><span class="s1">&#39;/../input/H1V1_O3.dat&#39;</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">usecols</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">LV_O3_freqs</span><span class="p">,</span><span class="n">LV_O3_sigmas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">script_directory</span><span class="o">+</span><span class="s1">&#39;/../input/L1V1_O3.dat&#39;</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">usecols</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="c1"># The above uncertainty spectra have been divided by the Stokes-I overlap reduction functions, in order to normalize</span>
+    <span class="c1"># the corresponding cross-correlation spectra such that they are direct estimates of the Stokes-I energy density.</span>
+    <span class="c1"># Here, our goal is to instead consider sensitivities to purely *Stokes-V* signals, and so we need to renormalize</span>
+    <span class="c1"># our uncertainty spectra accordingly. In particular, we need to undo the division by Stokes-I overlap reduction functions,</span>
+    <span class="c1"># and instead divide by the Stokes-V overlap reduction functions.</span>
+    <span class="c1"># Along the way, we have to do some cleanup of mistakes/oddities introduced upstream into the above data files</span>
+
+    <span class="c1"># As the ORF is an oscillatory function about zero, the resulting signal model diverges to infinity at the roots of the ORF.</span>
+    <span class="c1"># Differences between the ORFs computed with python (our code) and matlab libraries (LVK analysis code stochastic.m)</span>
+    <span class="c1"># place very high-order roots of the ORF at very slightly different locations, which nevertheless yield statistically signficant </span>
+    <span class="c1"># differences in the likelihood calculation. When dividing by the ORF to construct our signal model, it is therefore necessary to use</span>
+    <span class="c1"># the *same identical matlab calculation* of the ORF as in the upstream stochastic.m analysis. Load this matlab-based ORF in preparation.</span>
+    <span class="n">matlab_orf_freqs</span><span class="p">,</span><span class="n">matlab_orf_H1L1</span><span class="p">,</span><span class="n">matlab_orf_H1V1</span><span class="p">,</span><span class="n">matlab_orf_L1V1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">script_directory</span><span class="o">+</span><span class="s1">&#39;/../input/matlab_orfs.dat&#39;</span><span class="p">,</span><span class="n">unpack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Second, the frequency arrays associated with the above LVK data files have been rounded to an insufficiently </span>
+    <span class="c1"># low number of significant digits. As a result, the precise frequencies are incorrect at the mHz level.</span>
+    <span class="c1"># The frequency arrays should be regular grids with 1/32 Hz = 0.03125 Hz spacing.</span>
+    <span class="c1"># At low frequencies the above arrays behave as expected:</span>
+    <span class="c1"># </span>
+    <span class="c1"># &gt;&gt;&gt; print(f_H1L1_O1[0:3])</span>
+    <span class="c1">#   [20.      20.03125 20.0625 ]</span>
+    <span class="c1">#</span>
+    <span class="c1"># But at high frequencies rounding means that the precise grid spacing is no longer respected:</span>
+    <span class="c1">#</span>
+    <span class="c1"># &gt;&gt;&gt; print(f_H1L1_O1[15360:15363])</span>
+    <span class="c1">#   [500.     500.0312 500.0625]</span>
+    <span class="c1">#</span>
+    <span class="c1"># These small differences in frequencies are enough to noticeably perturb the signal model in places where the ORF</span>
+    <span class="c1"># is near zero (e.g. the signal model is sent to infinity in slightly different locations)</span>
+    <span class="c1"># Because of this, overwrite frequencies with array loaded in from original matlab calculation, which preserves</span>
+    <span class="c1"># the correct frequency spacing.</span>
+    <span class="n">f_H1L1_O3</span> <span class="o">=</span> <span class="n">matlab_orf_freqs</span><span class="p">[</span><span class="n">matlab_orf_freqs</span><span class="o">&lt;=</span><span class="mi">1726</span><span class="p">]</span>
+    <span class="n">matlab_orf_H1L1</span> <span class="o">=</span> <span class="n">matlab_orf_H1L1</span><span class="p">[</span><span class="n">matlab_orf_freqs</span><span class="o">&lt;=</span><span class="mi">1726</span><span class="p">]</span>
+    <span class="n">matlab_orf_H1V1</span> <span class="o">=</span> <span class="n">matlab_orf_H1V1</span><span class="p">[</span><span class="n">matlab_orf_freqs</span><span class="o">&lt;=</span><span class="mi">1726</span><span class="p">]</span>
+    <span class="n">matlab_orf_L1V1</span> <span class="o">=</span> <span class="n">matlab_orf_L1V1</span><span class="p">[</span><span class="n">matlab_orf_freqs</span><span class="o">&lt;=</span><span class="mi">1726</span><span class="p">]</span>
+
+    <span class="c1"># Instantiate baseline objects to compute Stokes V ORF</span>
+    <span class="n">H1L1</span> <span class="o">=</span> <span class="n">Baseline</span><span class="p">(</span><span class="n">Detector</span><span class="o">.</span><span class="n">H1</span><span class="p">(),</span><span class="n">Detector</span><span class="o">.</span><span class="n">L1</span><span class="p">())</span>
+    <span class="n">H1V1</span> <span class="o">=</span> <span class="n">Baseline</span><span class="p">(</span><span class="n">Detector</span><span class="o">.</span><span class="n">H1</span><span class="p">(),</span><span class="n">Detector</span><span class="o">.</span><span class="n">V1</span><span class="p">())</span>
+    <span class="n">L1V1</span> <span class="o">=</span> <span class="n">Baseline</span><span class="p">(</span><span class="n">Detector</span><span class="o">.</span><span class="n">L1</span><span class="p">(),</span><span class="n">Detector</span><span class="o">.</span><span class="n">V1</span><span class="p">())</span>
+
+    <span class="c1"># Use baseline objects to compute overlap reduction functions for Stokes-I and Stokes-V signals</span>
+    <span class="n">H1L1_gammaI</span><span class="p">,</span><span class="n">H1L1_gammaV</span> <span class="o">=</span> <span class="n">H1L1</span><span class="o">.</span><span class="n">stokes_overlap_reduction_functions</span><span class="p">(</span><span class="n">f_H1L1_O3</span><span class="p">)</span>
+    <span class="n">H1V1_gammaI</span><span class="p">,</span><span class="n">H1V1_gammaV</span> <span class="o">=</span> <span class="n">H1V1</span><span class="o">.</span><span class="n">stokes_overlap_reduction_functions</span><span class="p">(</span><span class="n">f_H1L1_O3</span><span class="p">)</span>
+    <span class="n">L1V1_gammaI</span><span class="p">,</span><span class="n">L1V1_gammaV</span> <span class="o">=</span> <span class="n">L1V1</span><span class="o">.</span><span class="n">stokes_overlap_reduction_functions</span><span class="p">(</span><span class="n">f_H1L1_O3</span><span class="p">)</span>
+
+    <span class="c1"># Rescale each baseline&#39;s sensitivity accordingly</span>
+    <span class="c1"># Note that we need to specifically multiply by the *exact same* matlab ORF that went into the original</span>
+    <span class="c1"># normalization of the uncertainty spectra</span>
+    <span class="n">HL_O1_sigmas</span> <span class="o">=</span> <span class="n">HL_O1_sigmas</span><span class="o">*</span><span class="p">(</span><span class="n">matlab_orf_H1L1</span><span class="o">/</span><span class="n">H1L1_gammaV</span><span class="p">)</span>
+    <span class="n">HL_O2_sigmas</span> <span class="o">=</span> <span class="n">HL_O2_sigmas</span><span class="o">*</span><span class="p">(</span><span class="n">matlab_orf_H1L1</span><span class="o">/</span><span class="n">H1L1_gammaV</span><span class="p">)</span>
+    <span class="n">HL_O3_sigmas</span> <span class="o">=</span> <span class="n">HL_O3_sigmas</span><span class="o">*</span><span class="p">(</span><span class="n">matlab_orf_H1L1</span><span class="o">/</span><span class="n">H1L1_gammaV</span><span class="p">)</span>
+    <span class="n">HV_O3_sigmas</span> <span class="o">=</span> <span class="n">HV_O3_sigmas</span><span class="o">*</span><span class="p">(</span><span class="n">matlab_orf_H1V1</span><span class="o">/</span><span class="n">H1V1_gammaV</span><span class="p">)</span>
+    <span class="n">LV_O3_sigmas</span> <span class="o">=</span> <span class="n">LV_O3_sigmas</span><span class="o">*</span><span class="p">(</span><span class="n">matlab_orf_L1V1</span><span class="o">/</span><span class="n">L1V1_gammaV</span><span class="p">)</span>
+
+    <span class="c1"># Optimally combine uncertainties</span>
+    <span class="n">inv_full_sigmas_squared</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="n">HL_O1_sigmas</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mf">1.</span><span class="o">/</span><span class="n">HL_O2_sigmas</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mf">1.</span><span class="o">/</span><span class="n">HL_O3_sigmas</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mf">1.</span><span class="o">/</span><span class="n">HV_O3_sigmas</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mf">1.</span><span class="o">/</span><span class="n">LV_O3_sigmas</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">full_sigmas</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">inv_full_sigmas_squared</span><span class="p">)</span>
+
+    <span class="c1"># And compute PI curve</span>
+    <span class="n">manual_PI_curve</span> <span class="o">=</span> <span class="n">pi_curve</span><span class="p">(</span><span class="n">HL_O1_freqs</span><span class="p">,</span><span class="n">full_sigmas</span><span class="p">,</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">HL_O1_freqs</span><span class="p">,</span><span class="n">manual_PI_curve</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, T. Callister, L. Jenks, D. Holz, N. Yunes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

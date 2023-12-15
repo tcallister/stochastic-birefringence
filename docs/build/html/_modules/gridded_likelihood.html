@@ -114,7 +114,7 @@
 <span class="sd">        Function to speed up calculation by skipping points in our 2D grid where the likelihood is known to be zero.</span>
 <span class="sd">        Takes in two arguments, `kappa_D` and `kappa_z` and returns a Boolean value.</span>
 <span class="sd">        If True, the point in question will be skipped and the log-likelihood manually fixed to -inf.</span>
-<span class="sd">        Defaults to :python:`lambda x,y : False`</span>
+<span class="sd">        Defaults to :code:`lambda x,y : False`</span>
 <span class="sd">    massGridSize : `tuple`</span>
 <span class="sd">        A two element tuple determining the number of mass values over which to integrate when computing the stochastic background.</span>
 <span class="sd">        Defaults to `(30,29)`.</span>

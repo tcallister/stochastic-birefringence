@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>numpyro_likelihoods &mdash; stochastic-birefringence  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            stochastic-birefringence
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../making-figures.html">Figure generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Modules</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">stochastic-birefringence</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">numpyro_likelihoods</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for numpyro_likelihoods</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">jnp</span>
+<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">vmap</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpyro</span>
+<span class="kn">import</span> <span class="nn">numpyro.distributions</span> <span class="k">as</span> <span class="nn">dist</span>
+<span class="kn">from</span> <span class="nn">constants</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">gwBackground</span> <span class="kn">import</span> <span class="n">dEdf</span>
+<span class="kn">import</span> <span class="nn">population_parameters</span>
+
+<span class="n">logit_std</span> <span class="o">=</span> <span class="mf">2.5</span>
+<span class="n">alt_logit_std</span> <span class="o">=</span> <span class="mf">2.5</span>
+
+<div class="viewcode-block" id="get_value_from_logit">
+<a class="viewcode-back" href="../numpyro_likelihoods.html#numpyro_likelihoods.get_value_from_logit">[docs]</a>
+<span class="k">def</span> <span class="nf">get_value_from_logit</span><span class="p">(</span><span class="n">logit_x</span><span class="p">,</span><span class="n">x_min</span><span class="p">,</span><span class="n">x_max</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function to map a variable `logit_x`, defined on `(-inf,+inf)`, to a quantity `x`</span>
+<span class="sd">    defined on the interval `(x_min,x_max)`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    logit_x : float</span>
+<span class="sd">        Quantity to inverse-logit transform</span>
+<span class="sd">    x_min : float</span>
+<span class="sd">        Lower bound of `x`</span>
+<span class="sd">    x_max : float</span>
+<span class="sd">        Upper bound of `x`</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    x : float</span>
+<span class="sd">       The inverse logit transform of `logit_x`</span>
+<span class="sd">    dlogit_dx : float</span>
+<span class="sd">       The Jacobian between `logit_x` and `x`; divide by this quantity to convert a uniform prior on `logit_x` to a uniform prior on `x`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">exp_logit</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">logit_x</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">exp_logit</span><span class="o">*</span><span class="n">x_max</span> <span class="o">+</span> <span class="n">x_min</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">exp_logit</span><span class="p">)</span>
+    <span class="n">dlogit_dx</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">x_min</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="n">x_max</span><span class="o">-</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">x</span><span class="p">,</span><span class="n">dlogit_dx</span></div>
+
+
+<div class="viewcode-block" id="unpolarized">
+<a class="viewcode-back" href="../numpyro_likelihoods.html#numpyro_likelihoods.unpolarized">[docs]</a>
+<span class="k">def</span> <span class="nf">unpolarized</span><span class="p">(</span><span class="n">spectra</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Likelihood to perform a standard power-law inference on the stochastic background, for use within `numpyro`.</span>
+<span class="sd">    Stochastic background is assumed to be unpolarized and governed by two parameters:</span>
+<span class="sd">    * `alpha` : Power-law index on energy density</span>
+<span class="sd">    * `log_Omega` : log10 of the energy-density amplitude at f=25 Hz</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    spectra : `dict`</span>
+<span class="sd">        Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Sample power-law parameters</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;alpha&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">3.5</span><span class="p">))</span>
+
+    <span class="c1"># Amplitude</span>
+    <span class="n">logit_log_Omega</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;logit_log_Omega&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">logit_std</span><span class="p">))</span>
+    <span class="n">log_Omega</span><span class="p">,</span><span class="n">jac_log_Omega</span> <span class="o">=</span> <span class="n">get_value_from_logit</span><span class="p">(</span><span class="n">logit_log_Omega</span><span class="p">,</span><span class="o">-</span><span class="mf">13.</span><span class="p">,</span><span class="o">-</span><span class="mf">5.</span><span class="p">)</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">factor</span><span class="p">(</span><span class="s2">&quot;p_log_Omega&quot;</span><span class="p">,</span><span class="n">logit_log_Omega</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">logit_std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">jac_log_Omega</span><span class="p">))</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;log_Omega&quot;</span><span class="p">,</span><span class="n">log_Omega</span><span class="p">)</span>
+
+    <span class="c1"># Define function to evalute likelihood of cross-correlation measurements</span>
+    <span class="k">def</span> <span class="nf">model_and_observe</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span><span class="n">Ys</span><span class="p">,</span><span class="n">sigmas</span><span class="p">):</span>
+        <span class="n">Omega_model</span> <span class="o">=</span> <span class="mf">10.</span><span class="o">**</span><span class="n">log_Omega</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">freqs</span><span class="o">/</span><span class="mf">25.</span><span class="p">,</span><span class="n">alpha</span><span class="p">)</span>
+        <span class="n">logp</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">Ys</span><span class="o">-</span><span class="n">Omega_model</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">sigmas</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">logp</span>
+
+    <span class="c1"># Map log-likelihood function across all baselines and observing runs</span>
+    <span class="n">log_ps</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">model_and_observe</span><span class="p">(</span><span class="o">*</span><span class="n">spectra</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">])</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">factor</span><span class="p">(</span><span class="s2">&quot;logp&quot;</span><span class="p">,</span><span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">log_ps</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="right_left">
+<a class="viewcode-back" href="../numpyro_likelihoods.html#numpyro_likelihoods.right_left">[docs]</a>
+<span class="k">def</span> <span class="nf">right_left</span><span class="p">(</span><span class="n">spectra</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Likelihood to perform inference on a possibly-circularly-polarized stochastic background, for use within `numpyro`.</span>
+<span class="sd">    Stochastic background is parametrized by right vs. left energy-densities, with the following four parameters:</span>
+
+<span class="sd">    * `alpha_R` : Power-law index on energy density in right-circular polarizations</span>
+<span class="sd">    * `alpha_L` : Power-law index on energy density in left-circular polarizations</span>
+<span class="sd">    * `log_Omega_R` : log10 of the energy-density amplitude at f=25 Hz in right-circular polarizations</span>
+<span class="sd">    * `log_Omega_L` : log10 of the energy-density amplitude at f=25 Hz in left-circular polarizations</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    spectra : `dict`</span>
+<span class="sd">        Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Sample power-law parameters</span>
+    <span class="n">alpha_R</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;alpha_R&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">3.5</span><span class="p">))</span>
+    <span class="n">alpha_L</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;alpha_L&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">3.5</span><span class="p">))</span>
+
+    <span class="c1"># Amplitude</span>
+    <span class="n">logit_log_Omega_R</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;logit_log_Omega_R&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">logit_std</span><span class="p">))</span>
+    <span class="n">logit_log_Omega_L</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;logit_log_Omega_L&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">logit_std</span><span class="p">))</span>
+    <span class="n">log_Omega_R</span><span class="p">,</span><span class="n">jac_log_Omega_R</span> <span class="o">=</span> <span class="n">get_value_from_logit</span><span class="p">(</span><span class="n">logit_log_Omega_R</span><span class="p">,</span><span class="o">-</span><span class="mf">13.</span><span class="p">,</span><span class="o">-</span><span class="mf">5.</span><span class="p">)</span>
+    <span class="n">log_Omega_L</span><span class="p">,</span><span class="n">jac_log_Omega_L</span> <span class="o">=</span> <span class="n">get_value_from_logit</span><span class="p">(</span><span class="n">logit_log_Omega_L</span><span class="p">,</span><span class="o">-</span><span class="mf">13.</span><span class="p">,</span><span class="o">-</span><span class="mf">5.</span><span class="p">)</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">factor</span><span class="p">(</span><span class="s2">&quot;p_log_Omega_R&quot;</span><span class="p">,</span><span class="n">logit_log_Omega_R</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">logit_std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">jac_log_Omega_R</span><span class="p">))</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">factor</span><span class="p">(</span><span class="s2">&quot;p_log_Omega_L&quot;</span><span class="p">,</span><span class="n">logit_log_Omega_L</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">logit_std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">jac_log_Omega_L</span><span class="p">))</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;log_Omega_R&quot;</span><span class="p">,</span><span class="n">log_Omega_R</span><span class="p">)</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;log_Omega_L&quot;</span><span class="p">,</span><span class="n">log_Omega_L</span><span class="p">)</span>
+
+    <span class="c1"># Define function to evalute likelihood of cross-correlation measurements</span>
+    <span class="k">def</span> <span class="nf">model_and_observe</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span><span class="n">Ys</span><span class="p">,</span><span class="n">sigmas</span><span class="p">,</span><span class="n">orfR</span><span class="p">,</span><span class="n">orfL</span><span class="p">):</span>
+
+        <span class="c1"># Construct right- and left-handed spectra</span>
+        <span class="n">Omega_model_R</span> <span class="o">=</span> <span class="mf">10.</span><span class="o">**</span><span class="n">log_Omega_R</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">freqs</span><span class="o">/</span><span class="mf">25.</span><span class="p">,</span><span class="n">alpha_R</span><span class="p">)</span>
+        <span class="n">Omega_model_L</span> <span class="o">=</span> <span class="mf">10.</span><span class="o">**</span><span class="n">log_Omega_L</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">freqs</span><span class="o">/</span><span class="mf">25.</span><span class="p">,</span><span class="n">alpha_L</span><span class="p">)</span>
+
+        <span class="c1"># Construct total model and compute log-likelihood</span>
+        <span class="c1"># Note that `Ys` are normalized such that we need to divide model by the Stokes-I ORF</span>
+        <span class="n">orfI</span> <span class="o">=</span> <span class="n">orfR</span> <span class="o">+</span> <span class="n">orfL</span>
+        <span class="n">total_model</span> <span class="o">=</span> <span class="n">Omega_model_R</span><span class="o">*</span><span class="n">orfR</span><span class="o">/</span><span class="n">orfI</span> <span class="o">+</span> <span class="n">Omega_model_L</span><span class="o">*</span><span class="n">orfL</span><span class="o">/</span><span class="n">orfI</span>
+        <span class="n">logp</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">Ys</span><span class="o">-</span><span class="n">total_model</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">sigmas</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">logp</span>
+
+    <span class="c1"># Map log-likelihood function across all baselines and observing runs</span>
+    <span class="n">log_ps</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">model_and_observe</span><span class="p">(</span><span class="o">*</span><span class="n">spectra</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">])</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">factor</span><span class="p">(</span><span class="s2">&quot;logp&quot;</span><span class="p">,</span><span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">log_ps</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="stokes">
+<a class="viewcode-back" href="../numpyro_likelihoods.html#numpyro_likelihoods.stokes">[docs]</a>
+<span class="k">def</span> <span class="nf">stokes</span><span class="p">(</span><span class="n">spectra</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Likelihood to perform inference on a possibly-circularly-polarized stochastic background, for use within `numpyro`.</span>
+<span class="sd">    Stochastic background is parametrized by Stokes I and V amplitudes, with the following four parameters:</span>
+<span class="sd">    * `alpha_I` : Power-law index on total energy density</span>
+<span class="sd">    * `log_Omega_I` : log10 of the total energy-density amplitude at f=25 Hz </span>
+<span class="sd">    * `log_Omega_L` : log10 of the energy-density amplitude at f=25 Hz in left-circular polarizations</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    spectra : `dict`</span>
+<span class="sd">        Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Sample power-law parameters</span>
+    <span class="n">alpha_I</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;alpha_I&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">3.5</span><span class="p">))</span>
+
+    <span class="c1"># Total energy-density amplitude</span>
+    <span class="n">logit_log_Omega_I</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;logit_log_Omega_I&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">logit_std</span><span class="p">))</span>
+    <span class="n">log_Omega_I</span><span class="p">,</span><span class="n">jac_log_Omega_I</span> <span class="o">=</span> <span class="n">get_value_from_logit</span><span class="p">(</span><span class="n">logit_log_Omega_I</span><span class="p">,</span><span class="o">-</span><span class="mf">13.</span><span class="p">,</span><span class="o">-</span><span class="mf">5.</span><span class="p">)</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">factor</span><span class="p">(</span><span class="s2">&quot;p_log_Omega_I&quot;</span><span class="p">,</span><span class="n">logit_log_Omega_I</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">logit_std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">jac_log_Omega_I</span><span class="p">))</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;log_Omega_I&quot;</span><span class="p">,</span><span class="n">log_Omega_I</span><span class="p">)</span>
+
+    <span class="c1"># Polarization fraction; when multiplyed by `Omega_I`, this is the energy density in Stokes V</span>
+    <span class="n">logit_pol_fraction</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;logit_pol_fraction&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">logit_std</span><span class="p">))</span>
+    <span class="n">pol_fraction</span><span class="p">,</span><span class="n">jac_pol_fraction</span> <span class="o">=</span> <span class="n">get_value_from_logit</span><span class="p">(</span><span class="n">logit_pol_fraction</span><span class="p">,</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span><span class="mf">1.</span><span class="p">)</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">factor</span><span class="p">(</span><span class="s2">&quot;p_pol_fraction&quot;</span><span class="p">,</span><span class="n">logit_pol_fraction</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">logit_std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">jac_pol_fraction</span><span class="p">))</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;pol_fraction&quot;</span><span class="p">,</span><span class="n">pol_fraction</span><span class="p">)</span>
+
+    <span class="c1"># Define function to evalute likelihood of cross-correlation measurements</span>
+    <span class="k">def</span> <span class="nf">model_and_observe</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span><span class="n">Ys</span><span class="p">,</span><span class="n">sigmas</span><span class="p">,</span><span class="n">orfI</span><span class="p">,</span><span class="n">orfV</span><span class="p">):</span>
+
+        <span class="c1"># Construct model</span>
+        <span class="c1"># Note that Stokes V term needs to be divided by the Stokes I ORF to match normalization of `Ys`</span>
+        <span class="n">Omega_model_I</span> <span class="o">=</span> <span class="mf">10.</span><span class="o">**</span><span class="n">log_Omega_I</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">freqs</span><span class="o">/</span><span class="mf">25.</span><span class="p">,</span><span class="n">alpha_I</span><span class="p">)</span>
+        <span class="n">total_model</span> <span class="o">=</span> <span class="n">Omega_model_I</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">orfV</span><span class="o">/</span><span class="n">orfI</span><span class="o">*</span><span class="n">pol_fraction</span><span class="p">)</span>
+
+        <span class="c1"># Compute likelihood</span>
+        <span class="n">logp</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">Ys</span><span class="o">-</span><span class="n">total_model</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">sigmas</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">logp</span>
+
+    <span class="c1"># Map log-likelihood function across all baselines and observing runs</span>
+    <span class="n">log_ps</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">model_and_observe</span><span class="p">(</span><span class="o">*</span><span class="n">spectra</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">])</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">factor</span><span class="p">(</span><span class="s2">&quot;logp&quot;</span><span class="p">,</span><span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">log_ps</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="generateMonteCarloEnergies">
+<a class="viewcode-back" href="../numpyro_likelihoods.html#numpyro_likelihoods.generateMonteCarloEnergies">[docs]</a>
+<span class="k">def</span> <span class="nf">generateMonteCarloEnergies</span><span class="p">(</span><span class="n">nsamples</span><span class="p">,</span><span class="n">freqs</span><span class="p">,</span><span class="n">dRdV_function</span><span class="p">,</span><span class="n">zMax</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Helper function to enable Monte Carlo calculation of stochastic energy-density spectra.</span>
+<span class="sd">    Draws an ensemble of BBHs and their associated energy densities; these energy densities can then be</span>
+<span class="sd">    reweighted to compute Omega(f) under a variety of BBH populations and/or birefringent scenarios</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    nsamples : `int`</span>
+<span class="sd">        Size of BBH ensemble to draw</span>
+<span class="sd">    freqs : `array`</span>
+<span class="sd">        Array of frequencies at which to evaluate energy spectra</span>
+<span class="sd">    dRdV_function : `func`</span>
+<span class="sd">        Function that, when provided a redshift, will return a merger rate per comoving volume</span>
+<span class="sd">    zMax : `int`</span>
+<span class="sd">        Maximum redshift to consider (default 10)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mc_weights : `array`</span>
+<span class="sd">        The mean of these weights gives the stochastic energy density Omega(f) arising from our default BBH population</span>
+<span class="sd">    z_samples : `array`</span>
+<span class="sd">        Redshifts of each BBH in our ensemble</span>
+<span class="sd">    dRdV_samples : `array`</span>
+<span class="sd">        The comoving merger rate density at each redshift in `z_samples`; divide by this if you wish to reweight `mc_weights` to another redshift distribution</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Parameters specifying BBH mass distribution</span>
+    <span class="n">R0</span> <span class="o">=</span> <span class="n">population_parameters</span><span class="o">.</span><span class="n">R0</span>
+    <span class="n">m_min</span> <span class="o">=</span> <span class="n">population_parameters</span><span class="o">.</span><span class="n">m_min</span>
+    <span class="n">m_max</span> <span class="o">=</span> <span class="n">population_parameters</span><span class="o">.</span><span class="n">m_max</span>
+    <span class="n">dm_min</span> <span class="o">=</span> <span class="n">population_parameters</span><span class="o">.</span><span class="n">dm_min</span>
+    <span class="n">dm_max</span> <span class="o">=</span> <span class="n">population_parameters</span><span class="o">.</span><span class="n">dm_max</span>
+    <span class="n">alpha_m</span> <span class="o">=</span> <span class="n">population_parameters</span><span class="o">.</span><span class="n">alpha</span>
+    <span class="n">mu_peak</span> <span class="o">=</span> <span class="n">population_parameters</span><span class="o">.</span><span class="n">mu_peak</span>
+    <span class="n">sig_peak</span> <span class="o">=</span> <span class="n">population_parameters</span><span class="o">.</span><span class="n">sig_peak</span>
+    <span class="n">frac_peak</span> <span class="o">=</span> <span class="n">population_parameters</span><span class="o">.</span><span class="n">frac_peak</span>
+    <span class="n">bq</span> <span class="o">=</span> <span class="n">population_parameters</span><span class="o">.</span><span class="n">bq</span>
+
+    <span class="c1"># Construct normalized power law and Gaussian over m1 grid</span>
+    <span class="n">m1_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">2.</span><span class="p">,</span><span class="mf">100.</span><span class="p">,</span><span class="mi">1000</span><span class="p">)</span>
+    <span class="n">p_m1_pl</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">alpha_m</span><span class="p">)</span><span class="o">*</span><span class="n">m1_grid</span><span class="o">**</span><span class="n">alpha_m</span><span class="o">/</span><span class="p">(</span><span class="mf">100.</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">alpha_m</span><span class="p">)</span> <span class="o">-</span> <span class="mf">2.</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">alpha_m</span><span class="p">))</span>
+    <span class="n">p_m1_peak</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">m1_grid</span><span class="o">-</span><span class="n">mu_peak</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">sig_peak</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">sig_peak</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># Compute low- and high-mass filters</span>
+    <span class="n">low_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">m1_grid</span><span class="o">-</span><span class="n">m_min</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">dm_min</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">low_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">m1_grid</span><span class="o">&lt;</span><span class="n">m_min</span><span class="p">,</span><span class="n">low_filter</span><span class="p">,</span><span class="mf">1.</span><span class="p">)</span>
+    <span class="n">high_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">m1_grid</span><span class="o">-</span><span class="n">m_max</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">dm_max</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">high_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">m1_grid</span><span class="o">&gt;</span><span class="n">m_max</span><span class="p">,</span><span class="n">high_filter</span><span class="p">,</span><span class="mf">1.</span><span class="p">)</span>
+
+    <span class="c1"># Apply filters to combined power-law and peak</span>
+    <span class="n">p_m1_grid</span> <span class="o">=</span> <span class="p">(</span><span class="n">frac_peak</span><span class="o">*</span><span class="n">p_m1_peak</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="n">frac_peak</span><span class="p">)</span><span class="o">*</span><span class="n">p_m1_pl</span><span class="p">)</span><span class="o">*</span><span class="n">low_filter</span><span class="o">*</span><span class="n">high_filter</span>
+    <span class="n">p_m1_grid</span><span class="p">[</span><span class="n">m1_grid</span><span class="o">&gt;=</span><span class="mf">100.</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+
+    <span class="c1"># Construct CDF and draw random primary masses</span>
+    <span class="n">cdf_m1_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">p_m1_grid</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">p_m1_grid</span><span class="p">)</span>
+    <span class="n">m1_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">nsamples</span><span class="p">),</span><span class="n">cdf_m1_grid</span><span class="p">,</span><span class="n">m1_grid</span><span class="p">)</span>
+
+    <span class="c1"># Draw random secondary masses</span>
+    <span class="n">m2_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">2.</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">bq</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">nsamples</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">m1_samples</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">bq</span><span class="p">)</span> <span class="o">-</span> <span class="mf">2.</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">bq</span><span class="p">)),</span><span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">bq</span><span class="p">))</span>
+
+    <span class="c1"># Now construct integrand of redshift integral</span>
+    <span class="c1"># First we need the comoving merger rate density</span>
+    <span class="c1"># Sample from a fiducial Madau+Dickinson model</span>
+    <span class="n">z_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">zMax</span><span class="p">,</span><span class="mi">10000</span><span class="p">)</span>
+    <span class="n">dRdV</span> <span class="o">=</span> <span class="n">dRdV_function</span><span class="p">(</span><span class="n">z_grid</span><span class="p">)</span>
+    <span class="n">dRdV</span> <span class="o">*=</span> <span class="p">(</span><span class="n">R0</span><span class="o">/</span><span class="mf">1e9</span><span class="o">/</span><span class="n">year</span><span class="p">)</span><span class="o">/</span><span class="n">dRdV_function</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>   <span class="c1"># Convert to number per Mpc^3 per sec to match units</span>
+
+    <span class="c1"># Construct full integrand and normalize to obtain a probability distribution</span>
+    <span class="c1"># Note that this is **not** any kind of physical probability distribution over source redshifts,</span>
+    <span class="c1"># but just a normalized version of the integrand we can use to draw monte carlo samples</span>
+    <span class="n">integrand</span> <span class="o">=</span> <span class="n">dRdV</span><span class="o">/</span><span class="p">((</span><span class="mf">1.</span><span class="o">+</span><span class="n">z_grid</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">OmgM</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">z_grid</span><span class="p">)</span><span class="o">**</span><span class="mi">3</span><span class="o">+</span><span class="n">OmgL</span><span class="p">))</span>
+    <span class="n">integrandNorm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">integrand</span><span class="p">,</span><span class="n">z_grid</span><span class="p">)</span>
+    <span class="n">p_z</span> <span class="o">=</span> <span class="n">integrand</span><span class="o">/</span><span class="n">integrandNorm</span>
+    <span class="n">cdf_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">p_z</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">p_z</span><span class="p">)</span>
+
+    <span class="c1"># Draw redshifts</span>
+    <span class="n">z_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">nsamples</span><span class="p">),</span><span class="n">cdf_z</span><span class="p">,</span><span class="n">z_grid</span><span class="p">)</span>
+    
+    <span class="c1"># Compute energy spectra at each sample</span>
+    <span class="n">Mtot_samples</span> <span class="o">=</span> <span class="n">m1_samples</span><span class="o">+</span><span class="n">m2_samples</span>
+    <span class="n">q_samples</span> <span class="o">=</span> <span class="n">m2_samples</span><span class="o">/</span><span class="n">m1_samples</span>
+    <span class="n">eta_samples</span> <span class="o">=</span> <span class="n">q_samples</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">q_samples</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">dEdf_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">dEdf</span><span class="p">(</span><span class="n">Mtot_samples</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">freqs</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">z_samples</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span><span class="n">eta_samples</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nsamples</span><span class="p">)])</span>
+
+    <span class="c1"># Finally, compute relevant monte carlo weights</span>
+    <span class="n">mc_weights</span> <span class="o">=</span> <span class="n">integrandNorm</span><span class="o">*</span><span class="n">dEdf_samples</span><span class="o">*</span><span class="n">freqs</span><span class="o">/</span><span class="n">rhoC</span><span class="o">/</span><span class="n">H0</span>
+
+    <span class="c1"># To enable reweighting, compute the merger rate density that went into our sample</span>
+    <span class="c1"># We can divide by this if we want to reweight to some other population</span>
+    <span class="n">dRdV_samples</span> <span class="o">=</span> <span class="n">dRdV_function</span><span class="p">(</span><span class="n">z_samples</span><span class="p">)</span>
+    <span class="n">dRdV_samples</span> <span class="o">*=</span> <span class="n">R0</span><span class="o">/</span><span class="n">dRdV_function</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">mc_weights</span><span class="p">,</span><span class="n">z_samples</span><span class="p">,</span><span class="n">dRdV_samples</span></div>
+
+
+<div class="viewcode-block" id="amplification_argument">
+<a class="viewcode-back" href="../numpyro_likelihoods.html#numpyro_likelihoods.amplification_argument">[docs]</a>
+<span class="k">def</span> <span class="nf">amplification_argument</span><span class="p">(</span><span class="n">kappa_Dc</span><span class="p">,</span><span class="n">kappa_z</span><span class="p">,</span><span class="n">Dcs_fs</span><span class="p">,</span><span class="n">zs_fs</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Helper function to compute birefringent amplification factor appearing in hyperbolic factors modifying Stokes I and Stokes V</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    kappa_Dc : float</span>
+<span class="sd">        Birefringent coefficient corresponding to comoving-distance-based amplification</span>
+<span class="sd">    kappa_z : float</span>
+<span class="sd">        Birefringent coefficient corresponding to redshift-based amplification</span>
+<span class="sd">    Dcs_fs : array</span>
+<span class="sd">        Expected to be a 2D outer product of comoving distances (units of Gpc) and frequencies, with `Dcs_fs[i,j]` corresponding</span>
+<span class="sd">        to distance i and frequency j</span>
+<span class="sd">    zs_fs : array</span>
+<span class="sd">        Expected to be a 2D outer product of redshifts and frequencies, as above.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    amp_factor : array</span>
+<span class="sd">        Total amplification factor at the corresponding comoving distance/redshift and frequency</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Combine</span>
+    <span class="c1"># Note that kappas are defined with reference to a 100 Hz reference frequency</span>
+    <span class="n">amp_factor</span> <span class="o">=</span> <span class="mf">2.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">kappa_Dc</span><span class="o">*</span><span class="n">Dcs_fs</span> <span class="o">+</span> <span class="n">kappa_z</span><span class="o">*</span><span class="n">zs_fs</span><span class="p">)</span><span class="o">/</span><span class="mf">100.</span>
+    <span class="k">return</span> <span class="n">amp_factor</span></div>
+
+
+<div class="viewcode-block" id="birefringence">
+<a class="viewcode-back" href="../numpyro_likelihoods.html#numpyro_likelihoods.birefringence">[docs]</a>
+<span class="k">def</span> <span class="nf">birefringence</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span><span class="n">weight_dictionary</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Likelihood to perform inference on a birefringently-amplified stochastic background, for use within `numpyro`.</span>
+<span class="sd">    Uses Monte Carlo stochastic background calculation scheme associated with `generateMonteCarloEnergies`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    spectra : `dict`</span>
+<span class="sd">        Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`</span>
+<span class="sd">    weight_dictionary : `dict`</span>
+<span class="sd">        Dictionary containing ensemble of BBHs and associated contributions to Omega(f); reweighted to perform Monte Carlo calculation of amplified energy-densities</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Draw comoving-distance birefringence parameter</span>
+    <span class="n">logit_kappa_Dc</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;logit_kappa_Dc&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">logit_std</span><span class="p">))</span>
+    <span class="n">kappa_Dc</span><span class="p">,</span><span class="n">jac_kappa_Dc</span> <span class="o">=</span> <span class="n">get_value_from_logit</span><span class="p">(</span><span class="n">logit_kappa_Dc</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">factor</span><span class="p">(</span><span class="s2">&quot;p_kappa_Dc&quot;</span><span class="p">,</span><span class="n">logit_kappa_Dc</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">logit_std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">jac_kappa_Dc</span><span class="p">))</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;kappa_Dc&quot;</span><span class="p">,</span><span class="n">kappa_Dc</span><span class="p">)</span>
+
+    <span class="c1"># Draw redshift birefringence parameter</span>
+    <span class="n">logit_kappa_z</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;logit_kappa_z&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">logit_std</span><span class="p">))</span>
+    <span class="n">kappa_z</span><span class="p">,</span><span class="n">jac_kappa_z</span> <span class="o">=</span> <span class="n">get_value_from_logit</span><span class="p">(</span><span class="n">logit_kappa_z</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">factor</span><span class="p">(</span><span class="s2">&quot;p_kappa_z&quot;</span><span class="p">,</span><span class="n">logit_kappa_z</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">logit_std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">jac_kappa_z</span><span class="p">))</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;kappa_z&quot;</span><span class="p">,</span><span class="n">kappa_z</span><span class="p">)</span>
+
+    <span class="c1"># Extract data from reference ensemble for reweighting</span>
+    <span class="n">sample_frequencies</span> <span class="o">=</span> <span class="n">weight_dictionary</span><span class="p">[</span><span class="s1">&#39;freqs&#39;</span><span class="p">]</span>
+    <span class="n">sample_Dcs_fs</span> <span class="o">=</span> <span class="n">weight_dictionary</span><span class="p">[</span><span class="s1">&#39;Dcs_outer_freqs&#39;</span><span class="p">]</span>
+    <span class="n">sample_zs_fs</span> <span class="o">=</span> <span class="n">weight_dictionary</span><span class="p">[</span><span class="s1">&#39;zs_outer_freqs&#39;</span><span class="p">]</span>
+    <span class="n">sample_omg_weights</span> <span class="o">=</span> <span class="n">weight_dictionary</span><span class="p">[</span><span class="s1">&#39;omg_weights&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Compute birefringent amplification and boost each sample event&#39;s contributions accordingly</span>
+    <span class="n">amp_argument</span> <span class="o">=</span> <span class="n">amplification_argument</span><span class="p">(</span><span class="n">kappa_Dc</span><span class="p">,</span><span class="n">kappa_z</span><span class="p">,</span><span class="n">sample_Dcs_fs</span><span class="p">,</span><span class="n">sample_zs_fs</span><span class="p">)</span>
+    <span class="n">Omg_I_weights</span> <span class="o">=</span> <span class="n">sample_omg_weights</span><span class="o">*</span><span class="n">jnp</span><span class="o">.</span><span class="n">cosh</span><span class="p">(</span><span class="n">amp_argument</span><span class="p">)</span>
+    <span class="n">Omg_V_weights</span> <span class="o">=</span> <span class="n">sample_omg_weights</span><span class="o">*</span><span class="n">jnp</span><span class="o">.</span><span class="n">sinh</span><span class="p">(</span><span class="n">amp_argument</span><span class="p">)</span>
+
+    <span class="c1"># Save model as well as frequency-dependent effective sample counts</span>
+    <span class="n">Omg_I_model</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;Omg_I_model&quot;</span><span class="p">,</span><span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">Omg_I_weights</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">Omg_V_model</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;Omg_V_model&quot;</span><span class="p">,</span><span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">Omg_V_weights</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">Omg_I_neff</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;Omg_I_neff&quot;</span><span class="p">,</span><span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Omg_I_weights</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Omg_I_weights</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">Omg_V_neff</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;Omg_V_neff&quot;</span><span class="p">,</span><span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Omg_V_weights</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Omg_V_weights</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+    <span class="c1"># Define function to evalute likelihood of cross-correlation measurements</span>
+    <span class="k">def</span> <span class="nf">model_and_observe</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span><span class="n">Ys</span><span class="p">,</span><span class="n">sigmas</span><span class="p">,</span><span class="n">orfI</span><span class="p">,</span><span class="n">orfV</span><span class="p">):</span>
+
+        <span class="c1"># Construct model</span>
+        <span class="n">Omega_I_interpolated</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span><span class="n">sample_frequencies</span><span class="p">,</span><span class="n">Omg_I_model</span><span class="p">)</span> 
+        <span class="n">Omega_V_interpolated</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span><span class="n">sample_frequencies</span><span class="p">,</span><span class="n">Omg_V_model</span><span class="p">)</span> 
+        <span class="n">total_model</span> <span class="o">=</span> <span class="n">Omega_I_interpolated</span> <span class="o">+</span> <span class="p">(</span><span class="n">orfV</span><span class="o">/</span><span class="n">orfI</span><span class="p">)</span><span class="o">*</span><span class="n">Omega_V_interpolated</span>
+
+        <span class="c1"># Compute likelihood</span>
+        <span class="n">logp</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">Ys</span><span class="o">-</span><span class="n">total_model</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">sigmas</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">logp</span>
+
+    <span class="c1"># Map log-likelihood function across all baselines and observing runs</span>
+    <span class="n">log_ps</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">model_and_observe</span><span class="p">(</span><span class="o">*</span><span class="n">spectra</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">])</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">factor</span><span class="p">(</span><span class="s2">&quot;logp&quot;</span><span class="p">,</span><span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">log_ps</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="birefringence_variable_evolution">
+<a class="viewcode-back" href="../numpyro_likelihoods.html#numpyro_likelihoods.birefringence_variable_evolution">[docs]</a>
+<span class="k">def</span> <span class="nf">birefringence_variable_evolution</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span><span class="n">weight_dictionary</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Likelihood to perform inference on a birefringently-amplified stochastic background, for use within `numpyro`.</span>
+<span class="sd">    Uses Monte Carlo stochastic background calculation scheme associated with `generateMonteCarloEnergies`</span>
+<span class="sd">    Infers the merger rate of BBHs alongside the amplitude birefringence coefficients.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    spectra : `dict`</span>
+<span class="sd">        Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`</span>
+<span class="sd">    weight_dictionary : `dict`</span>
+<span class="sd">        Dictionary containing ensemble of BBHs and associated contributions to Omega(f); reweighted to perform Monte Carlo calculation of amplified energy-densities</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Draw comoving-distance and redshift birefringence parameters</span>
+    <span class="n">kappa_Dc</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;kappa_Dc&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.4</span><span class="p">))</span>
+    <span class="n">kappa_z</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;kappa_z&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span><span class="mf">1.</span><span class="p">))</span>
+
+    <span class="c1"># Draw parameters governing rate of BBHs</span>
+    <span class="n">log_R0</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;log_R0&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">15.</span><span class="p">),</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">20.</span><span class="o">/</span><span class="mf">15.</span><span class="p">)))</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;alpha&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mf">3.</span><span class="p">,</span><span class="mf">1.5</span><span class="p">))</span>
+    <span class="n">R0</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_R0</span><span class="p">)</span>
+
+    <span class="c1"># Draw peak redshift</span>
+    <span class="n">logit_zp</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;logit_zp&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">logit_std</span><span class="p">))</span>
+    <span class="n">zp</span><span class="p">,</span><span class="n">jac_zp</span> <span class="o">=</span> <span class="n">get_value_from_logit</span><span class="p">(</span><span class="n">logit_zp</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">4.</span><span class="p">)</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">factor</span><span class="p">(</span><span class="s2">&quot;p_zp&quot;</span><span class="p">,</span><span class="n">logit_zp</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">logit_std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">jac_zp</span><span class="p">))</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;zp&quot;</span><span class="p">,</span><span class="n">zp</span><span class="p">)</span>
+
+    <span class="c1"># Draw max redshift</span>
+    <span class="n">logit_zMax</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;logit_zMax&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">logit_std</span><span class="p">))</span>
+    <span class="n">zMax</span><span class="p">,</span><span class="n">jac_zMax</span> <span class="o">=</span> <span class="n">get_value_from_logit</span><span class="p">(</span><span class="n">logit_zMax</span><span class="p">,</span><span class="mf">10.</span><span class="p">,</span><span class="mf">15.</span><span class="p">)</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">factor</span><span class="p">(</span><span class="s2">&quot;p_zMax&quot;</span><span class="p">,</span><span class="n">logit_zMax</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">logit_std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">jac_zMax</span><span class="p">))</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;zMax&quot;</span><span class="p">,</span><span class="n">zMax</span><span class="p">)</span>
+
+    <span class="c1"># Draw trailing slope</span>
+    <span class="n">logit_beta</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;logit_beta&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">logit_std</span><span class="p">))</span>
+    <span class="n">beta</span><span class="p">,</span><span class="n">jac_beta</span> <span class="o">=</span> <span class="n">get_value_from_logit</span><span class="p">(</span><span class="n">logit_beta</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">factor</span><span class="p">(</span><span class="s2">&quot;p_beta&quot;</span><span class="p">,</span><span class="n">logit_beta</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">logit_std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">jac_beta</span><span class="p">))</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;beta&quot;</span><span class="p">,</span><span class="n">beta</span><span class="p">)</span>
+
+    <span class="c1"># Extract data from reference ensemble for reweighting</span>
+    <span class="n">sample_frequencies</span> <span class="o">=</span> <span class="n">weight_dictionary</span><span class="p">[</span><span class="s1">&#39;freqs&#39;</span><span class="p">]</span>
+    <span class="n">sample_Dcs_fs</span> <span class="o">=</span> <span class="n">weight_dictionary</span><span class="p">[</span><span class="s1">&#39;Dcs_outer_freqs&#39;</span><span class="p">]</span>
+    <span class="n">sample_zs_fs</span> <span class="o">=</span> <span class="n">weight_dictionary</span><span class="p">[</span><span class="s1">&#39;zs_outer_freqs&#39;</span><span class="p">]</span>
+    <span class="n">sample_zs</span> <span class="o">=</span> <span class="n">weight_dictionary</span><span class="p">[</span><span class="s1">&#39;zs&#39;</span><span class="p">]</span>
+    <span class="n">sample_omg_weights</span> <span class="o">=</span> <span class="n">weight_dictionary</span><span class="p">[</span><span class="s1">&#39;omg_weights&#39;</span><span class="p">]</span>
+    <span class="n">sample_old_dRdVs</span> <span class="o">=</span> <span class="n">weight_dictionary</span><span class="p">[</span><span class="s1">&#39;dRdVs&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Compute new merger rate factors</span>
+    <span class="n">dRdV_norm</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">jnp</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">zp</span><span class="p">),</span><span class="n">alpha</span><span class="o">+</span><span class="n">beta</span><span class="p">))</span>
+    <span class="n">sample_new_dRdVs</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">sample_zs</span><span class="p">,</span><span class="n">alpha</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">jnp</span><span class="o">.</span><span class="n">power</span><span class="p">((</span><span class="mf">1.</span><span class="o">+</span><span class="n">sample_zs</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">zp</span><span class="p">),</span><span class="n">alpha</span><span class="o">+</span><span class="n">beta</span><span class="p">))</span>
+    <span class="n">sample_new_dRdVs</span> <span class="o">*=</span> <span class="n">R0</span><span class="o">/</span><span class="n">dRdV_norm</span>
+    <span class="n">sample_new_dRdVs</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">sample_zs</span><span class="o">&lt;=</span><span class="n">zMax</span><span class="p">,</span><span class="n">sample_new_dRdVs</span><span class="p">,</span><span class="mf">0.</span><span class="p">)</span>
+
+    <span class="c1"># Compute birefringent amplification and boost each sample event&#39;s contributions accordingly</span>
+    <span class="n">amp_argument</span> <span class="o">=</span> <span class="n">amplification_argument</span><span class="p">(</span><span class="n">kappa_Dc</span><span class="p">,</span><span class="n">kappa_z</span><span class="p">,</span><span class="n">sample_Dcs_fs</span><span class="p">,</span><span class="n">sample_zs_fs</span><span class="p">)</span>
+    <span class="n">Omg_weights_unamplified</span> <span class="o">=</span> <span class="n">sample_omg_weights</span><span class="o">*</span><span class="p">(</span><span class="n">sample_new_dRdVs</span><span class="o">/</span><span class="n">sample_old_dRdVs</span><span class="p">)[:,</span><span class="n">jnp</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+    <span class="n">Omg_I_weights</span> <span class="o">=</span> <span class="n">Omg_weights_unamplified</span><span class="o">*</span><span class="n">jnp</span><span class="o">.</span><span class="n">cosh</span><span class="p">(</span><span class="n">amp_argument</span><span class="p">)</span>
+    <span class="n">Omg_V_weights</span> <span class="o">=</span> <span class="n">Omg_weights_unamplified</span><span class="o">*</span><span class="n">jnp</span><span class="o">.</span><span class="n">sinh</span><span class="p">(</span><span class="n">amp_argument</span><span class="p">)</span>
+
+    <span class="c1"># Save model as well as frequency-dependent effective sample counts</span>
+    <span class="n">Omg_I_model</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;Omg_I_model&quot;</span><span class="p">,</span><span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">Omg_I_weights</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">Omg_V_model</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;Omg_V_model&quot;</span><span class="p">,</span><span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">Omg_V_weights</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">Omg_I_neff</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;Omg_I_neff&quot;</span><span class="p">,</span><span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Omg_I_weights</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Omg_I_weights</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">Omg_V_neff</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;Omg_V_neff&quot;</span><span class="p">,</span><span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Omg_V_weights</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Omg_V_weights</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+    <span class="c1"># Define function to evalute likelihood of cross-correlation measurements</span>
+    <span class="k">def</span> <span class="nf">model_and_observe</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span><span class="n">Ys</span><span class="p">,</span><span class="n">sigmas</span><span class="p">,</span><span class="n">orfI</span><span class="p">,</span><span class="n">orfV</span><span class="p">):</span>
+
+        <span class="c1"># Construct model</span>
+        <span class="n">Omega_I_interpolated</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span><span class="n">sample_frequencies</span><span class="p">,</span><span class="n">Omg_I_model</span><span class="p">)</span> 
+        <span class="n">Omega_V_interpolated</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span><span class="n">sample_frequencies</span><span class="p">,</span><span class="n">Omg_V_model</span><span class="p">)</span> 
+        <span class="n">total_model</span> <span class="o">=</span> <span class="n">Omega_I_interpolated</span> <span class="o">+</span> <span class="p">(</span><span class="n">orfV</span><span class="o">/</span><span class="n">orfI</span><span class="p">)</span><span class="o">*</span><span class="n">Omega_V_interpolated</span>
+
+        <span class="c1"># Compute likelihood</span>
+        <span class="n">logp</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">Ys</span><span class="o">-</span><span class="n">total_model</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">sigmas</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">logp</span>
+
+    <span class="c1"># Map log-likelihood function across all baselines and observing runs</span>
+    <span class="n">log_ps</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">model_and_observe</span><span class="p">(</span><span class="o">*</span><span class="n">spectra</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">])</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">factor</span><span class="p">(</span><span class="s2">&quot;logp&quot;</span><span class="p">,</span><span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">log_ps</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="birefringence_variable_evolution_massGrid">
+<a class="viewcode-back" href="../numpyro_likelihoods.html#numpyro_likelihoods.birefringence_variable_evolution_massGrid">[docs]</a>
+<span class="k">def</span> <span class="nf">birefringence_variable_evolution_massGrid</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span><span class="n">omg_calculator</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Likelihood to perform inference on a birefringently-amplified stochastic background, for use within `numpyro`.</span>
+<span class="sd">    Uses grid-based stochastic background calculation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    spectra : `dict`</span>
+<span class="sd">        Dictionary containing cross-correlation measurements and uncertainties, as prepared by `load_data.get_all_data()`</span>
+<span class="sd">    omg_calculator : `OmegaGW_BBH`    </span>
+<span class="sd">        `OmegaGW_BBH` object, as defined in `gwBackground.py`.</span>
+<span class="sd">        Used to perform stochastic energy-density calculations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Draw comoving-distance and redshift birefringence parameters</span>
+    <span class="c1"># To try to maximize sampling efficiency, we will actually draw parameters in a rotated</span>
+    <span class="c1"># coordinate space roughly aligned with the principal axes of the kappa_D vs. kappa_z posterior ellipse</span>
+
+    <span class="c1"># Draw first birefringence parameter</span>
+    <span class="n">logit_kappa_x</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;logit_kappa_x&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">alt_logit_std</span><span class="p">))</span>
+    <span class="n">kappa_x</span><span class="p">,</span><span class="n">jac_kappa_x</span> <span class="o">=</span> <span class="n">get_value_from_logit</span><span class="p">(</span><span class="n">logit_kappa_x</span><span class="p">,</span><span class="o">-</span><span class="mf">0.45</span><span class="p">,</span><span class="mf">0.45</span><span class="p">)</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">factor</span><span class="p">(</span><span class="s2">&quot;p_kappa_x&quot;</span><span class="p">,</span><span class="n">logit_kappa_x</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">alt_logit_std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">jac_kappa_x</span><span class="p">))</span>
+
+    <span class="c1"># Draw second birefringence parameter</span>
+    <span class="n">logit_kappa_y</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;logit_kappa_y&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">alt_logit_std</span><span class="p">))</span>
+    <span class="n">kappa_y</span><span class="p">,</span><span class="n">jac_kappa_y</span> <span class="o">=</span> <span class="n">get_value_from_logit</span><span class="p">(</span><span class="n">logit_kappa_y</span><span class="p">,</span><span class="o">-</span><span class="mf">0.15</span><span class="p">,</span><span class="mf">0.15</span><span class="p">)</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">factor</span><span class="p">(</span><span class="s2">&quot;p_kappa_y&quot;</span><span class="p">,</span><span class="n">logit_kappa_y</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">alt_logit_std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">jac_kappa_y</span><span class="p">))</span>
+
+    <span class="c1"># Rotate to convert to kappa_Dc and kappa_z parameters</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="o">-</span><span class="mf">1.9</span><span class="p">)</span>
+    <span class="n">rotation</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">jnp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">)],[</span><span class="n">jnp</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="n">jnp</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">)]])</span>
+    <span class="n">kappa_Dc</span><span class="p">,</span><span class="n">kappa_z</span> <span class="o">=</span> <span class="n">rotation</span><span class="nd">@jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">kappa_x</span><span class="p">,</span><span class="n">kappa_y</span><span class="p">])</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;kappa_Dc&quot;</span><span class="p">,</span><span class="n">kappa_Dc</span><span class="p">)</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;kappa_z&quot;</span><span class="p">,</span><span class="n">kappa_z</span><span class="p">)</span>
+
+    <span class="c1"># Draw parameters governing rate of BBHs</span>
+    <span class="n">log_R0</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;log_R0&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">16.</span><span class="p">),</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">20.</span><span class="o">/</span><span class="mf">16.</span><span class="p">)))</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;alpha&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mf">3.</span><span class="p">,</span><span class="mf">1.5</span><span class="p">))</span>
+    <span class="n">R0</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_R0</span><span class="p">)</span>
+
+    <span class="c1"># Draw peak redshift</span>
+    <span class="n">logit_zp</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;logit_zp&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">logit_std</span><span class="p">))</span>
+    <span class="n">zp</span><span class="p">,</span><span class="n">jac_zp</span> <span class="o">=</span> <span class="n">get_value_from_logit</span><span class="p">(</span><span class="n">logit_zp</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">4.</span><span class="p">)</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">factor</span><span class="p">(</span><span class="s2">&quot;p_zp&quot;</span><span class="p">,</span><span class="n">logit_zp</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">logit_std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">jac_zp</span><span class="p">))</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;zp&quot;</span><span class="p">,</span><span class="n">zp</span><span class="p">)</span>
+
+    <span class="c1"># Draw max redshift</span>
+    <span class="n">logit_zMax</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;logit_zMax&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">logit_std</span><span class="p">))</span>
+    <span class="n">zMax</span><span class="p">,</span><span class="n">jac_zMax</span> <span class="o">=</span> <span class="n">get_value_from_logit</span><span class="p">(</span><span class="n">logit_zMax</span><span class="p">,</span><span class="mf">10.</span><span class="p">,</span><span class="mf">15.</span><span class="p">)</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">factor</span><span class="p">(</span><span class="s2">&quot;p_zMax&quot;</span><span class="p">,</span><span class="n">logit_zMax</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">logit_std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">jac_zMax</span><span class="p">))</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;zMax&quot;</span><span class="p">,</span><span class="n">zMax</span><span class="p">)</span>
+
+    <span class="c1"># Draw trailing slope</span>
+    <span class="n">logit_beta</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="s2">&quot;logit_beta&quot;</span><span class="p">,</span><span class="n">dist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">logit_std</span><span class="p">))</span>
+    <span class="n">beta</span><span class="p">,</span><span class="n">jac_beta</span> <span class="o">=</span> <span class="n">get_value_from_logit</span><span class="p">(</span><span class="n">logit_beta</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">factor</span><span class="p">(</span><span class="s2">&quot;p_beta&quot;</span><span class="p">,</span><span class="n">logit_beta</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">logit_std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">jac_beta</span><span class="p">))</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;beta&quot;</span><span class="p">,</span><span class="n">beta</span><span class="p">)</span>
+
+    <span class="c1"># Compute merger rate per comoving volume</span>
+    <span class="n">zs</span> <span class="o">=</span> <span class="n">omg_calculator</span><span class="o">.</span><span class="n">ref_zs</span>
+    <span class="n">dRdV_norm</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">jnp</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">zp</span><span class="p">),</span><span class="n">alpha</span><span class="o">+</span><span class="n">beta</span><span class="p">))</span>
+    <span class="n">dRdV</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">zs</span><span class="p">,</span><span class="n">alpha</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">jnp</span><span class="o">.</span><span class="n">power</span><span class="p">((</span><span class="mf">1.</span><span class="o">+</span><span class="n">zs</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">zp</span><span class="p">),</span><span class="n">alpha</span><span class="o">+</span><span class="n">beta</span><span class="p">))</span>
+    <span class="n">dRdV</span> <span class="o">*=</span> <span class="n">R0</span><span class="o">/</span><span class="n">dRdV_norm</span>
+
+    <span class="c1"># Calculate and apply truncation</span>
+    <span class="n">truncation</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">zs</span><span class="o">-</span><span class="n">zMax</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="mf">0.25</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">dRdV</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">zs</span><span class="o">&lt;=</span><span class="n">zMax</span><span class="p">,</span><span class="n">dRdV</span><span class="p">,</span><span class="n">dRdV</span><span class="o">*</span><span class="n">truncation</span><span class="p">)</span>
+
+    <span class="c1"># Save model as well as frequency-dependent effective sample counts</span>
+    <span class="n">sample_frequencies</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mf">20.</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mf">1726.</span><span class="p">),</span><span class="mi">300</span><span class="p">)</span>
+    <span class="n">OmgI</span><span class="p">,</span><span class="n">OmgV</span> <span class="o">=</span> <span class="n">omg_calculator</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">R0</span><span class="p">,</span><span class="n">dRdV</span><span class="p">,</span><span class="n">sample_frequencies</span><span class="p">,</span><span class="n">kappa_Dc</span><span class="p">,</span><span class="n">kappa_z</span><span class="p">)</span>
+    <span class="n">Omg_I_model</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;Omg_I_model&quot;</span><span class="p">,</span><span class="n">OmgI</span><span class="p">)</span>
+    <span class="n">Omg_V_model</span> <span class="o">=</span> <span class="n">numpyro</span><span class="o">.</span><span class="n">deterministic</span><span class="p">(</span><span class="s2">&quot;Omg_V_model&quot;</span><span class="p">,</span><span class="n">OmgV</span><span class="p">)</span>
+
+    <span class="c1"># Define function to evalute likelihood of cross-correlation measurements</span>
+    <span class="k">def</span> <span class="nf">model_and_observe</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span><span class="n">Ys</span><span class="p">,</span><span class="n">sigmas</span><span class="p">,</span><span class="n">orfI</span><span class="p">,</span><span class="n">orfV</span><span class="p">):</span>
+
+        <span class="c1"># Construct model</span>
+        <span class="n">Omega_I_interpolated</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span><span class="n">sample_frequencies</span><span class="p">,</span><span class="n">Omg_I_model</span><span class="p">)</span> 
+        <span class="n">Omega_V_interpolated</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span><span class="n">sample_frequencies</span><span class="p">,</span><span class="n">Omg_V_model</span><span class="p">)</span> 
+        <span class="n">total_model</span> <span class="o">=</span> <span class="n">Omega_I_interpolated</span> <span class="o">+</span> <span class="p">(</span><span class="n">orfV</span><span class="o">/</span><span class="n">orfI</span><span class="p">)</span><span class="o">*</span><span class="n">Omega_V_interpolated</span>
+
+        <span class="c1"># Compute likelihood</span>
+        <span class="n">logp</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">Ys</span><span class="o">-</span><span class="n">total_model</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">sigmas</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">logp</span>
+
+    <span class="c1"># Map log-likelihood function across all baselines and observing runs</span>
+    <span class="n">log_ps</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">model_and_observe</span><span class="p">(</span><span class="o">*</span><span class="n">spectra</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">])</span>
+    <span class="n">numpyro</span><span class="o">.</span><span class="n">factor</span><span class="p">(</span><span class="s2">&quot;logp&quot;</span><span class="p">,</span><span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">log_ps</span><span class="p">))</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, T. Callister, L. Jenks, D. Holz, N. Yunes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

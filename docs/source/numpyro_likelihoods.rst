@@ -1,7 +1,7 @@
-gridded\_likelihoods module
+numpyro\_likelihoods module
 ===========================
 
-.. automodule:: geometry
+.. automodule:: numpyro_likelihoods
    :members:
    :undoc-members:
    :show-inheritance:

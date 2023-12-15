@@ -44,11 +44,10 @@ def generateTimeDelayData(zMax=10):
     This helper script precomputes a set of grids over possible redshifts and time delays to enable downstream
     integration. Specifically, the following are computed:
 
-       * `zs`: A 1D array of merger redshifts
-       * `tds`: A 1D array of delay times (units of Gyr) between 0.01 Gyr -- 13.5 Gyr
-       * `formationRedshifts`: A 2D array of formation redshifts corresponding to each combination of *merger* redshifts and time delays. The value `formationRedshifts[i,j]` corresponds to the formation redshift of a binary that mergers at zs[i] after 
-        a time delay tds[j].
-       * `formationRates`: A 2D array of the SFR (not metallicity weighted) at each of the redshifts in `formationRedshifts`
+    * `zs`: A 1D array of merger redshifts
+    * `tds`: A 1D array of delay times (units of Gyr) between 0.01 Gyr -- 13.5 Gyr
+    * `formationRedshifts`: A 2D array of formation redshifts corresponding to each combination of *merger* redshifts and time delays. The value `formationRedshifts[i,j]` corresponds to the formation redshift of a binary that mergers at zs[i] after a time delay tds[j].
+    * `formationRates`: A 2D array of the SFR (not metallicity weighted) at each of the redshifts in `formationRedshifts`
 
     Parameters
     ----------
