@@ -6,7 +6,7 @@
 Welcome to stochastic-birefringence's documentation!
 ====================================================
 
-This page details the code used to produce the results presented in *A New Probe of Gravitational Parity Violation Through (Non-)Observation of the Stochastic Gravitational-Wave Background*, which can be accessed at
+This page details the code used to produce the results presented in **A New Probe of Gravitational Parity Violation Through (Non-)Observation of the Stochastic Gravitational-Wave Background**, which can be accessed at
 
 https://github.com/tcallister/stochastic-birefringence/
 
@@ -18,5 +18,5 @@ Contents:
 
 .. toctree::
    :maxdepth: 1
-   :caption: Contents:
 
+   getting-started
