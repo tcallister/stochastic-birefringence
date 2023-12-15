@@ -13,9 +13,9 @@ def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGri
     Function to directly compute likelihoods over grids of birefringence coefficients.
     In particular, three calculations are done:
 
-    * 1. A 1D calculation for the likelihood of $\kappa_D$, fixing $\kappa_z = 0$.
-    * 2. A 1D calculation for the likelihood of $\kappa_z$, fixing $\kappa_D = 0$.
-    * 3. A 2D calculation across both non-zero $\kappa_D$ and $\kappa_z$.
+    1. A 1D calculation for the likelihood of $\kappa_D$, fixing $\kappa_z = 0$.
+    2. A 1D calculation for the likelihood of $\kappa_z$, fixing $\kappa_D = 0$.
+    3. A 2D calculation across both non-zero $\kappa_D$ and $\kappa_z$.
 
     This function is called by
 
@@ -48,11 +48,13 @@ def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGri
     baselines : `list`
         Allows for variations in which set of baselines/observing runs to include as observational input.
         Options are
+
         * `HLO1` : Hanford-Livingston O1
         * `HLO2` : Hanford-Livingston O2
         * `HLO3` : Hanford-Livingston O3
         * `HVO3` : Hanford-Virgo O3
         * `LVO3` : Livingston-Virgo O3
+
         Default is ['HLO1','HLO2','HLO3','HVO3','LVO3']
     joint : `bool`
         If False, will skip likelihood calculation over 2D grid. Default `True`
@@ -62,6 +64,7 @@ def compute_likelihood_grids(zs,dRdV,clippingFunction=lambda x,y : False,massGri
     resultsDict : `dict`
         Dictionary containing results of the three direct likelihood calculations.
         Keys are the following:
+
         * `kappa_dcs_1D` : Array of $\kappa_D$ values across which 1D likelihood is computing
         * `probability_kappa_dc_1D` : Corresponding array of posterior probabilities
         * `kappa_zs_1D` : Array of $\kappa_z$ values across which 1D likelihood is computed

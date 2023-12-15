@@ -53,6 +53,7 @@ class Detector():
     def pos(self):
         """
         Function returning detector's Cartesian coordinates
+
         Returns
         -------
         x : array
@@ -63,6 +64,7 @@ class Detector():
     def xArm(self):
         """
         Function returning detector's `x` arm direction
+
         Returns
         -------
         u : array
@@ -73,6 +75,7 @@ class Detector():
     def yArm(self):
         """
         Function returning detector's `y` arm direction
+
         Returns
         -------
         v : array
@@ -83,6 +86,7 @@ class Detector():
     def D(self):
         """
         Function that computes detector's response tensor
+
         Returns
         -------
         d : array (3x3)
@@ -131,6 +135,7 @@ class Detector():
     def H1(cls):
         """
         Creates detector consistent with LIGO-Hanford geometry
+
         Returns
         -------
         Detector object
@@ -141,6 +146,7 @@ class Detector():
     def L1(cls):
         """
         Creates detector consistent with LIGO-Livingston geometry
+
         Returns
         -------
         Detector object
@@ -151,6 +157,7 @@ class Detector():
     def V1(cls):
         """
         Creates detector consistent with Virgo geometry
+
         Returns
         -------
         Detector object

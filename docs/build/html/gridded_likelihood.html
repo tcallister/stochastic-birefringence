@@ -89,20 +89,11 @@
 <span class="sig-prename descclassname"><span class="pre">gridded_likelihood.</span></span><span class="sig-name descname"><span class="pre">compute_likelihood_grids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">zs,</span> <span class="pre">dRdV,</span> <span class="pre">clippingFunction=&lt;function</span> <span class="pre">&lt;lambda&gt;&gt;,</span> <span class="pre">massGridSize=(30,</span> <span class="pre">29),</span> <span class="pre">kappaGridSize=100,</span> <span class="pre">baselines=['HLO1',</span> <span class="pre">'HLO2',</span> <span class="pre">'HLO3',</span> <span class="pre">'HVO3',</span> <span class="pre">'LVO3'],</span> <span class="pre">joint=True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gridded_likelihood.html#compute_likelihood_grids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gridded_likelihood.compute_likelihood_grids" title="Link to this definition"></a></dt>
 <dd><p>Function to directly compute likelihoods over grids of birefringence coefficients.
 In particular, three calculations are done:</p>
-<ul class="simple">
-<li><ol class="arabic simple">
+<ol class="arabic simple">
 <li><p>A 1D calculation for the likelihood of $kappa_D$, fixing $kappa_z = 0$.</p></li>
-</ol>
-</li>
-<li><ol class="arabic simple" start="2">
 <li><p>A 1D calculation for the likelihood of $kappa_z$, fixing $kappa_D = 0$.</p></li>
-</ol>
-</li>
-<li><ol class="arabic simple" start="3">
 <li><p>A 2D calculation across both non-zero $kappa_D$ and $kappa_z$.</p></li>
 </ol>
-</li>
-</ul>
 <p>This function is called by</p>
 <ul class="simple">
 <li><p><cite>run_birefringence_uniformRate.py</cite></p></li>
@@ -133,13 +124,15 @@ Defaults to <cite>(30,29)</cite>.</p>
 Defaults to <cite>100</cite></p>
 </dd>
 <dt><strong>baselines</strong><span class="classifier"><cite>list</cite></span></dt><dd><p>Allows for variations in which set of baselines/observing runs to include as observational input.
-Options are
-* <cite>HLO1</cite> : Hanford-Livingston O1
-* <cite>HLO2</cite> : Hanford-Livingston O2
-* <cite>HLO3</cite> : Hanford-Livingston O3
-* <cite>HVO3</cite> : Hanford-Virgo O3
-* <cite>LVO3</cite> : Livingston-Virgo O3
-Default is [‘HLO1’,’HLO2’,’HLO3’,’HVO3’,’LVO3’]</p>
+Options are</p>
+<ul class="simple">
+<li><p><cite>HLO1</cite> : Hanford-Livingston O1</p></li>
+<li><p><cite>HLO2</cite> : Hanford-Livingston O2</p></li>
+<li><p><cite>HLO3</cite> : Hanford-Livingston O3</p></li>
+<li><p><cite>HVO3</cite> : Hanford-Virgo O3</p></li>
+<li><p><cite>LVO3</cite> : Livingston-Virgo O3</p></li>
+</ul>
+<p>Default is [‘HLO1’,’HLO2’,’HLO3’,’HVO3’,’LVO3’]</p>
 </dd>
 <dt><strong>joint</strong><span class="classifier"><cite>bool</cite></span></dt><dd><p>If False, will skip likelihood calculation over 2D grid. Default <cite>True</cite></p>
 </dd>
@@ -148,14 +141,16 @@ Default is [‘HLO1’,’HLO2’,’HLO3’,’HVO3’,’LVO3’]</p>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl>
 <dt><strong>resultsDict</strong><span class="classifier"><cite>dict</cite></span></dt><dd><p>Dictionary containing results of the three direct likelihood calculations.
-Keys are the following:
-* <cite>kappa_dcs_1D</cite> : Array of $kappa_D$ values across which 1D likelihood is computing
-* <cite>probability_kappa_dc_1D</cite> : Corresponding array of posterior probabilities
-* <cite>kappa_zs_1D</cite> : Array of $kappa_z$ values across which 1D likelihood is computed
-* <cite>probability_kappa_z_1D</cite> : Corresponding array of posterior probabilities
-* <cite>kappa_dcs_2D</cite> : Array of $kappa_D$ values specifying gridpoints in 2D calculation
-* <cite>kappa_zs_2D</cite> : Array of $kappa_z$ values specifying gridpoints in 2D calculation
-* <cite>probabilities</cite> : 2D array of posterior probabilities, where <cite>probabilities[i,j]</cite> gives the posterior at <cite>kappa_dcs_2D[i]</cite> and <cite>kappa_zs_2D[j]</cite></p>
+Keys are the following:</p>
+<ul class="simple">
+<li><p><cite>kappa_dcs_1D</cite> : Array of $kappa_D$ values across which 1D likelihood is computing</p></li>
+<li><p><cite>probability_kappa_dc_1D</cite> : Corresponding array of posterior probabilities</p></li>
+<li><p><cite>kappa_zs_1D</cite> : Array of $kappa_z$ values across which 1D likelihood is computed</p></li>
+<li><p><cite>probability_kappa_z_1D</cite> : Corresponding array of posterior probabilities</p></li>
+<li><p><cite>kappa_dcs_2D</cite> : Array of $kappa_D$ values specifying gridpoints in 2D calculation</p></li>
+<li><p><cite>kappa_zs_2D</cite> : Array of $kappa_z$ values specifying gridpoints in 2D calculation</p></li>
+<li><p><cite>probabilities</cite> : 2D array of posterior probabilities, where <cite>probabilities[i,j]</cite> gives the posterior at <cite>kappa_dcs_2D[i]</cite> and <cite>kappa_zs_2D[j]</cite></p></li>
+</ul>
 </dd>
 </dl>
 </dd>
