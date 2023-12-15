@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geometry module &mdash; stochastic-birefringence  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Modules" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            stochastic-birefringence
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="making-figures.html">Figure generation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">geometry module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#geometry.Baseline"><code class="docutils literal notranslate"><span class="pre">Baseline</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#geometry.Baseline.circular_overlap_reduction_functions"><code class="docutils literal notranslate"><span class="pre">Baseline.circular_overlap_reduction_functions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geometry.Baseline.stokes_overlap_reduction_functions"><code class="docutils literal notranslate"><span class="pre">Baseline.stokes_overlap_reduction_functions()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#geometry.Detector"><code class="docutils literal notranslate"><span class="pre">Detector</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#geometry.Detector.D"><code class="docutils literal notranslate"><span class="pre">Detector.D()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geometry.Detector.Fc"><code class="docutils literal notranslate"><span class="pre">Detector.Fc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geometry.Detector.Fp"><code class="docutils literal notranslate"><span class="pre">Detector.Fp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geometry.Detector.H1"><code class="docutils literal notranslate"><span class="pre">Detector.H1()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geometry.Detector.L1"><code class="docutils literal notranslate"><span class="pre">Detector.L1()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geometry.Detector.V1"><code class="docutils literal notranslate"><span class="pre">Detector.V1()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geometry.Detector.pos"><code class="docutils literal notranslate"><span class="pre">Detector.pos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geometry.Detector.xArm"><code class="docutils literal notranslate"><span class="pre">Detector.xArm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geometry.Detector.yArm"><code class="docutils literal notranslate"><span class="pre">Detector.yArm()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#geometry.Omega"><code class="docutils literal notranslate"><span class="pre">Omega()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#geometry.ec"><code class="docutils literal notranslate"><span class="pre">ec()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#geometry.ep"><code class="docutils literal notranslate"><span class="pre">ep()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#geometry.m"><code class="docutils literal notranslate"><span class="pre">m()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#geometry.n"><code class="docutils literal notranslate"><span class="pre">n()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">stochastic-birefringence</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Modules</a></li>
+      <li class="breadcrumb-item active">geometry module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/geometry.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-geometry">
+<span id="geometry-module"></span><h1>geometry module<a class="headerlink" href="#module-geometry" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="geometry.Baseline">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geometry.</span></span><span class="sig-name descname"><span class="pre">Baseline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Detector1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Detector2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#Baseline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.Baseline" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class representing a two-detector baseline</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>Detector1</strong><span class="classifier">Detector</span></dt><dd><p>Detector object comprising the first instrument in our baseline</p>
+</dd>
+<dt><strong>Detector2</strong><span class="classifier">Detector</span></dt><dd><p>Detector object comprising the second instrument in our baseline</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geometry.Baseline.circular_overlap_reduction_functions" title="geometry.Baseline.circular_overlap_reduction_functions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">circular_overlap_reduction_functions</span></code></a>(frequencies)</p></td>
+<td><p>Function to compute overlap reduction functions for R and L circular polarizations</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#geometry.Baseline.stokes_overlap_reduction_functions" title="geometry.Baseline.stokes_overlap_reduction_functions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stokes_overlap_reduction_functions</span></code></a>(frequencies)</p></td>
+<td><p>Function to compute overlap reduction functions for Stokes I and V parameters</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="geometry.Baseline.circular_overlap_reduction_functions">
+<span class="sig-name descname"><span class="pre">circular_overlap_reduction_functions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequencies</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#Baseline.circular_overlap_reduction_functions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.Baseline.circular_overlap_reduction_functions" title="Link to this definition"></a></dt>
+<dd><p>Function to compute overlap reduction functions for R and L circular polarizations</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>frequencies</strong><span class="classifier">array</span></dt><dd><p>Set of frequencies at which we want to evaluate ORFs</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>GammaR</strong><span class="classifier">array</span></dt><dd><p>Overlap reduction function for right-circular polarization at desired frequencies</p>
+</dd>
+<dt><strong>GammaL</strong><span class="classifier">array</span></dt><dd><p>Overlap reduction function for left-circular polarization at desired frequencies</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geometry.Baseline.stokes_overlap_reduction_functions">
+<span class="sig-name descname"><span class="pre">stokes_overlap_reduction_functions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequencies</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#Baseline.stokes_overlap_reduction_functions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.Baseline.stokes_overlap_reduction_functions" title="Link to this definition"></a></dt>
+<dd><p>Function to compute overlap reduction functions for Stokes I and V parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>frequencies</strong><span class="classifier">array</span></dt><dd><p>Set of frequencies at which we want to evaluate ORFs</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>GammaI</strong><span class="classifier">array</span></dt><dd><p>Overlap reduction function for Stokes I at desired frequencies</p>
+</dd>
+<dt><strong>GammaV</strong><span class="classifier">array</span></dt><dd><p>Overlap reduction function for Stokes V at desired frequencies</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="geometry.Detector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geometry.</span></span><span class="sig-name descname"><span class="pre">Detector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xArm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yArm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#Detector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.Detector" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class representing a single detector object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>position</strong><span class="classifier">array</span></dt><dd><p>Position vector of the detector’s vertex</p>
+</dd>
+<dt><strong>xArm</strong><span class="classifier">array</span></dt><dd><p>Vector parallel to the detector’s <cite>x</cite> arm</p>
+</dd>
+<dt><strong>yArm</strong><span class="classifier">array</span></dt><dd><p>Vector parallel to the detector’s <cite>y</cite> arm</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Attributes<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>Vector denoting the cartesian coordinates of the detector vertex</p>
+</dd>
+<dt><strong>u</strong><span class="classifier">array</span></dt><dd><p>Unit vector parallel to the detector’s ‘x’ arm</p>
+</dd>
+<dt><strong>v</strong><span class="classifier">array</span></dt><dd><p>Unit vector parallel to the detector’s ‘y’ arm</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geometry.Detector.D" title="geometry.Detector.D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">D</span></code></a>()</p></td>
+<td><p>Function that computes detector's response tensor :returns: <strong>d</strong> -- Response tensor :rtype: array (3x3)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#geometry.Detector.Fc" title="geometry.Detector.Fc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Fc</span></code></a>(theta, phi)</p></td>
+<td><p>Function computing antenna response pattern to cross-polarized signals</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geometry.Detector.Fp" title="geometry.Detector.Fp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Fp</span></code></a>(theta, phi)</p></td>
+<td><p>Function computing antenna response pattern to plus-polarized signals</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#geometry.Detector.H1" title="geometry.Detector.H1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">H1</span></code></a>()</p></td>
+<td><p>Creates detector consistent with LIGO-Hanford geometry :rtype: Detector object</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geometry.Detector.L1" title="geometry.Detector.L1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">L1</span></code></a>()</p></td>
+<td><p>Creates detector consistent with LIGO-Livingston geometry :rtype: Detector object</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#geometry.Detector.V1" title="geometry.Detector.V1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">V1</span></code></a>()</p></td>
+<td><p>Creates detector consistent with Virgo geometry :rtype: Detector object</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geometry.Detector.pos" title="geometry.Detector.pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pos</span></code></a>()</p></td>
+<td><p>Function returning detector's Cartesian coordinates :returns: <strong>x</strong> -- Vector denoting detector position (units of meters) :rtype: array</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#geometry.Detector.xArm" title="geometry.Detector.xArm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xArm</span></code></a>()</p></td>
+<td><p>Function returning detector's <cite>x</cite> arm direction :returns: <strong>u</strong> -- Unit vector parallel to <cite>x</cite> arm :rtype: array</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geometry.Detector.yArm" title="geometry.Detector.yArm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">yArm</span></code></a>()</p></td>
+<td><p>Function returning detector's <cite>y</cite> arm direction :returns: <strong>v</strong> -- Unit vector parallel to <cite>y</cite> arm :rtype: array</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="geometry.Detector.D">
+<span class="sig-name descname"><span class="pre">D</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#Detector.D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.Detector.D" title="Link to this definition"></a></dt>
+<dd><p>Function that computes detector’s response tensor
+:returns: <strong>d</strong> – Response tensor
+:rtype: array (3x3)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geometry.Detector.Fc">
+<span class="sig-name descname"><span class="pre">Fc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#Detector.Fc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.Detector.Fc" title="Link to this definition"></a></dt>
+<dd><p>Function computing antenna response pattern to cross-polarized signals</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>Polar angle defining target sky direction</p>
+</dd>
+<dt><strong>phi</strong><span class="classifier">float</span></dt><dd><p>Azimuthal angle defining target sky direction</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>Fc</strong><span class="classifier">float</span></dt><dd><p>Antenna response to the specified direction</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geometry.Detector.Fp">
+<span class="sig-name descname"><span class="pre">Fp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#Detector.Fp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.Detector.Fp" title="Link to this definition"></a></dt>
+<dd><p>Function computing antenna response pattern to plus-polarized signals</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>Polar angle defining target sky direction</p>
+</dd>
+<dt><strong>phi</strong><span class="classifier">float</span></dt><dd><p>Azimuthal angle defining target sky direction</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>Fp</strong><span class="classifier">float</span></dt><dd><p>Antenna response to the specified direction</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geometry.Detector.H1">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">H1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#Detector.H1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.Detector.H1" title="Link to this definition"></a></dt>
+<dd><p>Creates detector consistent with LIGO-Hanford geometry
+:rtype: Detector object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geometry.Detector.L1">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">L1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#Detector.L1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.Detector.L1" title="Link to this definition"></a></dt>
+<dd><p>Creates detector consistent with LIGO-Livingston geometry
+:rtype: Detector object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geometry.Detector.V1">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">V1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#Detector.V1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.Detector.V1" title="Link to this definition"></a></dt>
+<dd><p>Creates detector consistent with Virgo geometry
+:rtype: Detector object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geometry.Detector.pos">
+<span class="sig-name descname"><span class="pre">pos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#Detector.pos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.Detector.pos" title="Link to this definition"></a></dt>
+<dd><p>Function returning detector’s Cartesian coordinates
+:returns: <strong>x</strong> – Vector denoting detector position (units of meters)
+:rtype: array</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geometry.Detector.xArm">
+<span class="sig-name descname"><span class="pre">xArm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#Detector.xArm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.Detector.xArm" title="Link to this definition"></a></dt>
+<dd><p>Function returning detector’s <cite>x</cite> arm direction
+:returns: <strong>u</strong> – Unit vector parallel to <cite>x</cite> arm
+:rtype: array</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geometry.Detector.yArm">
+<span class="sig-name descname"><span class="pre">yArm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#Detector.yArm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.Detector.yArm" title="Link to this definition"></a></dt>
+<dd><p>Function returning detector’s <cite>y</cite> arm direction
+:returns: <strong>v</strong> – Unit vector parallel to <cite>y</cite> arm
+:rtype: array</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geometry.Omega">
+<span class="sig-prename descclassname"><span class="pre">geometry.</span></span><span class="sig-name descname"><span class="pre">Omega</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#Omega"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.Omega" title="Link to this definition"></a></dt>
+<dd><p>Unit vector along the direction of a GW’s propagation.
+Vectors <cite>Omega</cite>, <cite>m</cite>, and <cite>n</cite> form an orthonormal triad.
+:param theta: Polar angle from which plane wave originates (range 0-pi)
+:type theta: float
+:param phi: Azimuthal angle of wave (range 0-2pi)
+:type phi: float</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Unit vector (shape (3,) array) along direction of propagation</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geometry.ec">
+<span class="sig-prename descclassname"><span class="pre">geometry.</span></span><span class="sig-name descname"><span class="pre">ec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#ec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.ec" title="Link to this definition"></a></dt>
+<dd><p>Computes the cross-polarization basis tensor for a GW from a particular sky location.
+:param theta: Polar angle from which plane wave originates (range 0-pi)
+:type theta: float
+:param phi: Azimuthal angle of wave (range 0-2pi)
+:type phi: float</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Basis tensor (shape (3,3) array)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geometry.ep">
+<span class="sig-prename descclassname"><span class="pre">geometry.</span></span><span class="sig-name descname"><span class="pre">ep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#ep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.ep" title="Link to this definition"></a></dt>
+<dd><p>Computes the plus-polarization basis tensor for a GW from a particular sky location.
+:param theta: Polar angle from which plane wave originates (range 0-pi)
+:type theta: float
+:param phi: Azimuthal angle of wave (range 0-2pi)
+:type phi: float</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Basis tensor (shape (3,3) array)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geometry.m">
+<span class="sig-prename descclassname"><span class="pre">geometry.</span></span><span class="sig-name descname"><span class="pre">m</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#m"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.m" title="Link to this definition"></a></dt>
+<dd><p>Unit vector in the plane transverse to a GW’s direction of propagation.
+Vectors <cite>Omega</cite>, <cite>m</cite>, and <cite>n</cite> form an orthonormal triad.
+:param theta: Polar angle from which plane wave originates (range 0-pi)
+:type theta: float
+:param phi: Azimuthal angle of wave (range 0-2pi)
+:type phi: float</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Unit vector (shape (3,) array) transverse to direction of propagation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geometry.n">
+<span class="sig-prename descclassname"><span class="pre">geometry.</span></span><span class="sig-name descname"><span class="pre">n</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geometry.html#n"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geometry.n" title="Link to this definition"></a></dt>
+<dd><p>Unit vector in the plane transverse to a GW’s direction of propagation.
+Vectors <cite>Omega</cite>, <cite>m</cite>, and <cite>n</cite> form an orthonormal triad.
+:param theta: Polar angle from which plane wave originates (range 0-pi)
+:type theta: float
+:param phi: Azimuthal angle of wave (range 0-2pi)
+:type phi: float</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Unit vector (shape (3,) array) transverse to direction of propagation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, T. Callister, L. Jenks, D. Holz, N. Yunes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

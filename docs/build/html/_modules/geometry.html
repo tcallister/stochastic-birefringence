@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geometry &mdash; stochastic-birefringence  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            stochastic-birefringence
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../making-figures.html">Figure generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Modules</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">stochastic-birefringence</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">geometry</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for geometry</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">constants</span> <span class="k">as</span> <span class="nn">const</span>
+<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">spherical_jn</span>
+
+<span class="c1"># Hanford</span>
+<span class="c1"># http://www.ligo.org/scientists/GW100916/detectors.txt</span>
+<span class="c1"># See also LIGO DCC T980044</span>
+<span class="c1"># Also https://git.ligo.org/lscsoft/lalsuite/-/blob/master/lal/lib/tools/LALDetectors.h</span>
+<span class="n">H1x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">2.16141492636e6</span><span class="p">,</span><span class="o">-</span><span class="mf">3.83469517889e6</span><span class="p">,</span><span class="mf">4.60035022664e6</span><span class="p">])</span>
+<span class="n">H1u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.22389266154</span><span class="p">,</span><span class="mf">0.79983062746</span><span class="p">,</span><span class="mf">0.55690487831</span><span class="p">])</span>
+<span class="n">H1v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.91397818574</span><span class="p">,</span><span class="mf">0.02609403989</span><span class="p">,</span><span class="o">-</span><span class="mf">0.40492342125</span><span class="p">])</span>
+
+<span class="c1"># Livingston</span>
+<span class="n">L1x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">7.42760447238e4</span><span class="p">,</span><span class="o">-</span><span class="mf">5.49628371971e6</span><span class="p">,</span><span class="mf">3.22425701744e6</span><span class="p">])</span>
+<span class="n">L1u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.95457412153</span><span class="p">,</span><span class="o">-</span><span class="mf">0.14158077340</span><span class="p">,</span><span class="o">-</span><span class="mf">0.26218911324</span><span class="p">])</span>
+<span class="n">L1v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.29774156894</span><span class="p">,</span><span class="o">-</span><span class="mf">0.48791033647</span><span class="p">,</span><span class="o">-</span><span class="mf">0.82054461286</span><span class="p">])</span>
+
+<span class="c1"># Virgo</span>
+<span class="n">V1x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">4.54637409900e6</span><span class="p">,</span><span class="mf">8.42989697626e5</span><span class="p">,</span><span class="mf">4.37857696241e6</span><span class="p">])</span>
+<span class="n">V1u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.70045821479</span><span class="p">,</span><span class="mf">0.20848948619</span><span class="p">,</span><span class="mf">0.68256166277</span><span class="p">])</span>
+<span class="n">V1v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.05379255368</span><span class="p">,</span><span class="o">-</span><span class="mf">0.96908180549</span><span class="p">,</span><span class="mf">0.24080451708</span><span class="p">])</span>
+
+<div class="viewcode-block" id="Detector">
+<a class="viewcode-back" href="../geometry.html#geometry.Detector">[docs]</a>
+<span class="k">class</span> <span class="nc">Detector</span><span class="p">():</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class representing a single detector object</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    position : array</span>
+<span class="sd">        Position vector of the detector&#39;s vertex</span>
+<span class="sd">    xArm : array</span>
+<span class="sd">        Vector parallel to the detector&#39;s `x` arm</span>
+<span class="sd">    yArm : array</span>
+<span class="sd">        Vector parallel to the detector&#39;s `y` arm</span>
+<span class="sd">    </span>
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : array</span>
+<span class="sd">        Vector denoting the cartesian coordinates of the detector vertex</span>
+<span class="sd">    u : array</span>
+<span class="sd">        Unit vector parallel to the detector&#39;s &#39;x&#39; arm</span>
+<span class="sd">    v : array</span>
+<span class="sd">        Unit vector parallel to the detector&#39;s &#39;y&#39; arm</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">position</span><span class="p">,</span><span class="n">xArm</span><span class="p">,</span><span class="n">yArm</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">u</span> <span class="o">=</span> <span class="n">xArm</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">xArm</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="n">yArm</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">yArm</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Detector.pos">
+<a class="viewcode-back" href="../geometry.html#geometry.Detector.pos">[docs]</a>
+    <span class="k">def</span> <span class="nf">pos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function returning detector&#39;s Cartesian coordinates</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        x : array</span>
+<span class="sd">            Vector denoting detector position (units of meters)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="Detector.xArm">
+<a class="viewcode-back" href="../geometry.html#geometry.Detector.xArm">[docs]</a>
+    <span class="k">def</span> <span class="nf">xArm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function returning detector&#39;s `x` arm direction</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        u : array</span>
+<span class="sd">            Unit vector parallel to `x` arm</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">u</span></div>
+
+
+<div class="viewcode-block" id="Detector.yArm">
+<a class="viewcode-back" href="../geometry.html#geometry.Detector.yArm">[docs]</a>
+    <span class="k">def</span> <span class="nf">yArm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function returning detector&#39;s `y` arm direction</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        v : array</span>
+<span class="sd">            Unit vector parallel to `y` arm</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span></div>
+
+
+<div class="viewcode-block" id="Detector.D">
+<a class="viewcode-back" href="../geometry.html#geometry.Detector.D">[docs]</a>
+    <span class="k">def</span> <span class="nf">D</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function that computes detector&#39;s response tensor</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        d : array (3x3)</span>
+<span class="sd">            Response tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="p">)</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">d</span></div>
+
+
+<div class="viewcode-block" id="Detector.Fp">
+<a class="viewcode-back" href="../geometry.html#geometry.Detector.Fp">[docs]</a>
+    <span class="k">def</span> <span class="nf">Fp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">theta</span><span class="p">,</span><span class="n">phi</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function computing antenna response pattern to plus-polarized signals</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        theta : float</span>
+<span class="sd">            Polar angle defining target sky direction</span>
+<span class="sd">        phi : float</span>
+<span class="sd">            Azimuthal angle defining target sky direction</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Fp : float</span>
+<span class="sd">            Antenna response to the specified direction</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">(),</span><span class="n">ep</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="n">phi</span><span class="p">),</span><span class="n">axes</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Detector.Fc">
+<a class="viewcode-back" href="../geometry.html#geometry.Detector.Fc">[docs]</a>
+    <span class="k">def</span> <span class="nf">Fc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">theta</span><span class="p">,</span><span class="n">phi</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function computing antenna response pattern to cross-polarized signals</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        theta : float</span>
+<span class="sd">            Polar angle defining target sky direction</span>
+<span class="sd">        phi : float</span>
+<span class="sd">            Azimuthal angle defining target sky direction</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Fc : float</span>
+<span class="sd">            Antenna response to the specified direction</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">(),</span><span class="n">ec</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="n">phi</span><span class="p">),</span><span class="n">axes</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Detector.H1">
+<a class="viewcode-back" href="../geometry.html#geometry.Detector.H1">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">H1</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates detector consistent with LIGO-Hanford geometry</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Detector object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">H1x</span><span class="p">,</span><span class="n">H1u</span><span class="p">,</span><span class="n">H1v</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Detector.L1">
+<a class="viewcode-back" href="../geometry.html#geometry.Detector.L1">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">L1</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates detector consistent with LIGO-Livingston geometry</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Detector object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">L1x</span><span class="p">,</span><span class="n">L1u</span><span class="p">,</span><span class="n">L1v</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Detector.V1">
+<a class="viewcode-back" href="../geometry.html#geometry.Detector.V1">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">V1</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates detector consistent with Virgo geometry</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Detector object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">V1x</span><span class="p">,</span><span class="n">V1u</span><span class="p">,</span><span class="n">V1v</span><span class="p">)</span></div>
+</div>
+
+
+<div class="viewcode-block" id="Baseline">
+<a class="viewcode-back" href="../geometry.html#geometry.Baseline">[docs]</a>
+<span class="k">class</span> <span class="nc">Baseline</span><span class="p">():</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class representing a two-detector baseline</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Detector1 : Detector</span>
+<span class="sd">       Detector object comprising the first instrument in our baseline </span>
+<span class="sd">    Detector2 : Detector</span>
+<span class="sd">       Detector object comprising the second instrument in our baseline </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">Detector1</span><span class="p">,</span><span class="n">Detector2</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">D1</span> <span class="o">=</span> <span class="n">Detector1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">D2</span> <span class="o">=</span> <span class="n">Detector2</span>
+
+    <span class="k">def</span> <span class="nf">_get_baseline_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper function computing angles characterizing the baseline and detector</span>
+<span class="sd">        orientations, for use in computing overlap reduction functions, following</span>
+<span class="sd">        Sect. 3 of https://arxiv.org/pdf/0707.0535.pdf</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        beta : float</span>
+<span class="sd">            Angular separation of detectors as viewed from Earth&#39;s center</span>
+<span class="sd">        sigma1 : float</span>
+<span class="sd">            Azimuthal rotation of detector 1 relative to great circle connecting instruments</span>
+<span class="sd">        sigma2 : float</span>
+<span class="sd">            Azimuthal rotation of detector 2 relative to great circle connecting instruments</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Define unit vectors normal to the Earth&#39;s surface at the location of each instrument</span>
+        <span class="n">r1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">D1</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D1</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="nd">@self</span><span class="o">.</span><span class="n">D1</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+        <span class="n">r2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">D2</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D2</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="nd">@self</span><span class="o">.</span><span class="n">D2</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+        
+        <span class="c1"># Separation angle between instruments</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">r1</span><span class="nd">@r2</span><span class="p">)</span>
+
+        <span class="c1"># Next, we want to define an orthonormal frame at the location of each detector,</span>
+        <span class="c1"># leveraging the above normal vectors and the great circle connecting both instruments</span>
+        <span class="c1"># First, define a unit vector orthogonal to r1, r2, and the great circle</span>
+        <span class="n">r1_cross_r2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span><span class="n">r2</span><span class="p">)</span>
+        <span class="n">r1_cross_r2</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">r1_cross_r2</span><span class="nd">@r1_cross_r2</span><span class="p">)</span>
+
+        <span class="c1"># Now complete orthonormal triads by computing unit vectors tangent to the great circle at each location</span>
+        <span class="n">r1_gc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">r1_cross_r2</span><span class="p">,</span><span class="n">r1</span><span class="p">)</span>
+        <span class="n">r2_gc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">r1_cross_r2</span><span class="p">,</span><span class="n">r2</span><span class="p">)</span>
+
+        <span class="c1"># Define unit vector along the bisector of each detector</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">D1_bisector</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D1</span><span class="o">.</span><span class="n">xArm</span><span class="p">()</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">D1</span><span class="o">.</span><span class="n">yArm</span><span class="p">())</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">D2_bisector</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D2</span><span class="o">.</span><span class="n">xArm</span><span class="p">()</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">D2</span><span class="o">.</span><span class="n">yArm</span><span class="p">())</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># Project bisectors onto triad vectors on the Earth&#39;s surface and compute rotation angle</span>
+        <span class="c1"># relative to the great circle joining instruments</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">D1_bisector_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">D1_bisector</span><span class="nd">@r1_gc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">D1_bisector_b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">D1_bisector</span><span class="nd">@r1_cross_r2</span>
+        <span class="n">sig1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D1_bisector_b</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">D1_bisector_a</span><span class="p">)</span>
+
+        <span class="c1"># Repeat with second instrument</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">D2_bisector_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">D2_bisector</span><span class="nd">@r2_gc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">D2_bisector_b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">D2_bisector</span><span class="nd">@r1_cross_r2</span>
+        <span class="n">sig2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D2_bisector_b</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">D2_bisector_a</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">beta</span><span class="p">,</span><span class="n">sig1</span><span class="p">,</span><span class="n">sig2</span>
+
+<div class="viewcode-block" id="Baseline.stokes_overlap_reduction_functions">
+<a class="viewcode-back" href="../geometry.html#geometry.Baseline.stokes_overlap_reduction_functions">[docs]</a>
+    <span class="k">def</span> <span class="nf">stokes_overlap_reduction_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">frequencies</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function to compute overlap reduction functions for Stokes I and V parameters</span>
+<span class="sd">  </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        frequencies : array</span>
+<span class="sd">            Set of frequencies at which we want to evaluate ORFs</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        GammaI : array</span>
+<span class="sd">            Overlap reduction function for Stokes I at desired frequencies</span>
+<span class="sd">        GammaV : array</span>
+<span class="sd">            Overlap reduction function for Stokes V at desired frequencies</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get angles</span>
+        <span class="n">beta</span><span class="p">,</span><span class="n">sig1</span><span class="p">,</span><span class="n">sig2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_baseline_angles</span><span class="p">()</span>
+        <span class="n">Delta</span> <span class="o">=</span> <span class="p">(</span><span class="n">sig1</span><span class="o">+</span><span class="n">sig2</span><span class="p">)</span><span class="o">/</span><span class="mf">2.</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="p">(</span><span class="n">sig1</span><span class="o">-</span><span class="n">sig2</span><span class="p">)</span><span class="o">/</span><span class="mf">2.</span>
+
+        <span class="c1"># Evaluate necessary bessel functions</span>
+        <span class="n">bessel_arg</span> <span class="o">=</span> <span class="mf">4.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">frequencies</span><span class="o">*</span><span class="n">const</span><span class="o">.</span><span class="n">R_earth</span><span class="o">/</span><span class="n">const</span><span class="o">.</span><span class="n">c</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">beta</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">j0</span> <span class="o">=</span> <span class="n">spherical_jn</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">bessel_arg</span><span class="p">)</span>
+        <span class="n">j1</span> <span class="o">=</span> <span class="n">spherical_jn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">bessel_arg</span><span class="p">)</span>
+        <span class="n">j2</span> <span class="o">=</span> <span class="n">spherical_jn</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">bessel_arg</span><span class="p">)</span>
+        <span class="n">j3</span> <span class="o">=</span> <span class="n">spherical_jn</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="n">bessel_arg</span><span class="p">)</span>
+        <span class="n">j4</span> <span class="o">=</span> <span class="n">spherical_jn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="n">bessel_arg</span><span class="p">)</span>
+
+        <span class="c1"># Compute Eqs. 23, 24, and 27 of https://arxiv.org/pdf/0801.4185.pdf</span>
+        <span class="n">Theta1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">beta</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">4</span><span class="o">*</span><span class="p">(</span><span class="n">j0</span> <span class="o">+</span> <span class="mf">5.</span><span class="o">*</span><span class="n">j2</span><span class="o">/</span><span class="mf">7.</span> <span class="o">+</span> <span class="mf">3.</span><span class="o">*</span><span class="n">j4</span><span class="o">/</span><span class="mf">112.</span><span class="p">)</span>
+        <span class="n">Theta2</span> <span class="o">=</span> <span class="p">((</span><span class="o">-</span><span class="mf">3.</span><span class="o">/</span><span class="mf">8.</span><span class="p">)</span><span class="o">*</span><span class="n">j0</span> <span class="o">+</span> <span class="p">(</span><span class="mf">45.</span><span class="o">/</span><span class="mf">56.</span><span class="p">)</span><span class="o">*</span><span class="n">j2</span> <span class="o">-</span> <span class="p">(</span><span class="mf">169.</span><span class="o">/</span><span class="mf">896.</span><span class="p">)</span><span class="o">*</span><span class="n">j4</span><span class="p">)</span> \
+                    <span class="o">+</span> <span class="p">(</span><span class="n">j0</span><span class="o">/</span><span class="mf">2.</span> <span class="o">-</span> <span class="p">(</span><span class="mf">5.</span><span class="o">/</span><span class="mf">7.</span><span class="p">)</span><span class="o">*</span><span class="n">j2</span> <span class="o">-</span> <span class="p">(</span><span class="mf">27.</span><span class="o">/</span><span class="mf">224.</span><span class="p">)</span><span class="o">*</span><span class="n">j4</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span> \
+                    <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="n">j0</span><span class="o">/</span><span class="mf">8.</span> <span class="o">-</span> <span class="p">(</span><span class="mf">5.</span><span class="o">/</span><span class="mf">56.</span><span class="p">)</span><span class="o">*</span><span class="n">j2</span> <span class="o">-</span> <span class="p">(</span><span class="mf">3.</span><span class="o">/</span><span class="mf">896.</span><span class="p">)</span><span class="o">*</span><span class="n">j4</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">beta</span><span class="p">)</span>
+        <span class="n">Theta3</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">beta</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span><span class="o">*</span><span class="p">((</span><span class="o">-</span><span class="n">j1</span> <span class="o">+</span> <span class="p">(</span><span class="mf">7.</span><span class="o">/</span><span class="mf">8.</span><span class="p">)</span><span class="o">*</span><span class="n">j3</span><span class="p">)</span> \
+                    <span class="o">+</span> <span class="p">(</span><span class="n">j1</span> <span class="o">+</span> <span class="p">(</span><span class="mf">3.</span><span class="o">/</span><span class="mf">8.</span><span class="p">)</span><span class="o">*</span><span class="n">j3</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">beta</span><span class="p">))</span>
+
+        <span class="c1"># Combine and return ORFs</span>
+        <span class="n">GammaI</span> <span class="o">=</span> <span class="n">Theta1</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">delta</span><span class="p">)</span> <span class="o">+</span> <span class="n">Theta2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">Delta</span><span class="p">)</span>
+        <span class="n">GammaV</span> <span class="o">=</span> <span class="n">Theta3</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">4.</span><span class="o">*</span><span class="n">Delta</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">GammaI</span><span class="p">,</span><span class="n">GammaV</span></div>
+
+
+<div class="viewcode-block" id="Baseline.circular_overlap_reduction_functions">
+<a class="viewcode-back" href="../geometry.html#geometry.Baseline.circular_overlap_reduction_functions">[docs]</a>
+    <span class="k">def</span> <span class="nf">circular_overlap_reduction_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">frequencies</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function to compute overlap reduction functions for R and L circular polarizations</span>
+<span class="sd">  </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        frequencies : array</span>
+<span class="sd">            Set of frequencies at which we want to evaluate ORFs</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        GammaR : array</span>
+<span class="sd">            Overlap reduction function for right-circular polarization at desired frequencies</span>
+<span class="sd">        GammaL : array</span>
+<span class="sd">            Overlap reduction function for left-circular polarization at desired frequencies</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">GammaI</span><span class="p">,</span><span class="n">GammaV</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stokes_overlap_reduction_functions</span><span class="p">(</span><span class="n">frequencies</span><span class="p">)</span>
+        <span class="n">GammaR</span> <span class="o">=</span> <span class="n">GammaI</span> <span class="o">+</span> <span class="n">GammaV</span>
+        <span class="n">GammaL</span> <span class="o">=</span> <span class="n">GammaI</span> <span class="o">-</span> <span class="n">GammaV</span>
+        <span class="k">return</span> <span class="n">GammaR</span><span class="p">,</span><span class="n">GammaL</span></div>
+</div>
+
+
+<div class="viewcode-block" id="Omega">
+<a class="viewcode-back" href="../geometry.html#geometry.Omega">[docs]</a>
+<span class="k">def</span> <span class="nf">Omega</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="n">phi</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Unit vector along the direction of a GW&#39;s propagation.</span>
+<span class="sd">    Vectors `Omega`, `m`, and `n` form an orthonormal triad.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    theta : float</span>
+<span class="sd">        Polar angle from which plane wave originates (range 0-pi)</span>
+<span class="sd">    phi : float</span>
+<span class="sd">        Azimuthal angle of wave (range 0-2pi)</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Unit vector (shape (3,) array) along direction of propagation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)])</span></div>
+
+
+<div class="viewcode-block" id="m">
+<a class="viewcode-back" href="../geometry.html#geometry.m">[docs]</a>
+<span class="k">def</span> <span class="nf">m</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="n">phi</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Unit vector in the plane transverse to a GW&#39;s direction of propagation.</span>
+<span class="sd">    Vectors `Omega`, `m`, and `n` form an orthonormal triad.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    theta : float</span>
+<span class="sd">        Polar angle from which plane wave originates (range 0-pi)</span>
+<span class="sd">    phi : float</span>
+<span class="sd">        Azimuthal angle of wave (range 0-2pi)</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Unit vector (shape (3,) array) transverse to direction of propagation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="mf">0.</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="n">
+<a class="viewcode-back" href="../geometry.html#geometry.n">[docs]</a>
+<span class="k">def</span> <span class="nf">n</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="n">phi</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Unit vector in the plane transverse to a GW&#39;s direction of propagation.</span>
+<span class="sd">    Vectors `Omega`, `m`, and `n` form an orthonormal triad.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    theta : float</span>
+<span class="sd">        Polar angle from which plane wave originates (range 0-pi)</span>
+<span class="sd">    phi : float</span>
+<span class="sd">        Azimuthal angle of wave (range 0-2pi)</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Unit vector (shape (3,) array) transverse to direction of propagation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)])</span></div>
+
+
+<div class="viewcode-block" id="ep">
+<a class="viewcode-back" href="../geometry.html#geometry.ep">[docs]</a>
+<span class="k">def</span> <span class="nf">ep</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="n">phi</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the plus-polarization basis tensor for a GW from a particular sky location.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    theta : float</span>
+<span class="sd">        Polar angle from which plane wave originates (range 0-pi)</span>
+<span class="sd">    phi : float</span>
+<span class="sd">        Azimuthal angle of wave (range 0-2pi)</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Basis tensor (shape (3,3) array)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="mf">0.</span><span class="p">])</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">m</span><span class="p">)</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">n</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ec">
+<a class="viewcode-back" href="../geometry.html#geometry.ec">[docs]</a>
+<span class="k">def</span> <span class="nf">ec</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="n">phi</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the cross-polarization basis tensor for a GW from a particular sky location.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    theta : float</span>
+<span class="sd">        Polar angle from which plane wave originates (range 0-pi)</span>
+<span class="sd">    phi : float</span>
+<span class="sd">        Azimuthal angle of wave (range 0-2pi)</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Basis tensor (shape (3,3) array)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="mf">0.</span><span class="p">])</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">)</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">)</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, T. Callister, L. Jenks, D. Holz, N. Yunes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
