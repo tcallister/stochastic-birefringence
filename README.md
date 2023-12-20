@@ -5,4 +5,4 @@ Through (Non-)Observation of the Stochastic Gravitational Wave Background**" (**
 
 For documentation and instructions for reproducing our results, see **https://tcallister.github.io/stochastic-birefringence/**
 
-Our datasets themselves are hosted on [Zenodo](). See our documentation pages above for info about how to download, inspect, and plots these datasets.
+Our datasets themselves are hosted on [Zenodo](https://zenodo.org/doi/10.5281/zenodo.10384997). See our documentation pages above for info about how to download, inspect, and plots these datasets.
