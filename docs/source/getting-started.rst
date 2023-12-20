@@ -36,7 +36,7 @@ Downloading input files and inference results
 ---------------------------------------------
 
 Datafiles containing the output of our inference codes are hosted on Zenodo.
-All data needed to regenerate figures and/or rerun our analyses can be found at https://doi.org/10.5281/zenodo.10384998.
+Data needed to regenerate figures and/or rerun our analyses can be found at https://doi.org/10.5281/zenodo.10384998.
 To download this input/output data locally, you can do the following:
 
 .. code-block:: bash
@@ -47,3 +47,4 @@ To download this input/output data locally, you can do the following:
 This script will populate the :code:`data/` directory with datafiles containing processed outputs of our analyses.
 These output files can be inspected by running the jupyter notebooks also appearing in the :code:`data/` directory.
 The script will also place several files in the :code:`input/` directory, which are needed to rerun analyses and/or regenerate figures.
+It will additionally execute two more scripts, `input/download_cross_correlation_data.sh` and `input/download_sensitivity_curves.sh`, which download additional input data from the LIGO and Cosmic Explorer document control centers.

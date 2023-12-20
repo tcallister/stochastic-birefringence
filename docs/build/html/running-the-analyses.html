@@ -56,6 +56,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#inference-with-variable-bbh-merger-rate">Inference with variable BBH merger rate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#inference-with-individual-baselines">Inference with individual baselines</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">Modules</a></li>
@@ -225,6 +226,49 @@ $<span class="w"> </span>python<span class="w"> </span>process_birefringence_var
 <p>This will finally create the following file:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>data/birefringence_variable_evolution.hdf
 </pre></div>
+</div>
+</section>
+<section id="inference-with-individual-baselines">
+<h2>Inference with individual baselines<a class="headerlink" href="#inference-with-individual-baselines" title="Link to this heading"></a></h2>
+<p>In an Appendix, we investigate the per-baseline results to better understand the elevated “spike” appearing in some of our birefringent posteriors.
+These per-baseline results are obtained by running the following scripts:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>code/run_birefringence_delayedSFR_HLO1.py
+code/run_birefringence_delayedSFR_HLO2.py
+code/run_birefringence_delayedSFR_HLO3.py
+code/run_birefringence_delayedSFR_HVO3.py
+code/run_birefringence_delayedSFR_LVO3.py
+</pre></div>
+</div>
+<p>Running each of these proceeds completely analogously with the directions above, e.g.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>conda<span class="w"> </span>activate<span class="w"> </span>stochastic-birefringence
+$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>code/
+$<span class="w"> </span>python<span class="w"> </span>run_birefringence_delayedSFR_HLO1.py
+</pre></div>
+</div>
+<p>As above, these can also be executed over slurm on a computing cluster via e.g.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>conda<span class="w"> </span>activate<span class="w"> </span>stochastic-birefringence
+$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>code/
+$<span class="w"> </span>sbatch<span class="w"> </span>launch_birefringence_delayedSFR_HLO1.sbatch
+</pre></div>
+</div>
+<p>Running each of these scripts will produce the following output files:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>data/fixed_rate_delayedSFR_HLO1.hdf
+data/fixed_rate_delayedSFR_HLO2.hdf
+data/fixed_rate_delayedSFR_HLO3.hdf
+data/fixed_rate_delayedSFR_HVO3.hdf
+data/fixed_rate_delayedSFR_LVO3.hdf
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Notebooks that demonstrates how to load in, inspect, and manipulate this output file can be found at</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/tcallister/stochastic-birefringence/blob/main/data/inspect_birefringence_delayedSFR_HLO1.ipynb">inspect_birefringence_delayedSFR_HLO1</a></p></li>
+<li><p><a class="reference external" href="https://github.com/tcallister/stochastic-birefringence/blob/main/data/inspect_birefringence_delayedSFR_HLO2.ipynb">inspect_birefringence_delayedSFR_HLO2</a></p></li>
+<li><p><a class="reference external" href="https://github.com/tcallister/stochastic-birefringence/blob/main/data/inspect_birefringence_delayedSFR_HLO3.ipynb">inspect_birefringence_delayedSFR_HLO3</a></p></li>
+<li><p><a class="reference external" href="https://github.com/tcallister/stochastic-birefringence/blob/main/data/inspect_birefringence_delayedSFR_HVO3.ipynb">inspect_birefringence_delayedSFR_HVO3</a></p></li>
+<li><p><a class="reference external" href="https://github.com/tcallister/stochastic-birefringence/blob/main/data/inspect_birefringence_delayedSFR_LVO3.ipynb">inspect_birefringence_delayedSFR_LVO3</a></p></li>
+</ul>
 </div>
 </section>
 </section>

@@ -106,7 +106,7 @@ Following the above steps, but substituting this environment file, will create a
 <section id="downloading-input-files-and-inference-results">
 <h2>Downloading input files and inference results<a class="headerlink" href="#downloading-input-files-and-inference-results" title="Link to this heading"></a></h2>
 <p>Datafiles containing the output of our inference codes are hosted on Zenodo.
-All data needed to regenerate figures and/or rerun our analyses can be found at <a class="reference external" href="https://doi.org/10.5281/zenodo.10384998">https://doi.org/10.5281/zenodo.10384998</a>.
+Data needed to regenerate figures and/or rerun our analyses can be found at <a class="reference external" href="https://doi.org/10.5281/zenodo.10384998">https://doi.org/10.5281/zenodo.10384998</a>.
 To download this input/output data locally, you can do the following:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>data/
 $<span class="w"> </span>.<span class="w"> </span>download_data_from_zenodo.sh
@@ -114,7 +114,8 @@ $<span class="w"> </span>.<span class="w"> </span>download_data_from_zenodo.sh
 </div>
 <p>This script will populate the <code class="code docutils literal notranslate"><span class="pre">data/</span></code> directory with datafiles containing processed outputs of our analyses.
 These output files can be inspected by running the jupyter notebooks also appearing in the <code class="code docutils literal notranslate"><span class="pre">data/</span></code> directory.
-The script will also place several files in the <code class="code docutils literal notranslate"><span class="pre">input/</span></code> directory, which are needed to rerun analyses and/or regenerate figures.</p>
+The script will also place several files in the <code class="code docutils literal notranslate"><span class="pre">input/</span></code> directory, which are needed to rerun analyses and/or regenerate figures.
+It will additionally execute two more scripts, <cite>input/download_cross_correlation_data.sh</cite> and <cite>input/download_sensitivity_curves.sh</cite>, which download additional input data from the LIGO and Cosmic Explorer document control centers.</p>
 </section>
 </section>
 

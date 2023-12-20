@@ -171,3 +171,53 @@ This will finally create the following file:
 .. code-block:: bash
 
     data/birefringence_variable_evolution.hdf
+
+Inference with individual baselines
+-----------------------------------
+
+In an Appendix, we investigate the per-baseline results to better understand the elevated "spike" appearing in some of our birefringent posteriors.
+These per-baseline results are obtained by running the following scripts:
+
+.. code-block:: bash
+
+    code/run_birefringence_delayedSFR_HLO1.py
+    code/run_birefringence_delayedSFR_HLO2.py
+    code/run_birefringence_delayedSFR_HLO3.py
+    code/run_birefringence_delayedSFR_HVO3.py
+    code/run_birefringence_delayedSFR_LVO3.py
+
+Running each of these proceeds completely analogously with the directions above, e.g.
+
+.. code-block:: bash
+
+    $ conda activate stochastic-birefringence
+    $ cd code/
+    $ python run_birefringence_delayedSFR_HLO1.py
+
+As above, these can also be executed over slurm on a computing cluster via e.g.
+
+.. code-block:: bash
+
+    $ conda activate stochastic-birefringence
+    $ cd code/
+    $ sbatch launch_birefringence_delayedSFR_HLO1.sbatch
+
+Running each of these scripts will produce the following output files:
+
+.. code-block:: bash
+
+    data/fixed_rate_delayedSFR_HLO1.hdf
+    data/fixed_rate_delayedSFR_HLO2.hdf
+    data/fixed_rate_delayedSFR_HLO3.hdf
+    data/fixed_rate_delayedSFR_HVO3.hdf
+    data/fixed_rate_delayedSFR_LVO3.hdf
+
+.. note::
+
+    Notebooks that demonstrates how to load in, inspect, and manipulate this output file can be found at
+
+    * `inspect_birefringence_delayedSFR_HLO1 <https://github.com/tcallister/stochastic-birefringence/blob/main/data/inspect_birefringence_delayedSFR_HLO1.ipynb>`__
+    * `inspect_birefringence_delayedSFR_HLO2 <https://github.com/tcallister/stochastic-birefringence/blob/main/data/inspect_birefringence_delayedSFR_HLO2.ipynb>`__
+    * `inspect_birefringence_delayedSFR_HLO3 <https://github.com/tcallister/stochastic-birefringence/blob/main/data/inspect_birefringence_delayedSFR_HLO3.ipynb>`__
+    * `inspect_birefringence_delayedSFR_HVO3 <https://github.com/tcallister/stochastic-birefringence/blob/main/data/inspect_birefringence_delayedSFR_HVO3.ipynb>`__
+    * `inspect_birefringence_delayedSFR_LVO3 <https://github.com/tcallister/stochastic-birefringence/blob/main/data/inspect_birefringence_delayedSFR_LVO3.ipynb>`__
