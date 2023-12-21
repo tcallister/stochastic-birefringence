@@ -1,7 +1,7 @@
 # stochastic-birefringence
 
 This repository holds code and data release products behind the paper "**A New Probe of Gravitational Parity Violation
-Through (Non-)Observation of the Stochastic Gravitational Wave Background**" (**[arXiv:2312.?????]()**)
+Through (Non-)Observation of the Stochastic Gravitational Wave Background**" (**[arXiv:2312.12532](https://arxiv.org/abs/2312.12532)**)
 
 For documentation and instructions for reproducing our results, see **https://tcallister.github.io/stochastic-birefringence/**
 
